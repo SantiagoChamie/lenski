@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lenski/navigation/navigation_handler.dart';
+import 'package:lenski/screens/navigation/navigation_handler.dart';
 
 void main() {
   runApp(const MyApp());
