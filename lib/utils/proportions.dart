@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+/// Class to calculate proportions of the screen
 class Proportions {
   final BuildContext context;
 

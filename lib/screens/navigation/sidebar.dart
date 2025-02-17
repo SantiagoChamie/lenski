@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
 
-
+/// Sidebar widget
 class Sidebar extends StatelessWidget {
   final Function(String) onItemSelected;
   final GlobalKey<NavigatorState> navigatorKey;
@@ -36,7 +36,8 @@ class Sidebar extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(p.standardPadding()),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center, // Center the button vertically
+              mainAxisAlignment: MainAxisAlignment.center, 
+              // Sidebar buttons
               children: [
                 _buildMenuButton(p, 'Home', Icons.home_rounded),
               ],
@@ -47,6 +48,7 @@ class Sidebar extends StatelessWidget {
     );
   }
 
+  // Button for the sidebar
   Widget _buildMenuButton(Proportions p, String title, IconData icon) {
     return IconButton(
       icon: Icon(icon, color: Colors.black, size: p.sidebarButtonWidth() / 2),

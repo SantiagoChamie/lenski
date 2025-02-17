@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:lenski/courses.dart';
+import 'package:lenski/screens/courses/courses.dart';
 import 'sidebar.dart';
+
+/// This is the main widget that handles the navigation of the app.
+/// It contains a [Sidebar] and a [Navigator] widget.
+/// The [Sidebar] is used to navigate between the different screens of the app.
+/// The [Navigator] is used to display the content of the selected screen.
 
 class NavigationHandler extends StatefulWidget {
   const NavigationHandler({super.key});
@@ -10,8 +15,10 @@ class NavigationHandler extends StatefulWidget {
 }
 
 class NavigationHandlerState extends State<NavigationHandler> {
+  // Create a GlobalKey for the Navigator widget
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
+  // This function is called when an item is selected in the Sidebar
   void _onItemSelected(String item) {
     if (item == 'Home') {
       _navigatorKey.currentState?.pushNamedAndRemoveUntil(item, (Route<dynamic> route) => false);
@@ -31,6 +38,7 @@ class NavigationHandlerState extends State<NavigationHandler> {
               key: _navigatorKey,
               onGenerateRoute: (RouteSettings settings) {
                 WidgetBuilder builder;
+                // Check the name of the route and return the corresponding widget
                 switch (settings.name) {
                   case 'Home':
                     builder = (BuildContext _) => const Courses();
@@ -43,62 +51,6 @@ class NavigationHandlerState extends State<NavigationHandler> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class Item1Widget extends StatelessWidget {
-  const Item1Widget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child:  Text(
-        'Content for Item 1',
-        style: TextStyle(fontSize: 24),
-      ),
-    );
-  }
-}
-
-class Item2Widget extends StatelessWidget {
-  const Item2Widget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Content for Item 2',
-        style: TextStyle(fontSize: 24),
-      ),
-    );
-  }
-}
-
-class Item3Widget extends StatelessWidget {
-  const Item3Widget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Content for Item 3',
-        style: TextStyle(fontSize: 24),
-      ),
-    );
-  }
-}
-
-class UnknownItemWidget extends StatelessWidget {
-  const UnknownItemWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Unknown Item',
-        style: TextStyle(fontSize: 24),
       ),
     );
   }
