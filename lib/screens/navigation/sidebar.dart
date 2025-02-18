@@ -26,7 +26,7 @@ class Sidebar extends StatelessWidget {
                 style: TextStyle(
                   color: Color(0xFF2C73DE),
                   fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Unbounded',
                   //TODO: eventualmente será un logo
                 ),
               ),
