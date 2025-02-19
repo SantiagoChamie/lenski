@@ -21,14 +21,10 @@ class Sidebar extends StatelessWidget {
           const SizedBox(
             height: 100,
             child: Center(
-              child: Text(
-                'L',
-                style: TextStyle(
-                  color: Color(0xFF2C73DE),
-                  fontSize: 20,
-                  fontFamily: 'Unbounded',
-                  //TODO: eventualmente será un logo
-                ),
+              child: Image(
+                image: AssetImage('assets/icon.png'),
+                width: 33,
+                height: 33,
               ),
             ),
           ),
