@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
+import 'course_model.dart';
+import 'course.dart';
 
 class CourseList extends StatelessWidget {
-  const CourseList({super.key});
+  final List<Course> courses;
+
+  const CourseList({super.key, required this.courses});
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    // Create a scrollable list of courses
+    // TODO: for when the user selects a grid view
+    return SingleChildScrollView(
+      child: Column(
+        children: courses.map((course) => CourseButton(course: course)).toList(),
+      ),
+    );
   }
 }

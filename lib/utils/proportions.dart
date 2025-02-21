@@ -16,4 +16,14 @@ class Proportions {
   double sidebarButtonWidth() => 59;//screenWidth() * 0.0438;
 
   double standardPadding() => 20; //screenHeight() * 0.025;
+
+  // CourseButton height has parameter Quantity
+  // with quantity = 3, being the maximum allowed
+  double courseButtonHeight(quantity) {
+    if (quantity <= 3) {
+      return (screenHeight() - (3 + quantity - 1) * standardPadding() - sidebarButtonWidth()) / quantity;
+    } else {
+      return (screenHeight() - (3 + 3 - 1) * standardPadding() - sidebarButtonWidth()) / 3;
+    }
+  }
 }
