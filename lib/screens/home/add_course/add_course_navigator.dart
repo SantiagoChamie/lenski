@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lenski/screens/home/add_course/add_course_button.dart';
 import 'package:lenski/screens/home/add_course/add_course_screen.dart';
 
+const int animationDuration = 300;
+
 class AddCourseNavigator extends StatefulWidget {
   final VoidCallback onToggle;
 
@@ -26,17 +28,17 @@ class _AddCourseNavigatorState extends State<AddCourseNavigator> {
     return LayoutBuilder(
       builder: (context, constraints) {
         return AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: animationDuration),
           curve: Curves.easeInOut,
           height: _isAddCourseScreenVisible ? constraints.maxHeight - 50.0 : 50.0, // Adjust the height as needed
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
+            duration: Duration(milliseconds: (animationDuration/2).floor()),
             transitionBuilder: (Widget child, Animation<double> animation) {
               return FadeTransition(opacity: animation, child: child);
             },
             child: _isAddCourseScreenVisible
-                ? AddCourseScreen(key: ValueKey(1), onBack: _toggleAddCourseScreen)
-                : AddCourseButton(key: ValueKey(2), onPressed: _toggleAddCourseScreen),
+                ? AddCourseScreen(key: const ValueKey(1), onBack: _toggleAddCourseScreen)
+                : AddCourseButton(key: const ValueKey(2), onPressed: _toggleAddCourseScreen),
           ),
         );
       },
