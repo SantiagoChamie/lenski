@@ -21,7 +21,9 @@ class NavigationHandlerState extends State<NavigationHandler> {
   // This function is called when an item is selected in the Sidebar
   void _onItemSelected(String item) {
     if (item == 'Home') {
-      _navigatorKey.currentState?.pushNamedAndRemoveUntil(item, (Route<dynamic> route) => false);
+      if (_navigatorKey.currentState?.canPop() == true) {
+        _navigatorKey.currentState?.popUntil((route) => route.isFirst);
+      }
     } else {
       _navigatorKey.currentState?.pushNamed(item);
     }
