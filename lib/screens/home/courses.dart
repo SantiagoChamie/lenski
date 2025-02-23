@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
-import 'add_course_button.dart';
+import 'add_course/add_course_button.dart';
 import 'course_list.dart';
 import 'course_model.dart';
 
