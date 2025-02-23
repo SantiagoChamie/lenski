@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
-import 'add_course/add_course_button.dart';
+import 'add_course/add_course_navigator.dart';
 import 'course_list.dart';
 import 'course_model.dart';
 
@@ -27,6 +27,17 @@ class _CoursesState extends State<Courses> {
             _isCourseListVisible = false;
           });
         });
+      } else {
+        _isCourseListVisible = true;
+      }
+    });
+  }
+
+  void _toggleAddCourseScreen() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+      if (_isExpanded) {
+        _isCourseListVisible = false;
       } else {
         _isCourseListVisible = true;
       }
@@ -71,7 +82,7 @@ class _CoursesState extends State<Courses> {
         child: Stack(
           children: [
             AnimatedOpacity(
-              opacity: _isExpanded ? 0.0 : 1.0,
+              opacity: _isCourseListVisible ? 1.0 : 0.0,
               duration: const Duration(milliseconds: animationDuration),
               child: Visibility(
                 visible: _isCourseListVisible,
@@ -89,7 +100,7 @@ class _CoursesState extends State<Courses> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: animationDuration),
                 height: _isExpanded ? MediaQuery.of(context).size.height - p.standardPadding() * 2 : p.sidebarButtonWidth(),
-                child: AddCourseButton(onPressed: _toggleExpand),
+                child: AddCourseNavigator(onToggle: _toggleAddCourseScreen),
               ),
             ),
           ],
