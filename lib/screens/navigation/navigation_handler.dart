@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lenski/screens/courses/courses.dart';
+import 'package:lenski/screens/home/courses.dart';
 import 'sidebar.dart';
 
 /// This is the main widget that handles the navigation of the app.
