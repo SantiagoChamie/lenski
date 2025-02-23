@@ -4,8 +4,34 @@ import 'add_course_button.dart';
 import 'course_list.dart';
 import 'course_model.dart';
 
-class Courses extends StatelessWidget {
+// Define a global variable for the animation duration
+const int animationDuration = 200;
+
+class Courses extends StatefulWidget {
   const Courses({super.key});
+
+  @override
+  _CoursesState createState() => _CoursesState();
+}
+
+class _CoursesState extends State<Courses> {
+  bool _isExpanded = false;
+  bool _isCourseListVisible = true;
+
+  void _toggleExpand() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+      if (_isExpanded) {
+        Future.delayed(Duration(milliseconds: animationDuration), () {
+          setState(() {
+            _isCourseListVisible = false;
+          });
+        });
+      } else {
+        _isCourseListVisible = true;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,12 +68,30 @@ class Courses extends StatelessWidget {
     return Center(
       child: Padding(
         padding: EdgeInsets.all(p.standardPadding()),
-        child: Column(
+        child: Stack(
           children: [
-            Expanded(
-              child: CourseList(courses: sampleCourses),
+            AnimatedOpacity(
+              opacity: _isExpanded ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: animationDuration),
+              child: Visibility(
+                visible: _isCourseListVisible,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: CourseList(courses: sampleCourses),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const AddCourseButton(),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: animationDuration),
+                height: _isExpanded ? MediaQuery.of(context).size.height - p.standardPadding() * 2 : p.sidebarButtonWidth(),
+                child: AddCourseButton(onPressed: _toggleExpand),
+              ),
+            ),
           ],
         ),
       ),

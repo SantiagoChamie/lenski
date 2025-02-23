@@ -67,12 +67,12 @@ class CourseButton extends StatelessWidget {
                   Align(
                     alignment: Alignment.topCenter,
                     child: Transform.translate(
-                      offset: const Offset(0, -20), // Adjust the value as needed
+                      offset: const Offset(0, -12), // Adjust the value as needed
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
                           const Icon(
-                            Icons.bookmark,
+                            Icons.bookmark_sharp,
                             color: Colors.green,
                             size: 100,
                           ),

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
 
 class AddCourseButton extends StatelessWidget {
-  const AddCourseButton({super.key});
+  final VoidCallback onPressed;
+
+  const AddCourseButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +25,7 @@ class AddCourseButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(33), // Square appearance
             ),
           ),
-          onPressed: () {
-            // Add your onPressed code here!
-          },
+          onPressed: onPressed,
         ),
       ),
     );
