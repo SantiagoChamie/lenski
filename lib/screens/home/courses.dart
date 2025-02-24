@@ -4,9 +4,6 @@ import 'add_course/add_course_navigator.dart';
 import 'course_list.dart';
 import 'course_model.dart';
 
-// Define a global variable for the animation duration
-const int animationDuration = 200;
-
 class Courses extends StatefulWidget {
   const Courses({super.key});
 

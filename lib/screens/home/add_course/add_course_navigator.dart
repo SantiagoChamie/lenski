@@ -40,7 +40,8 @@ class _AddCourseNavigatorState extends State<AddCourseNavigator> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           return AnimatedSwitcher(
-            duration: Duration(milliseconds: (animationDuration / 2).floor()),
+            // Set the duration to be slightly less than the parent container to avoid clipping issue
+            duration: Duration(milliseconds: (animationDuration-1).floor()),
             transitionBuilder: (Widget child, Animation<double> animation) {
               return FadeTransition(opacity: animation, child: child);
             },
