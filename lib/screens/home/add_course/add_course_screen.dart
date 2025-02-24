@@ -24,7 +24,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ClipRRect(
-        borderRadius: BorderRadius.circular(16.0), // Set the border radius here
+        borderRadius: BorderRadius.circular(33.0), // Set the border radius here
         child: Container(
           color: const Color(0xFFD9D0DB), // Set the background color to black
           padding: const EdgeInsets.all(16.0),

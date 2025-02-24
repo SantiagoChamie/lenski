@@ -18,21 +18,6 @@ class _CoursesState extends State<Courses> {
   bool _isExpanded = false;
   bool _isCourseListVisible = true;
 
-  void _toggleExpand() {
-    setState(() {
-      _isExpanded = !_isExpanded;
-      if (_isExpanded) {
-        Future.delayed(Duration(milliseconds: animationDuration), () {
-          setState(() {
-            _isCourseListVisible = false;
-          });
-        });
-      } else {
-        _isCourseListVisible = true;
-      }
-    });
-  }
-
   void _toggleAddCourseScreen() {
     setState(() {
       _isExpanded = !_isExpanded;
@@ -81,26 +66,14 @@ class _CoursesState extends State<Courses> {
         padding: EdgeInsets.all(p.standardPadding()),
         child: Stack(
           children: [
-            AnimatedOpacity(
-              opacity: _isCourseListVisible ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: animationDuration),
-              child: Visibility(
-                visible: _isCourseListVisible,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: CourseList(courses: sampleCourses),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            CourseList(courses: sampleCourses),
             Align(
               alignment: Alignment.bottomCenter,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: animationDuration),
-                height: _isExpanded ? MediaQuery.of(context).size.height - p.standardPadding() * 2 : p.sidebarButtonWidth(),
-                child: AddCourseNavigator(onToggle: _toggleAddCourseScreen),
+              child: AddCourseNavigator(
+                onToggle: _toggleAddCourseScreen,
+                isExpanded: _isExpanded,
+                expandedHeight: MediaQuery.of(context).size.height - p.standardPadding() * 2,
+                collapsedHeight: p.sidebarButtonWidth(),
               ),
             ),
           ],
