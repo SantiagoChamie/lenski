@@ -16,16 +16,10 @@ class Courses extends StatefulWidget {
 
 class _CoursesState extends State<Courses> {
   bool _isExpanded = false;
-  bool _isCourseListVisible = true;
 
   void _toggleAddCourseScreen() {
     setState(() {
       _isExpanded = !_isExpanded;
-      if (_isExpanded) {
-        _isCourseListVisible = false;
-      } else {
-        _isCourseListVisible = true;
-      }
     });
   }
 
