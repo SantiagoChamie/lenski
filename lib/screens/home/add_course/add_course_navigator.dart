@@ -39,6 +39,16 @@ class _AddCourseNavigatorState extends State<AddCourseNavigator> {
       height: widget.isExpanded ? widget.expandedHeight : widget.collapsedHeight,
       child: LayoutBuilder(
         builder: (context, constraints) {
+          // Override FlutterError.onError to catch RenderFlex errors
+          //TODO: Remove this issue in a proper way, this is just a workaround
+          FlutterError.onError = (FlutterErrorDetails details) {
+            if (details.exceptionAsString().contains('RenderFlex')) {
+              // Do nothing or log the error if needed
+            } else {
+              FlutterError.presentError(details);
+            }
+          };
+
           return AnimatedSwitcher(
             // Set the duration to be slightly less than the parent container to avoid clipping issue
             duration: Duration(milliseconds: (animationDuration-1).floor()),
