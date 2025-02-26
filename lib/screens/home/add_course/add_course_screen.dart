@@ -49,14 +49,14 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
           color: const Color(0xFFF5F0F6), // Set the background color
           borderRadius: BorderRadius.circular(33.0), // Set the border radius
         ),
-        padding: const EdgeInsets.all(0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             // First element: Back button
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -66,51 +66,55 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
               ),
             ),
             // Second element: Row with three columns and separators
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text("Title 1", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    ElevatedButton(onPressed: () {}, child: const Text("Button 1")),
-                    ElevatedButton(onPressed: () {}, child: const Text("Button 2")),
-                    ElevatedButton(onPressed: () {}, child: const Text("Button 3")),
-                  ],
-                ),
-                Container(
-                  width: 1,
-                  height: 100,
-                  color: Colors.grey,
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text("Title 2", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    ElevatedButton(onPressed: () {}, child: const Text("Button 1")),
-                    ElevatedButton(onPressed: () {}, child: const Text("Button 2")),
-                    ElevatedButton(onPressed: () {}, child: const Text("Button 3")),
-                  ],
-                ),
-                Container(
-                  width: 1,
-                  height: 100,
-                  color: Colors.grey,
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text("Title 3", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    ElevatedButton(onPressed: () {}, child: const Text("Button 1")),
-                    ElevatedButton(onPressed: () {}, child: const Text("Button 2")),
-                    ElevatedButton(onPressed: () {}, child: const Text("Button 3")),
-                  ],
-                ),
-              ],
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Text("Language", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
+                      SizedBox(height: p.standardPadding()*3),
+                      ElevatedButton(onPressed: () {}, child: const Text("Button 1")),
+                      ElevatedButton(onPressed: () {}, child: const Text("Button 2")),
+                      ElevatedButton(onPressed: () {}, child: const Text("Button 3")),
+                    ],
+                  ),
+                  Container(
+                    width: 1,
+                    height: 400,
+                    color: Colors.grey,
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Text("Skills", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
+                      SizedBox(height: p.standardPadding()*3),
+                      ElevatedButton(onPressed: () {}, child: const Text("Button 1")),
+                      ElevatedButton(onPressed: () {}, child: const Text("Button 2")),
+                      ElevatedButton(onPressed: () {}, child: const Text("Button 3")),
+                    ],
+                  ),
+                  Container(
+                    width: 1,
+                    height: 400,
+                    color: Colors.grey,
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Text("Goal", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
+                      SizedBox(height: p.standardPadding()*3),
+                      ElevatedButton(onPressed: () {}, child: const Text("Button 1")),
+                      ElevatedButton(onPressed: () {}, child: const Text("Button 2")),
+                      ElevatedButton(onPressed: () {}, child: const Text("Button 3")),
+                    ],
+                  ),
+                ],
+              ),
             ),
+            // TODO: make third element independent from whole 
             // Third element: Container with background color and Row inside
             Container(
               decoration: const BoxDecoration(
