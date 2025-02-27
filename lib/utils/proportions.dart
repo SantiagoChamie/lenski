@@ -17,6 +17,10 @@ class Proportions {
 
   double standardPadding() => 20; //screenHeight() * 0.025;
 
+  double createCourseHeight() => screenHeight() - 2 * standardPadding();
+  double createCourseBottomHeight() => createCourseHeight()/6;
+  double createCourseTopHeight() => createCourseHeight() - createCourseBottomHeight();
+
   // CourseButton height has parameter Quantity
   // with quantity = 3, being the maximum allowed
   double courseButtonHeight(quantity) {

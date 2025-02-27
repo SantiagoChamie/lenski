@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lenski/screens/home/add_course/course_difficulty_text.dart';
 import 'package:lenski/screens/home/add_course/language_selector_button.dart';
 import 'package:lenski/utils/proportions.dart';
 
@@ -45,150 +46,129 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   Widget build(BuildContext context) {
     final p = Proportions(context);
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFF5F0F6), // Set the background color
-          borderRadius: BorderRadius.circular(33.0), // Set the border radius
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            // First element: Back button
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: widget.onBack,
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              Container(
+                decoration: const BoxDecoration(
+                  color:  Color(0xFFF5F0F6), // Set the background color
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(33.0),
+                    topRight: Radius.circular(33.0),
                   ),
-                ],
-              ),
-            ),
-            // Second element: Row with three columns and separators
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Text("Language", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
-                      SizedBox(height: p.standardPadding()*3),
-                      LanguageSelectorButton(),
-                      const Icon(Icons.arrow_downward_rounded, color: Colors.black),
-                      LanguageSelectorButton(),
-                    ],
-                  ),
-                  Container(
-                    width: 1,
-                    height: 400,
-                    color: Colors.grey,
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Text("Skills", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
-                      SizedBox(height: p.standardPadding()*3),
-                      ElevatedButton(onPressed: () {}, child: const Text("Button 1")),
-                      ElevatedButton(onPressed: () {}, child: const Text("Button 2")),
-                      ElevatedButton(onPressed: () {}, child: const Text("Button 3")),
-                    ],
-                  ),
-                  Container(
-                    width: 1,
-                    height: 400,
-                    color: Colors.grey,
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Text("Goal", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
-                      SizedBox(height: p.standardPadding()*3),
-                      ElevatedButton(onPressed: () {}, child: const Text("Button 1")),
-                      ElevatedButton(onPressed: () {}, child: const Text("Button 2")),
-                      ElevatedButton(onPressed: () {}, child: const Text("Button 3")),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            // TODO: make third element independent from whole 
-            // Third element: Container with background color and Row inside
-            Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFFD9D0DB),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(33.0),
-                  bottomRight: Radius.circular(33.0),
                 ),
-              ),
-              height: 150,
-              child: Padding(
-                padding: EdgeInsets.all(p.standardPadding() * 2),
+                height: p.createCourseTopHeight(),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: Center(
-                        child: RichText(
-                          text: TextSpan(
-                            style: const TextStyle(
-                              fontFamily: "Varela Round",
-                              fontSize: 30,
-                              color: Colors.black,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: widget.lightText,
-                                style: TextStyle(color: widget.lightColor),
-                              ),
-                              const TextSpan(text: " course with "),
-                              TextSpan(
-                                text: widget.mediumText,
-                                style: TextStyle(color: widget.mediumColor),
-                              ),
-                              const TextSpan(text: " intensity"),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
                     Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Text(widget.durationText, style: const TextStyle(fontFamily: "Sansation", fontSize: 20)),
-                        Text(widget.dailyTimeText, style: const TextStyle(fontFamily: "Sansation", fontSize: 20)),
+                        const Text("Language", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
+                        SizedBox(height: p.standardPadding()*3),
+                        const LanguageSelectorButton(),
+                        const Icon(Icons.arrow_downward_rounded, color: Colors.black),
+                        const LanguageSelectorButton(),
                       ],
                     ),
-                    const SizedBox(width: 16), // Add some spacing between the second and third elements
+                    Container(
+                      width: 1,
+                      height: 400,
+                      color: Colors.grey,
+                    ),
                     Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: onPressed,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2C73DE), // Background color
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10), // Rectangular border
-                              ),
-                            ),
-                            child: const Text(
-                              "Start learning!",
-                              style: TextStyle(fontFamily: "Telex", fontSize: 30, color: Colors.white),
-                            ),
-                          ),
-                        ),
+                        const Text("Skills", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
+                        SizedBox(height: p.standardPadding()*3),
+                        ElevatedButton(onPressed: () {}, child: const Text("Button 1")),
+                        ElevatedButton(onPressed: () {}, child: const Text("Button 2")),
+                        ElevatedButton(onPressed: () {}, child: const Text("Button 3")),
+                      ],
+                    ),
+                    Container(
+                      width: 1,
+                      height: 400,
+                      color: Colors.grey,
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const Text("Goal", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
+                        SizedBox(height: p.standardPadding()*3),
+                        ElevatedButton(onPressed: () {}, child: const Text("Button 1")),
+                        ElevatedButton(onPressed: () {}, child: const Text("Button 2")),
+                        ElevatedButton(onPressed: () {}, child: const Text("Button 3")),
                       ],
                     ),
                   ],
                 ),
               ),
+              // Third element: Container with background color and Row inside
+              Container(
+                decoration: const BoxDecoration(
+                  color: Color(0xFFD9D0DB),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(33.0),
+                    bottomRight: Radius.circular(33.0),
+                  ),
+                ),
+                height: p.createCourseBottomHeight(),
+                child: Padding(
+                  padding: EdgeInsets.all(p.standardPadding() * 2),
+                  child: Row(
+                    children: [
+                      const Expanded(
+                        child: Center(
+                          // Course difficulty text
+                          child: CourseDifficultyText(difficulty: "Light", intensity: "medium")
+                        ),
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(widget.durationText, style: const TextStyle(fontFamily: "Sansation", fontSize: 20)),
+                          Text(widget.dailyTimeText, style: const TextStyle(fontFamily: "Sansation", fontSize: 20)),
+                        ],
+                      ),
+                      const SizedBox(width: 16), // Add some spacing between the second and third elements
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: onPressed,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF2C73DE), // Background color
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10), // Rectangular border
+                                ),
+                              ),
+                              child: const Text(
+                                "Start learning!",
+                                style: TextStyle(fontFamily: "Telex", fontSize: 30, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Positioned(
+            top: 16.0,
+            left: 16.0,
+            child: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: widget.onBack,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

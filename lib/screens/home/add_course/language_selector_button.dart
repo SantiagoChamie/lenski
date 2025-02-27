@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class LanguageSelectorButton extends StatefulWidget {
+  const LanguageSelectorButton({super.key});
+
   @override
   _LanguageSelectorButtonState createState() => _LanguageSelectorButtonState();
 }
@@ -48,7 +50,7 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(_selectedLanguage, style: const TextStyle(fontSize: 20, fontFamily: "Varela Round", color: Colors.black)), // Text on the left
-          SizedBox(width: 8), // Space between text and icon
+          const SizedBox(width: 8), // Space between text and icon
           const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black), // Icon on the right
         ],
       ),
