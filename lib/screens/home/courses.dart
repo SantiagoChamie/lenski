@@ -63,8 +63,6 @@ class _CoursesState extends State<Courses> {
               child: AddCourseNavigator(
                 onToggle: _toggleAddCourseScreen,
                 isExpanded: _isExpanded,
-                expandedHeight: MediaQuery.of(context).size.height - p.standardPadding() * 2,
-                collapsedHeight: p.sidebarButtonWidth(),
               ),
             ),
           ],
