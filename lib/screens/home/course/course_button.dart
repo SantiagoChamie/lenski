@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:lenski/screens/home/competences/competence_list.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'course_model.dart';
+import 'flag_icon.dart';
 
-
+/// CourseButton is a widget that displays a course as a button.
+/// It shows the competences, the course name, the flag, and the level.
 class CourseButton extends StatelessWidget {
   final Course course;
 
@@ -38,28 +40,16 @@ class CourseButton extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Circular flag above the course name
-                  Container(
-                    width: 150,
-                    height: 150,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 7),
-                    ),
-                    child: ClipOval(
-                      child: Image.network(
-                        course.imageUrl,
-                        fit: BoxFit.cover,
-                        width: 150,
-                        height: 150,
-                      ),
-                    ),
+                  FlagIcon(
+                    size: 150,
+                    borderWidth: 7,
+                    imageUrl: course.imageUrl,
                   ),
                   const SizedBox(height: 20, width: 20),
                   Text(course.name, style: const TextStyle(fontSize: 40, fontFamily: "Unbounded", color: Colors.white)),
                 ],
               ),
               const Spacer(),
-              // Level on the right
               //TODO: Bug: Level not showing when there is only one course
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,

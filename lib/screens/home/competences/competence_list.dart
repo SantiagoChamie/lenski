@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
-import '../course_model.dart';
+import '../course/course_model.dart';
 import 'competence_icon.dart';
 
+/// A list of competences for a course
 class CompetenceList extends StatelessWidget {
   final Course course;
 

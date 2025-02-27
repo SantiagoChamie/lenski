@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'add_course/add_course_navigator.dart';
-import 'course_list.dart';
-import 'course_model.dart';
+import 'course/course_list.dart';
+import 'course/course_model.dart';
 
 class Courses extends StatefulWidget {
   const Courses({super.key});
