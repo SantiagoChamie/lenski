@@ -11,29 +11,31 @@ class CompetenceList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
+    final iconSize = p.standardPadding() * 2; // Example size, adjust as needed
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         SizedBox(height: p.standardPadding() / 2),
         if (course.listening)
-          const CompetenceIcon(
-            icon: Icons.hearing,
-            color: Color(0xFFD52CDE),
+          CompetenceIcon(
+            type: 'listening',
+            size: iconSize,
           ),
         if (course.speaking)
-          const CompetenceIcon(
-            icon: Icons.mic,
-            color: Color(0xFFDE2C50),
+          CompetenceIcon(
+            type: 'speaking',
+            size: iconSize,
           ),
         if (course.reading)
-          const CompetenceIcon(
-            icon: Icons.menu_book_sharp,
-            color: Color(0xFFEDA42E),
+          CompetenceIcon(
+            type: 'reading',
+            size: iconSize,
           ),
         if (course.writing)
-          const CompetenceIcon(
-            icon: Icons.edit_outlined,
-            color: Color(0xFFEDE72D),
+          CompetenceIcon(
+            type: 'writing',
+            size: iconSize,
           ),
       ],
     );

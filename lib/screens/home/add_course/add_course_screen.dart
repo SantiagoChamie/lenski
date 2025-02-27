@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lenski/screens/home/add_course/language_selector_button.dart';
 import 'package:lenski/utils/proportions.dart';
 
 class AddCourseScreen extends StatefulWidget {
@@ -76,9 +77,9 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                     children: [
                       const Text("Language", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
                       SizedBox(height: p.standardPadding()*3),
-                      ElevatedButton(onPressed: () {}, child: const Text("Button 1")),
-                      ElevatedButton(onPressed: () {}, child: const Text("Button 2")),
-                      ElevatedButton(onPressed: () {}, child: const Text("Button 3")),
+                      LanguageSelectorButton(),
+                      const Icon(Icons.arrow_downward_rounded, color: Colors.black),
+                      LanguageSelectorButton(),
                     ],
                   ),
                   Container(
