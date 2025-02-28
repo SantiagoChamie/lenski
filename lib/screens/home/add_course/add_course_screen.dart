@@ -158,7 +158,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                           children: [
                             Expanded(
                               child: ElevatedButton(
-                                onPressed: onPressed,
+                                onPressed: widget.onBack,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF2C73DE), // Background color
                                   shape: RoundedRectangleBorder(
