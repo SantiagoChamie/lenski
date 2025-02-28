@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'add_course/add_course_navigator.dart';
 import 'course/course_list.dart';
-import 'course/course_model.dart';
+import '../../models/course_model.dart';
 
 class Courses extends StatefulWidget {
   const Courses({super.key});
@@ -40,7 +40,7 @@ class _CoursesState extends State<Courses> {
       ),
       Course(
         name: 'Español',
-        level: 'A2',
+        level: 'A1',
         code: 'es',
         listening: false,
         speaking: true,

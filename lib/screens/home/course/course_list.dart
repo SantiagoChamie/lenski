@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'course_model.dart';
+import '../../../models/course_model.dart';
 import 'course_button.dart';
 
 /// A list of courses in a scrollable view

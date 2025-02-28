@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
-import '../course/course_model.dart';
+import '../../../models/course_model.dart';
 import 'competence_icon.dart';
 
 /// A list of competences for a course

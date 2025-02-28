@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/screens/home/competences/competence_list.dart';
 import 'package:lenski/utils/proportions.dart';
-import 'course_model.dart';
+import '../../../models/course_model.dart';
 import 'flag_icon.dart';
 
 /// CourseButton is a widget that displays a course as a button.
