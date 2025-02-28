@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lenski/utils/proportions.dart';
+import 'package:lenski/screens/home/course/flag_icon.dart';
 
 class LanguageSelectorButton extends StatefulWidget {
   const LanguageSelectorButton({super.key});
@@ -8,8 +10,15 @@ class LanguageSelectorButton extends StatefulWidget {
 }
 
 class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
-  String _selectedLanguage = 'Select Language';
+  String _selectedLanguage = 'English';
   final List<String> _languages = ['English', 'Spanish', 'French', 'German', 'Chinese'];
+  final Map<String, String> _languageFlags = {
+    'English': 'https://upload.wikimedia.org/wikipedia/en/thumb/a/ae/Flag_of_the_United_Kingdom.svg/640px-Flag_of_the_United_Kingdom.svg.png',
+    'Spanish': 'https://upload.wikimedia.org/wikipedia/en/thumb/9/9a/Flag_of_Spain.svg/1920px-Flag_of_Spain.svg.png',
+    'French': 'https://upload.wikimedia.org/wikipedia/en/thumb/c/c3/Flag_of_France.svg/1920px-Flag_of_France.svg.png',
+    'German': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Flag_of_Germany.svg/1200px-Flag_of_Germany.svg.png', 
+    'Chinese': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Flag_of_the_People%27s_Republic_of_China.svg/1200px-Flag_of_the_People%27s_Republic_of_China.svg.png',
+  };
 
   void _showLanguageSelector(BuildContext context) {
     showDialog(
@@ -39,18 +48,27 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
 
   @override
   Widget build(BuildContext context) {
+    final p = Proportions(context);
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderRadius: BorderRadius.circular(10), 
         ),
+        fixedSize: Size(p.createCourseButtonWidth(), p.createCourseButtonHeight())
       ),
       onPressed: () => _showLanguageSelector(context),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          FlagIcon(
+            size: 30,
+            borderWidth: 0,
+            imageUrl: _languageFlags[_selectedLanguage]!,
+          ),
+          const SizedBox(width: 8), // Space between flag icon and text
           Text(_selectedLanguage, style: const TextStyle(fontSize: 20, fontFamily: "Varela Round", color: Colors.black)), // Text on the left
           const SizedBox(width: 8), // Space between text and icon
+          const Spacer(),
           const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black), // Icon on the right
         ],
       ),

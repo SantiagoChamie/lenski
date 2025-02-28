@@ -11,22 +11,18 @@ class CompetenceIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final p = Proportions(context);
     final iconData = _getIconData(type);
     final color = _getColor(type);
 
-    return Padding(
-      padding: EdgeInsets.only(top: p.standardPadding() / 2),
-      child: Container(
-        height: size,
-        width: size,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        padding: const EdgeInsets.all(4),
-        child: Icon(iconData, color: Colors.white, size: size*2/3,),
+    return Container(
+      height: size,
+      width: size,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(8),
       ),
+      padding: const EdgeInsets.all(4),
+      child: Icon(iconData, color: Colors.white, size: size*2/3,),
     );
   }
 

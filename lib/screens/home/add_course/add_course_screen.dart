@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:lenski/screens/home/add_course/buttons/competence_selector_button.dart';
 import 'package:lenski/screens/home/add_course/course_difficulty_text.dart';
-import 'package:lenski/screens/home/add_course/language_selector_button.dart';
+import 'package:lenski/screens/home/add_course/buttons/language_selector_button.dart';
 import 'package:lenski/utils/proportions.dart';
 
 class AddCourseScreen extends StatefulWidget {
@@ -64,45 +65,62 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          const Text("Language", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
-                          SizedBox(height: p.standardPadding()*3),
-                          const LanguageSelectorButton(),
-                          const Icon(Icons.arrow_downward_rounded, color: Colors.black),
-                          const LanguageSelectorButton(),
-                        ],
+                      SizedBox(
+                        width: p.createCourseColumnWidth()-1,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(height: p.createCourseButtonHeight()),
+                            const Text("Language", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
+                            SizedBox(height: p.standardPadding()*3),
+                            const LanguageSelectorButton(),
+                            SizedBox(height: p.standardPadding()),
+                            SizedBox(width: p.createCourseButtonWidth(), height: p.createCourseButtonHeight(),
+                              child: const Icon(Icons.arrow_downward_rounded, color: Colors.black ,size: 40)),
+                            SizedBox(height: p.standardPadding()),
+                            const LanguageSelectorButton(),
+                          ],
+                        ),
                       ),
                       Container(
                         width: 1,
                         height: 400,
                         color: Colors.grey,
                       ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          const Text("Skills", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
-                          SizedBox(height: p.standardPadding()*3),
-                          ElevatedButton(onPressed: () {}, child: const Text("Button 1")),
-                          ElevatedButton(onPressed: () {}, child: const Text("Button 2")),
-                          ElevatedButton(onPressed: () {}, child: const Text("Button 3")),
-                        ],
+                      SizedBox(
+                        width: p.createCourseColumnWidth(),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(height: p.createCourseButtonHeight()),
+                            const Text("Skills", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
+                            SizedBox(height: p.standardPadding()*3),
+                            const CompetenceSelectorButton(competence: "listening"),
+                            SizedBox(height: p.standardPadding()),
+                            const CompetenceSelectorButton(competence: "speaking"),
+                            SizedBox(height: p.standardPadding()),
+                            const CompetenceSelectorButton(competence: "reading",),
+                            SizedBox(height: p.standardPadding()),
+                            const CompetenceSelectorButton(competence: "writing"),
+                          ],
+                        ),
                       ),
                       Container(
                         width: 1,
                         height: 400,
                         color: Colors.grey,
                       ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          const Text("Goal", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
-                          SizedBox(height: p.standardPadding()*3),
-                          ElevatedButton(onPressed: () {}, child: const Text("Button 1")),
-                          ElevatedButton(onPressed: () {}, child: const Text("Button 2")),
-                          ElevatedButton(onPressed: () {}, child: const Text("Button 3")),
-                        ],
+                      SizedBox(
+                        width: p.createCourseColumnWidth()-1,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(height: p.createCourseButtonHeight()),
+                            const Text("Goal", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
+                            SizedBox(height: p.standardPadding()*3),
+                            Text("Coming soon...", style: TextStyle(fontSize: 20, fontFamily: "Telex", color: Colors.grey[700]),),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -118,7 +136,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                   ),
                   height: p.createCourseBottomHeight(),
                   child: Padding(
-                    padding: EdgeInsets.all(p.standardPadding() * 2),
+                    padding: EdgeInsets.all(p.standardPadding()),
                     child: Row(
                       children: [
                         const Expanded(

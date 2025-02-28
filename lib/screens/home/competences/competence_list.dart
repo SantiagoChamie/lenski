@@ -17,27 +17,35 @@ class CompetenceList extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        SizedBox(height: p.standardPadding() / 2),
-        if (course.listening)
+        SizedBox(height: p.standardPadding()),
+        if (course.listening) ...[
           CompetenceIcon(
             type: 'listening',
             size: iconSize,
           ),
-        if (course.speaking)
+          SizedBox(height: p.standardPadding() / 2),
+        ],
+        if (course.speaking) ...[
           CompetenceIcon(
             type: 'speaking',
             size: iconSize,
           ),
-        if (course.reading)
+          SizedBox(height: p.standardPadding() / 2),
+        ],
+        if (course.reading) ...[
           CompetenceIcon(
             type: 'reading',
             size: iconSize,
           ),
-        if (course.writing)
+          SizedBox(height: p.standardPadding() / 2),
+        ],
+        if (course.writing) ...[
           CompetenceIcon(
             type: 'writing',
             size: iconSize,
           ),
+          SizedBox(height: p.standardPadding() / 2),
+        ],
       ],
     );
   }
