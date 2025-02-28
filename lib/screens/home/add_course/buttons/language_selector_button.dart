@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
-import 'package:lenski/screens/home/course/flag_icon.dart';
+import 'package:lenski/screens/home/courses/flag_icon.dart';
 
 class LanguageSelectorButton extends StatefulWidget {
   const LanguageSelectorButton({super.key});

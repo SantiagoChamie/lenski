@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lenski/utils/proportions.dart';
 
 /// An icon representing a competence
 /// Competences include: listening, speaking, reading, writing

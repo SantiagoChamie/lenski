@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lenski/screens/course/course_home.dart';
 import 'package:lenski/screens/home/competences/competence_list.dart';
 import 'package:lenski/utils/proportions.dart';
 import '../../../models/course_model.dart';
@@ -21,7 +22,12 @@ class CourseButton extends StatelessWidget {
         height: p.courseButtonHeight(3),
         child: ElevatedButton(
           onPressed: () {
-            // Define what happens when the button is pressed
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CourseHome(course: course),
+              ),
+            );
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: course.color, // Example of using a parameter
