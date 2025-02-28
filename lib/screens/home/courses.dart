@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
-import 'add_course_button.dart';
-import 'course_list.dart';
-import 'course_model.dart';
+import 'add_course/add_course_navigator.dart';
+import 'course/course_list.dart';
+import '../../models/course_model.dart';
 
-class Courses extends StatelessWidget {
+class Courses extends StatefulWidget {
   const Courses({super.key});
+
+  @override
+  _CoursesState createState() => _CoursesState();
+}
+
+class _CoursesState extends State<Courses> {
+  bool _isExpanded = false;
+
+  void _toggleAddCourseScreen() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +40,7 @@ class Courses extends StatelessWidget {
       ),
       Course(
         name: 'Español',
-        level: 'A2',
+        level: 'A1',
         code: 'es',
         listening: false,
         speaking: true,
@@ -42,12 +55,16 @@ class Courses extends StatelessWidget {
     return Center(
       child: Padding(
         padding: EdgeInsets.all(p.standardPadding()),
-        child: Column(
+        child: Stack(
           children: [
-            Expanded(
-              child: CourseList(courses: sampleCourses),
+            CourseList(courses: sampleCourses),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: AddCourseNavigator(
+                onToggle: _toggleAddCourseScreen,
+                isExpanded: _isExpanded,
+              ),
             ),
-            const AddCourseButton(),
           ],
         ),
       ),

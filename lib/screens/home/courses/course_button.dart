@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:lenski/screens/courses/competences/competence_list.dart';
+import 'package:lenski/screens/home/competences/competence_list.dart';
 import 'package:lenski/utils/proportions.dart';
-import 'course_model.dart';
+import '../../../models/course_model.dart';
+import 'flag_icon.dart';
 
-
+/// CourseButton is a widget that displays a course as a button.
+/// It shows the competences, the course name, the flag, and the level.
 class CourseButton extends StatelessWidget {
   final Course course;
 
@@ -28,36 +30,26 @@ class CourseButton extends StatelessWidget {
             ),
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               // Icons on the left indicating the competences
               CompetenceList(course: course),
+              const SizedBox(width: 50),
               // Column with image and text in the center
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Circular flag above the course name
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 5),
-                    ),
-                    child: ClipOval(
-                      child: Image.network(
-                        course.imageUrl,
-                        fit: BoxFit.cover,
-                        width: 100,
-                        height: 100,
-                      ),
-                    ),
+                  FlagIcon(
+                    size: 150,
+                    borderWidth: 7,
+                    imageUrl: course.imageUrl,
                   ),
-                  const SizedBox(height: 10, width: 10),
-                  Text(course.name, style: const TextStyle(fontSize: 30, fontFamily: "Unbounded", color: Colors.white)),
+                  const SizedBox(height: 20, width: 20),
+                  Text(course.name, style: const TextStyle(fontSize: 40, fontFamily: "Unbounded", color: Colors.white)),
                 ],
               ),
-              // Level on the right
+              const Spacer(),
               //TODO: Bug: Level not showing when there is only one course
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -65,12 +57,12 @@ class CourseButton extends StatelessWidget {
                   Align(
                     alignment: Alignment.topCenter,
                     child: Transform.translate(
-                      offset: const Offset(0, -20), // Adjust the value as needed
+                      offset: const Offset(0, -12), // Adjust the value as needed
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
                           const Icon(
-                            Icons.bookmark,
+                            Icons.bookmark_sharp,
                             color: Colors.green,
                             size: 100,
                           ),

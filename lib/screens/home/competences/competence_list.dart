@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
-import '../course_model.dart';
+import '../../../models/course_model.dart';
 import 'competence_icon.dart';
 
+/// A list of competences for a course
 class CompetenceList extends StatelessWidget {
   final Course course;
 
@@ -11,30 +12,40 @@ class CompetenceList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
+    final iconSize = p.standardPadding() * 2; // Example size, adjust as needed
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        SizedBox(height: p.standardPadding() / 2),
-        if (course.listening)
-          const CompetenceIcon(
-            icon: Icons.hearing,
-            color: Color(0xFFD52CDE),
+        SizedBox(height: p.standardPadding()),
+        if (course.listening) ...[
+          CompetenceIcon(
+            type: 'listening',
+            size: iconSize,
           ),
-        if (course.speaking)
-          const CompetenceIcon(
-            icon: Icons.mic,
-            color: Color(0xFFDE2C50),
+          SizedBox(height: p.standardPadding() / 2),
+        ],
+        if (course.speaking) ...[
+          CompetenceIcon(
+            type: 'speaking',
+            size: iconSize,
           ),
-        if (course.reading)
-          const CompetenceIcon(
-            icon: Icons.menu_book_sharp,
-            color: Color(0xFFEDA42E),
+          SizedBox(height: p.standardPadding() / 2),
+        ],
+        if (course.reading) ...[
+          CompetenceIcon(
+            type: 'reading',
+            size: iconSize,
           ),
-        if (course.writing)
-          const CompetenceIcon(
-            icon: Icons.edit_outlined,
-            color: Color(0xFFEDE72D),
+          SizedBox(height: p.standardPadding() / 2),
+        ],
+        if (course.writing) ...[
+          CompetenceIcon(
+            type: 'writing',
+            size: iconSize,
           ),
+          SizedBox(height: p.standardPadding() / 2),
+        ],
       ],
     );
   }
