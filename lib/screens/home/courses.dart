@@ -29,26 +29,21 @@ class _CoursesState extends State<Courses> {
     return Center(
       child: Padding(
         padding: EdgeInsets.all(p.standardPadding()),
-        child: Column(
+        child: Stack(
           children: [
-            Expanded(
-              child: FutureBuilder<List<Course>>(
-                future: _courseRepository.courses(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return const Center(child: Text('Error loading courses'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return AddCourseNavigator(
-                      onToggle: _toggleAddCourseScreen,
-                      isExpanded: true,
-                    );
-                  } else {
-                    return CourseList(courses: snapshot.data!);
-                  }
-                },
-              ),
+            FutureBuilder<List<Course>>(
+              future: _courseRepository.courses(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Center(child: Text('Error loading courses'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No courses available'));
+                } else {
+                  return CourseList(courses: snapshot.data!);
+                }
+              },
             ),
             Align(
               alignment: Alignment.bottomCenter,
