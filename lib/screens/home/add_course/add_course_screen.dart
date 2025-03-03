@@ -39,6 +39,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   String _selectedFlagUrl = 'https://upload.wikimedia.org/wikipedia/en/thumb/a/ae/Flag_of_the_United_Kingdom.svg/640px-Flag_of_the_United_Kingdom.svg.png';
   String _selectedOriginLanguage = 'Español';
   final List<String> _selectedCompetences = [];
+  bool _isMessageDisplayed = false;
 
   @override
   void dispose() {
@@ -66,11 +67,17 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
         course.code == newCourse.code && course.fromCode == newCourse.fromCode);
 
     if (courseExists) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Course already exists!'),
-        ),
-      );
+      if (!_isMessageDisplayed) {
+        _isMessageDisplayed = true;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Course already exists!'),
+            duration: Duration(seconds: 2),
+          ),
+        ).closed.then((_) {
+          _isMessageDisplayed = false;
+        });
+      }
     } else {
       await _courseRepository.insertCourse(newCourse);
       widget.onBack();
