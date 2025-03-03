@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:lenski/screens/home/add_course/buttons/competence_selector_button.dart';
 import 'package:lenski/screens/home/add_course/course_difficulty_text.dart';
@@ -49,6 +51,16 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   }
 
   void _createCourse() async {
+    //TODO: color selector option
+    final List<Color> pastelColors = [
+    const Color(0xFFFFCC85), // Light Orange
+    const Color(0xFF99CCFF), // Light Blue
+    const Color(0xFFFFAEAE), // Light Red
+    ];
+
+    final random = Random();
+    final randomColor = pastelColors[random.nextInt(pastelColors.length)];
+
     final newCourse = Course(
       name: _selectedLanguage,
       level: 'A1',
@@ -58,7 +70,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       speaking: _selectedCompetences.contains('speaking'),
       reading: _selectedCompetences.contains('reading'),
       writing: _selectedCompetences.contains('writing'),
-      color: const Color(0xFFFFCC85),
+      color: randomColor,
       imageUrl: _selectedFlagUrl,
     );
 
