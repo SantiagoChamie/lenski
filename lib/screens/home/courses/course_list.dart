@@ -31,6 +31,15 @@ class _CourseListState extends State<CourseList> {
 
   @override
   Widget build(BuildContext context) {
+    if (_courses.isEmpty) {
+      return const Center(
+        child: Text(
+          'Add a course to start learning!',
+          style: TextStyle(fontFamily: "Varela Round", fontSize: 20),
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       child: Column(
         children: _courses.map((course) => CourseButton(course: course, onDelete: _refreshCourses, courseCount: _courses.length)).toList(),
