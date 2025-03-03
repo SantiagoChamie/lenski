@@ -3,7 +3,7 @@ import 'package:lenski/utils/proportions.dart';
 import 'add_course/add_course_navigator.dart';
 import 'courses/course_list.dart';
 import '../../models/course_model.dart';
-import '../../repositories/course_repository.dart';
+import '../../data/course_repository.dart';
 
 class Courses extends StatefulWidget {
   const Courses({super.key});

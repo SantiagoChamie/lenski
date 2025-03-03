@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/course_model.dart';
 import 'course_button.dart';
-import 'package:lenski/repositories/course_repository.dart';
+import 'package:lenski/data/course_repository.dart';
 
 /// A list of courses in a scrollable view
 class CourseList extends StatefulWidget {

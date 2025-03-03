@@ -6,7 +6,7 @@ import 'package:lenski/screens/home/add_course/course_difficulty_text.dart';
 import 'package:lenski/screens/home/add_course/buttons/language_selector_button.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/models/course_model.dart';
-import 'package:lenski/repositories/course_repository.dart';
+import 'package:lenski/data/course_repository.dart';
 
 class AddCourseScreen extends StatefulWidget {
   final VoidCallback onBack;
@@ -51,11 +51,27 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   }
 
   void _createCourse() async {
+    // Check if at least one competence is selected
+    if (_selectedCompetences.isEmpty) {
+      if (!_isMessageDisplayed) {
+        _isMessageDisplayed = true;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select at least one competence!'),
+            duration: Duration(seconds: 2),
+          ),
+        ).closed.then((_) {
+          _isMessageDisplayed = false;
+        });
+      }
+      return;
+    }
+
     //TODO: color selector option
     final List<Color> pastelColors = [
-    const Color(0xFFFFCC85), // Light Orange
-    const Color(0xFF99CCFF), // Light Blue
-    const Color(0xFFFFAEAE), // Light Red
+      const Color(0xFFFFCC85), // Light Orange
+      const Color(0xFF99CCFF), // Light Blue
+      const Color(0xFFFFAEAE), // Light Red
     ];
 
     final random = Random();
