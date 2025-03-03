@@ -1,4 +1,4 @@
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import '../../models/course_model.dart';
 
@@ -24,7 +24,7 @@ class CourseRepository {
       path,
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE courses(id INTEGER PRIMARY KEY, name TEXT, level TEXT, code TEXT, listening INTEGER, speaking INTEGER, reading INTEGER, writing INTEGER, color INTEGER, imageUrl TEXT)',
+          'CREATE TABLE courses(id INTEGER PRIMARY KEY, name TEXT, level TEXT, code TEXT, fromCode TEXT, listening INTEGER, speaking INTEGER, reading INTEGER, writing INTEGER, color INTEGER, imageUrl TEXT)',
         );
       },
       version: 1,
@@ -38,6 +38,7 @@ class CourseRepository {
       course.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    print('Course inserted: ' + course.name);
   }
 
   Future<List<Course>> courses() async {

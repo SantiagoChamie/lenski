@@ -48,6 +48,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   }
 
   void _createCourse() async {
+    print("este boton ni sirve");
     final newCourse = Course(
       name: _selectedLanguage,
       level: 'A1',
@@ -60,7 +61,6 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       color: const Color(0xFFFFCC85),
       imageUrl: _selectedFlagUrl,
     );
-
     await _courseRepository.insertCourse(newCourse);
     widget.onBack();
   }

@@ -3,6 +3,7 @@ import 'package:lenski/utils/proportions.dart';
 import 'add_course/add_course_navigator.dart';
 import 'courses/course_list.dart';
 import '../../models/course_model.dart';
+import '../../repositories/course_repository.dart';
 
 class Courses extends StatefulWidget {
   const Courses({super.key});
@@ -13,6 +14,7 @@ class Courses extends StatefulWidget {
 
 class _CoursesState extends State<Courses> {
   bool _isExpanded = false;
+  final CourseRepository _courseRepository = CourseRepository();
 
   void _toggleAddCourseScreen() {
     setState(() {
@@ -24,40 +26,25 @@ class _CoursesState extends State<Courses> {
   Widget build(BuildContext context) {
     final p = Proportions(context);
 
-    // Sample courses for testing
-    final List<Course> sampleCourses = [
-      Course(
-        name: 'English',
-        level: 'A1',
-        code: 'en',
-        fromCode: 'es',
-        listening: true,
-        speaking: false,
-        reading: true,
-        writing: false,
-        color: const Color(0xFFFFAEAE),
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/ae/Flag_of_the_United_Kingdom.svg/640px-Flag_of_the_United_Kingdom.svg.png',
-      ),
-      Course(
-        name: 'Español',
-        level: 'A1',
-        code: 'es',
-        fromCode: 'en',
-        listening: false,
-        speaking: true,
-        reading: false,
-        writing: true,
-        color: const Color(0xFFFFCC85),
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/9/9a/Flag_of_Spain.svg/1920px-Flag_of_Spain.svg.png',
-      ),
-    ];
-
     return Center(
       child: Padding(
         padding: EdgeInsets.all(p.standardPadding()),
         child: Stack(
           children: [
-            CourseList(courses: sampleCourses),
+            FutureBuilder<List<Course>>(
+              future: _courseRepository.courses(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Center(child: Text('Error loading courses'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No courses available'));
+                } else {
+                  return CourseList(courses: snapshot.data!);
+                }
+              },
+            ),
             Align(
               alignment: Alignment.bottomCenter,
               child: AddCourseNavigator(
