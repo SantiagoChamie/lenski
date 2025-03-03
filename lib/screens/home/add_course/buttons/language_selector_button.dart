@@ -3,14 +3,18 @@ import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/screens/home/courses/flag_icon.dart';
 
 class LanguageSelectorButton extends StatefulWidget {
-  const LanguageSelectorButton({super.key});
+  final Function(String, String) onLanguageSelected;
+  final String startingLanguage;
+
+  const LanguageSelectorButton({super.key, required this.onLanguageSelected, required this.startingLanguage});
 
   @override
   _LanguageSelectorButtonState createState() => _LanguageSelectorButtonState();
 }
 
+/// Contains the information to create the course
 class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
-  String _selectedLanguage = 'English';
+  late String _selectedLanguage;
   //TODO: download fonts for non latin characters
   final List<String> _languages = ['English', 'Español', 'Français', 'Deutsche', '漢語'];
   final Map<String, String> _languageFlags = {
@@ -20,6 +24,12 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
     'Deutsche': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Flag_of_Germany.svg/1200px-Flag_of_Germany.svg.png', 
     '漢語': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Flag_of_the_People%27s_Republic_of_China.svg/1200px-Flag_of_the_People%27s_Republic_of_China.svg.png',
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedLanguage = widget.startingLanguage;
+  }
 
   void _showLanguageSelector(BuildContext context) {
     showDialog(
@@ -37,6 +47,7 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
                     setState(() {
                       _selectedLanguage = language;
                     });
+                    widget.onLanguageSelected(language, _languageFlags[language]!);
                     Navigator.of(context).pop();
                   },
                 );

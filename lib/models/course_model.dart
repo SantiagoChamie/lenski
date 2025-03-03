@@ -5,6 +5,7 @@ class Course {
   String name;
   String level;
   String code;
+  String fromCode;
   bool listening;
   bool speaking;
   bool reading;
@@ -17,6 +18,7 @@ class Course {
     required this.name,
     required this.level,
     required this.code,
+    required this.fromCode,
     required this.listening,
     required this.speaking,
     required this.reading,
@@ -31,6 +33,7 @@ class Course {
       'name': name,
       'level': level,
       'code': code,
+      'fromCode': fromCode,
       'listening': listening ? 1 : 0,
       'speaking': speaking ? 1 : 0,
       'reading': reading ? 1 : 0,
@@ -47,6 +50,7 @@ class Course {
       name: map['name'],
       level: map['level'],
       code: map['code'],
+      fromCode: map['fromCode'],
       listening: map['listening'] == 1,
       speaking: map['speaking'] == 1,
       reading: map['reading'] == 1,

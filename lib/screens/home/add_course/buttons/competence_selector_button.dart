@@ -4,8 +4,9 @@ import 'package:lenski/utils/proportions.dart';
 
 class CompetenceSelectorButton extends StatefulWidget {
   final String competence;
+  final Function(String) onToggle;
 
-  const CompetenceSelectorButton({super.key, required this.competence});
+  const CompetenceSelectorButton({super.key, required this.competence, required this.onToggle});
 
   @override
   _CompetenceSelectorButtonState createState() => _CompetenceSelectorButtonState();
@@ -18,6 +19,7 @@ class _CompetenceSelectorButtonState extends State<CompetenceSelectorButton> {
     setState(() {
       _isSelected = !_isSelected;
     });
+    widget.onToggle(widget.competence);
   }
 
   @override
