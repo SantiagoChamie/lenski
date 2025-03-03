@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/home/courses.dart';
+import 'package:lenski/screens/course/course_home.dart';
 import 'sidebar.dart';
 
 /// This is the main widget that handles the navigation of the app.
@@ -44,6 +46,10 @@ class NavigationHandlerState extends State<NavigationHandler> {
                 switch (settings.name) {
                   case 'Home':
                     builder = (BuildContext _) => const Courses();
+                    break;
+                  case 'Course':
+                    final course = settings.arguments as Course;
+                    builder = (BuildContext _) => CourseHome(course: course);
                     break;
                   default:
                     builder = (BuildContext _) => const Courses();
