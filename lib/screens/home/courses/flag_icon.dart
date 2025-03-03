@@ -5,12 +5,14 @@ class FlagIcon extends StatelessWidget {
   final double size;
   final double borderWidth;
   final String imageUrl;
+  final Color? borderColor;
 
   const FlagIcon({
     super.key,
     required this.size,
     required this.borderWidth,
     required this.imageUrl,
+    this.borderColor,
   });
 
   @override
@@ -20,7 +22,7 @@ class FlagIcon extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: borderWidth),
+        border: Border.all(color: borderColor ?? Colors.white, width: borderWidth),
       ),
       child: ClipOval(
         child: Image.network(
