@@ -76,7 +76,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
 
     final existingCourses = await _courseRepository.courses();
     final courseExists = existingCourses.any((course) =>
-        course.code == newCourse.code && course.fromCode == newCourse.fromCode);
+        course.code == newCourse.code);
 
     if (courseExists) {
       if (!_isMessageDisplayed) {

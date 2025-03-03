@@ -53,17 +53,17 @@ class CourseRepository {
     await db.update(
       'courses',
       course.toMap(),
-      where: 'fromCode = ? AND code = ?',
-      whereArgs: [course.fromCode, course.code],
+      where: 'code = ?',
+      whereArgs: [course.code],
     );
   }
 
-  Future<void> deleteCourse(String from, String to) async {
+  Future<void> deleteCourse(String to) async {
     final db = await database;
     await db.delete(
       'courses',
-      where: 'fromCode = ? AND code = ?',
-      whereArgs: [from, to],
+      where: 'code = ?',
+      whereArgs: [to],
     );
   }
 }

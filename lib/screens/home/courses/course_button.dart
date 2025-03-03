@@ -101,7 +101,7 @@ class CourseButton extends StatelessWidget {
             child: IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
               onPressed: () async {
-                await CourseRepository().deleteCourse(course.fromCode, course.code);
+                await CourseRepository().deleteCourse(course.code);
                 onDelete();
               },
             ),
