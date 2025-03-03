@@ -60,8 +60,21 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       color: const Color(0xFFFFCC85),
       imageUrl: _selectedFlagUrl,
     );
-    await _courseRepository.insertCourse(newCourse);
-    widget.onBack();
+
+    final existingCourses = await _courseRepository.courses();
+    final courseExists = existingCourses.any((course) =>
+        course.code == newCourse.code && course.fromCode == newCourse.fromCode);
+
+    if (courseExists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Course already exists!'),
+        ),
+      );
+    } else {
+      await _courseRepository.insertCourse(newCourse);
+      widget.onBack();
+    }
   }
 
   void _updateSelectedLanguage(String language, String flagUrl) {
