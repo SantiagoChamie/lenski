@@ -48,7 +48,6 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   }
 
   void _createCourse() async {
-    print("este boton ni sirve");
     final newCourse = Course(
       name: _selectedLanguage,
       level: 'A1',

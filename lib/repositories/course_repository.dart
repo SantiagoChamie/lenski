@@ -38,7 +38,6 @@ class CourseRepository {
       course.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    print('Course inserted: ' + course.name);
   }
 
   Future<List<Course>> courses() async {
@@ -54,17 +53,17 @@ class CourseRepository {
     await db.update(
       'courses',
       course.toMap(),
-      where: 'id = ?',
-      whereArgs: [course.id],
+      where: 'fromCode = ? AND code = ?',
+      whereArgs: [course.fromCode, course.code],
     );
   }
 
-  Future<void> deleteCourse(int id) async {
+  Future<void> deleteCourse(String from, String to) async {
     final db = await database;
     await db.delete(
       'courses',
-      where: 'id = ?',
-      whereArgs: [id],
+      where: 'fromCode = ? AND code = ?',
+      whereArgs: [from, to],
     );
   }
 }
