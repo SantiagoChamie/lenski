@@ -1,20 +1,39 @@
 import 'package:flutter/material.dart';
 import '../../../models/course_model.dart';
 import 'course_button.dart';
+import 'package:lenski/repositories/course_repository.dart';
 
 /// A list of courses in a scrollable view
-class CourseList extends StatelessWidget {
+class CourseList extends StatefulWidget {
   final List<Course> courses;
 
   const CourseList({super.key, required this.courses});
 
   @override
+  _CourseListState createState() => _CourseListState();
+}
+
+class _CourseListState extends State<CourseList> {
+  late List<Course> _courses;
+
+  @override
+  void initState() {
+    super.initState();
+    _courses = widget.courses;
+  }
+
+  void _refreshCourses() async {
+    final courses = await CourseRepository().courses();
+    setState(() {
+      _courses = courses;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Create a scrollable list of courses
-    // TODO: for when the user selects a grid view
     return SingleChildScrollView(
       child: Column(
-        children: courses.map((course) => CourseButton(course: course)).toList(),
+        children: _courses.map((course) => CourseButton(course: course, onDelete: _refreshCourses, courseCount: _courses.length)).toList(),
       ),
     );
   }

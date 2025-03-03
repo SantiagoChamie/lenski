@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lenski/screens/course/course_home.dart';
 import 'package:lenski/screens/home/competences/competence_list.dart';
 import 'package:lenski/utils/proportions.dart';
-import 'package:lenski/repositories/course_repository.dart'; // Add this import
+import 'package:lenski/repositories/course_repository.dart';
 import '../../../models/course_model.dart';
 import 'flag_icon.dart';
 
@@ -10,8 +10,10 @@ import 'flag_icon.dart';
 /// It shows the competences, the course name, the flag, and the level.
 class CourseButton extends StatelessWidget {
   final Course course;
+  final VoidCallback onDelete;
+  final int courseCount;
 
-  const CourseButton({super.key, required this.course});
+  const CourseButton({super.key, required this.course, required this.onDelete, required this.courseCount});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +24,7 @@ class CourseButton extends StatelessWidget {
         children: [
           SizedBox(
             width: double.infinity,
-            height: p.courseButtonHeight(3),
+            height: p.courseButtonHeight(courseCount),
             child: ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -100,6 +102,7 @@ class CourseButton extends StatelessWidget {
               icon: const Icon(Icons.delete, color: Colors.red),
               onPressed: () async {
                 await CourseRepository().deleteCourse(course.fromCode, course.code);
+                onDelete();
               },
             ),
           ),
