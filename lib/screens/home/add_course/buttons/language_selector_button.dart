@@ -11,19 +11,21 @@ class LanguageSelectorButton extends StatefulWidget {
 
 class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
   String _selectedLanguage = 'English';
-  final List<String> _languages = ['English', 'Spanish', 'French', 'German', 'Chinese'];
+  //TODO: download fonts for non latin characters
+  final List<String> _languages = ['English', 'Español', 'Français', 'Deutsche', '漢語'];
   final Map<String, String> _languageFlags = {
     'English': 'https://upload.wikimedia.org/wikipedia/en/thumb/a/ae/Flag_of_the_United_Kingdom.svg/640px-Flag_of_the_United_Kingdom.svg.png',
-    'Spanish': 'https://upload.wikimedia.org/wikipedia/en/thumb/9/9a/Flag_of_Spain.svg/1920px-Flag_of_Spain.svg.png',
-    'French': 'https://upload.wikimedia.org/wikipedia/en/thumb/c/c3/Flag_of_France.svg/1920px-Flag_of_France.svg.png',
-    'German': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Flag_of_Germany.svg/1200px-Flag_of_Germany.svg.png', 
-    'Chinese': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Flag_of_the_People%27s_Republic_of_China.svg/1200px-Flag_of_the_People%27s_Republic_of_China.svg.png',
+    'Español': 'https://upload.wikimedia.org/wikipedia/en/thumb/9/9a/Flag_of_Spain.svg/1920px-Flag_of_Spain.svg.png',
+    'Français': 'https://upload.wikimedia.org/wikipedia/en/thumb/c/c3/Flag_of_France.svg/1920px-Flag_of_France.svg.png',
+    'Deutsche': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Flag_of_Germany.svg/1200px-Flag_of_Germany.svg.png', 
+    '漢語': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Flag_of_the_People%27s_Republic_of_China.svg/1200px-Flag_of_the_People%27s_Republic_of_China.svg.png',
   };
 
   void _showLanguageSelector(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        // TODO: make this a dropdown menu
         return AlertDialog(
           title: const Text('Select a Language'),
           content: SingleChildScrollView(
