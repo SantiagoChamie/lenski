@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/course_model.dart';
+import 'package:lenski/screens/course/book.dart';
+import 'package:lenski/screens/course/library.dart';
 import 'package:lenski/screens/home/courses/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 
@@ -52,9 +54,9 @@ class CourseHome extends StatelessWidget {
             ],
           ),
         ),
-        Expanded(
+        const Expanded(
           child: Center(
-            child: Text(course.name),
+            child: Book()
           ),
         ),
       ],
