@@ -1,9 +1,10 @@
 class Book {
-  String id;
+  int id;
   String name;
   String imageUrl;
-  String totalLines;
-  String currentLine;
+  int totalLines;
+  int currentLine;
+  String language;
 
   Book({
     required this.id,
@@ -11,6 +12,7 @@ class Book {
     required this.imageUrl,
     required this.totalLines,
     required this.currentLine,
+    required this.language,
   });
   // Convert a Course into a Map. The keys must correspond to the names of the columns in the database.
   Map<String, dynamic> toMap() {
@@ -20,6 +22,7 @@ class Book {
       'imageUrl': imageUrl,
       'totalLines': totalLines,
       'currentLine': currentLine,
+      'language': language,
     };
   }
 
@@ -31,6 +34,7 @@ class Book {
       imageUrl: map['imageUrl'],
       totalLines: map['totalLines'],
       currentLine: map['currentLine'],
+      language: map['language'],
     );
   }
 }
