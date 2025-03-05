@@ -16,7 +16,7 @@ class CourseHome extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(top: p.standardPadding()*2, left: p.standardPadding()*2),
+          padding: EdgeInsets.only(top: p.standardPadding()*2, left: p.standardPadding()*2, bottom: p.standardPadding()*2),
           child: Row(
             children: [
               FlagIcon(
@@ -54,9 +54,13 @@ class CourseHome extends StatelessWidget {
             ],
           ),
         ),
-        const Expanded(
-          child: Center(
-            child: Book()
+        Expanded(
+          child: Row(
+
+            children: [
+              
+              Center(child: Library()),
+            ],
           ),
         ),
       ],

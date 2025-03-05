@@ -22,6 +22,7 @@ class Book extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
+    const double bookWidth = 150;
     final randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
     final percentage = (totalLines != null && currentLine != null && totalLines! > 0)
         ? (currentLine! / totalLines! * 100).toInt()
@@ -43,8 +44,8 @@ class Book extends StatelessWidget {
           child: Stack(
             children: [
               Container(
-                width: 100,
-                height: 150,
+                width: bookWidth,
+                height: bookWidth*1.5,
                 decoration: BoxDecoration(
                   color: imageUrl == null ? randomColor : null,
                   image: imageUrl != null
@@ -101,7 +102,7 @@ class Book extends StatelessWidget {
         SizedBox(
           width: 100 + p.standardPadding() * 2,
           child: Text(
-            name ?? 'unnamed wa',
+            name ?? ' test test test test test test tes test test test',
             style: const TextStyle(
               fontSize: 16,
               fontFamily: 'Varela Round',

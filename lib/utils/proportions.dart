@@ -9,6 +9,8 @@ class Proportions {
   double screenWidth() => MediaQuery.of(context).size.width;
   double screenHeight() => MediaQuery.of(context).size.height;
 
+  double mainScreenWidth() => screenWidth() - sidebarWidth();
+
   double sidebarWidth() => 100; //screenWidth() * 0.0744;
   double sidebarButtonWidth() => 59;//screenWidth() * 0.0438;
 
@@ -22,6 +24,11 @@ class Proportions {
   double createCourseColumnWidth() => createCourseWidth()/3;
   double createCourseButtonHeight() => createCourseHeight()/12;
   double createCourseButtonWidth() => (createCourseColumnWidth()-4*standardPadding());
+
+  double libraryHeight() => screenHeight() - 2 * standardPadding() - 100;
+  double libraryWidth() => (mainScreenWidth() - 2 * standardPadding() - sidebarWidth())/2;
+  double bookWidth() => libraryWidth()/3 - 4 * standardPadding();
+
 
   // CourseButton height has parameter Quantity
   // with quantity = 3, being the maximum allowed
