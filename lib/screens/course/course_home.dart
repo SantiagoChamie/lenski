@@ -59,7 +59,7 @@ class CourseHome extends StatelessWidget {
 
             children: [
               
-              Center(child: Library()),
+              Center(child: Library(languageCode: course.code)),
             ],
           ),
         ),

@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:lenski/screens/course/books/add_book_button.dart';
+import 'package:lenski/screens/course/books/empty_book_button.dart';
 
 import 'package:lenski/utils/proportions.dart';
 
+/// BookButton is a widget that displays a book with an image, name, and progress.
+/// If the book is not yet added, it will display an empty book.
+/// It will also display an add book button if it is the last book in the list.
+// TODO: could work better with a book button selector as intermediary
 class BookButton extends StatelessWidget {
+  final String? id;
+  final bool? add;
   final String? imageUrl;
   final String? name;
   final int? totalLines;
@@ -12,12 +20,24 @@ class BookButton extends StatelessWidget {
 
   const BookButton({
     super.key,
+    this.id,
+    this.add = false,
     this.imageUrl,
     this.name,
     this.totalLines,
     this.currentLine,
     this.onPressed,
   });
+
+  void _printBookType() {
+    if (id == null && add == true) {
+      print('Add Book Button');
+    } else if (id == null) {
+      print('Empty Book');
+    } else {
+      print('Full Book');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,61 +60,66 @@ class BookButton extends StatelessWidget {
     return Column(
       children: [
         InkWell(
-          onTap: onPressed,
+          onTap: _printBookType,
           child: Stack(
             children: [
-              Container(
-                width: bookWidth,
-                height: bookWidth*1.5,
-                decoration: BoxDecoration(
-                  color: imageUrl == null ? randomColor : null,
-                  image: imageUrl != null
-                      ? DecorationImage(
-                          image: NetworkImage(imageUrl!),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              Positioned(
-                bottom: 10,
-                right: 10,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                      ),
-                      child: Center(
-                        child: Text(
-                          '$percentage%',
-                          style: TextStyle(
-                            fontSize: fontSize,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Sansation',
-                            color: const Color.fromARGB(255, 0, 0, 0),
+              id == null
+                ? add == true ? const AddBookButton(bookWidth: bookWidth) 
+              : const EmptyBookButton(bookWidth: bookWidth)
+                : Container(
+                    width: bookWidth,
+                    height: bookWidth * 1.5,
+                    decoration: BoxDecoration(
+                      color: imageUrl == null ? randomColor : null,
+                      image: imageUrl != null
+                          ? DecorationImage(
+                              image: NetworkImage(imageUrl!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+              id != null && add == false
+              ? Positioned(
+                  bottom: 10,
+                  right: 10,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                        child: Center(
+                          child: Text(
+                            '$percentage%',
+                            style: TextStyle(
+                              fontSize: fontSize,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Sansation',
+                              color: const Color.fromARGB(255, 0, 0, 0),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: CircularProgressIndicator(
-                        value: percentage / 100,
-                        strokeWidth: 5,
-                        backgroundColor: Colors.white,
-                        valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2C73DE)),
+                      SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: CircularProgressIndicator(
+                          value: percentage / 100,
+                          strokeWidth: 5,
+                          backgroundColor: Colors.white,
+                          valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2C73DE)),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                    ],
+                  ),
+                )
+              : const SizedBox(),
             ],
           ),
         ),
@@ -102,7 +127,7 @@ class BookButton extends StatelessWidget {
         SizedBox(
           width: 100 + p.standardPadding() * 2,
           child: Text(
-            name ?? ' test test test test test test tes test test test',
+            name ?? ' ',
             style: const TextStyle(
               fontSize: 16,
               fontFamily: 'Varela Round',
