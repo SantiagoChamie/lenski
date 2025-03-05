@@ -60,7 +60,7 @@ class BookButton extends StatelessWidget {
     return Column(
       children: [
         InkWell(
-          onTap: _printBookType,
+          onTap: id != null || add == true ? _printBookType : onPressed,
           child: Stack(
             children: [
               id == null
