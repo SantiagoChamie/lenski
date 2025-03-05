@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/course_model.dart';
-import 'package:lenski/screens/course/book.dart';
-import 'package:lenski/screens/course/library.dart';
+import 'package:lenski/screens/course/books/book_button.dart';
+import 'package:lenski/screens/course/books/library.dart';
 import 'package:lenski/screens/home/courses/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 

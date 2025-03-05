@@ -3,14 +3,14 @@ import 'dart:math';
 
 import 'package:lenski/utils/proportions.dart';
 
-class Book extends StatelessWidget {
+class BookButton extends StatelessWidget {
   final String? imageUrl;
   final String? name;
   final int? totalLines;
   final int? currentLine;
   final VoidCallback? onPressed;
 
-  const Book({
+  const BookButton({
     super.key,
     this.imageUrl,
     this.name,

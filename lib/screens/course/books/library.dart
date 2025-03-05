@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lenski/screens/course/book.dart';
+import 'package:lenski/screens/course/books/book_button.dart';
 import 'package:lenski/utils/proportions.dart';
 
 class Library extends StatelessWidget {
@@ -19,7 +19,7 @@ class Library extends StatelessWidget {
               spacing: p.standardPadding()*2, // Horizontal spacing between books
               runSpacing: p.standardPadding(), // Vertical spacing between books
               children: List.generate(9, (index) {
-                return Book();
+                return BookButton();
               }),
             ),
           ),
