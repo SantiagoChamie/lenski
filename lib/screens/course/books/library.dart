@@ -6,8 +6,9 @@ import 'package:lenski/models/book_model.dart';
 
 class Library extends StatefulWidget {
   final String languageCode;
+  final VoidCallback onAddBookPressed;
 
-  const Library({super.key, required this.languageCode});
+  const Library({super.key, required this.languageCode, required this.onAddBookPressed});
 
   @override
   _LibraryState createState() => _LibraryState();
@@ -51,7 +52,7 @@ class _LibraryState extends State<Library> {
           }
 
           // Add the "Add Book" button
-          bookButtons.add(const BookButton(add: true));
+          bookButtons.add(BookButton(add: true, onPressed: widget.onAddBookPressed));
 
           // Ensure there are at least 6 buttons in total
           while (bookButtons.length < 6) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:lenski/screens/course/books/add_book_button.dart';
 import 'package:lenski/screens/course/books/empty_book_button.dart';
+import 'package:lenski/screens/course/books/add_book_screen.dart'; // Import AddBookScreen
 
 import 'package:lenski/utils/proportions.dart';
 
@@ -29,9 +30,11 @@ class BookButton extends StatelessWidget {
     this.onPressed,
   });
 
-  void _printBookType() {
+  void _printBookType(BuildContext context) {
     if (id == null && add == true) {
-      print('Add Book Button');
+      if (onPressed != null) {
+        onPressed!();
+      }
     } else if (id == null) {
       print('Empty Book');
     } else {
@@ -60,7 +63,7 @@ class BookButton extends StatelessWidget {
     return Column(
       children: [
         InkWell(
-          onTap: id != null || add == true ? _printBookType : onPressed,
+          onTap: id != null || add == true ? () => _printBookType(context) : onPressed,
           child: Stack(
             children: [
               id == null
