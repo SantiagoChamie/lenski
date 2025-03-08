@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/course/books/course_navigator.dart';
 import 'package:lenski/screens/home/courses/flag_icon.dart';
+import 'package:lenski/utils/languages.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/widgets/ltext.dart';
 
@@ -27,7 +28,7 @@ class CourseHome extends StatelessWidget {
               ),
               SizedBox(width: p.standardPadding()),
               LText(
-                text: 'Welcome!',
+                text: welcomeMessages[course.name]!,
                 style: const TextStyle(
                   fontSize: 24.0,
                   color: Color.fromARGB(255, 0, 0, 0),

@@ -8,6 +8,46 @@ const List<String> targetLanguages = [
   'العربية', 'Български', 'Čeština', 'Dansk', 'Deutsch', 'Ελληνικά', 'English', 'English (British)', 'English (American)', 'Español', 'Eesti', 'Suomi', 'Français', 'Magyar', 'Bahasa Indonesia', 'Italiano', '日本語', '한국어', 'Lietuvių', 'Latviešu', 'Norsk Bokmål', 'Nederlands', 'Polski', 'Português', 'Português (Brazilian)', 'Português (Portugal)', 'Română', 'Русский', 'Slovenčina', 'Slovenščina', 'Svenska', 'Türkçe', 'Українська', '汉语', '汉语 (Simplified)', '汉语 (Traditional)'
 ];
 
+// Welcome message per language
+const Map<String, String> welcomeMessages = {
+  'العربية': 'مرحبًا!',
+  'Български': 'Добре дошли!',
+  'Čeština': 'Vítejte!',
+  'Dansk': 'Velkommen!',
+  'Deutsch': 'Willkommen!',
+  'Ελληνικά': 'Καλώς ορίσατε!',
+  'English': 'Welcome!',
+  'English (British)': 'Welcome!',
+  'English (American)': 'Welcome!',
+  'Español': '¡Bienvenido!',
+  'Eesti': 'Tere tulemast!',
+  'Suomi': 'Tervetuloa!',
+  'Français': 'Bienvenue!',
+  'Magyar': 'Üdvözöljük!',
+  'Bahasa Indonesia': 'Selamat datang!',
+  'Italiano': 'Benvenuto!',
+  '日本語': 'ようこそ！',
+  '한국어': '환영합니다!',
+  'Lietuvių': 'Sveiki atvykę!',
+  'Latviešu': 'Laipni lūdzam!',
+  'Norsk Bokmål': 'Velkommen!',
+  'Nederlands': 'Welkom!',
+  'Polski': 'Witamy!',
+  'Português': 'Bem-vindo!',
+  'Português (Brazilian)': 'Bem-vindo!',
+  'Português (Portugal)': 'Bem-vindo!',
+  'Română': 'Bine ați venit!',
+  'Русский': 'Добро пожаловать!',
+  'Slovenčina': 'Vitajte!',
+  'Slovenščina': 'Dobrodošli!',
+  'Svenska': 'Välkommen!',
+  'Türkçe': 'Hoş geldiniz!',
+  'Українська': 'Ласкаво просимо!',
+  '汉语': '欢迎！',
+  '汉语 (Simplified)': '欢迎！',
+  '汉语 (Traditional)': '歡迎！',
+};
+
 // Flags for each language
 const Map<String, String> languageFlags = {
   'العربية': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Flag_of_the_Arab_League.svg/1200px-Flag_of_the_Arab_League.svg.png',
