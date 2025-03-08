@@ -3,6 +3,7 @@ import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/course/books/course_navigator.dart';
 import 'package:lenski/screens/home/courses/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
+import 'package:lenski/widgets/ltext.dart';
 
 class CourseHome extends StatelessWidget {
   final Course course;
@@ -25,16 +26,18 @@ class CourseHome extends StatelessWidget {
                 imageUrl: course.imageUrl,
               ),
               SizedBox(width: p.standardPadding()),
-              const Text(
-                'Welcome!',
+              const LText(
+                text: 'Welcome!',
                 style: TextStyle(
                   fontSize: 24.0,
-                  color: Color(0xFFEE9A1D),
+                  color: Color.fromARGB(255, 0, 0, 0),
                   fontFamily: "Unbounded",
                   decoration: TextDecoration.underline,
                   decorationStyle: TextDecorationStyle.dotted,
-                  decorationColor: Color(0xFFEE9A1D),
+                  decorationColor: Color.fromARGB(255, 0, 0, 0),
                 ),
+                fromLanguage: 'en',
+                toLanguage: 'es',
               ),
               const Spacer(),
               Container(
