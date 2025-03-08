@@ -1,7 +1,7 @@
 class Book {
-  int id;
+  int? id;
   String name;
-  String imageUrl;
+  String? imageUrl;
   int totalLines;
   int currentLine;
   String language;

@@ -1,5 +1,6 @@
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
+import 'dart:io';
 import '../../models/book_model.dart';
 
 class BookRepository {
@@ -40,6 +41,29 @@ class BookRepository {
     );
   }
 
+  Future<void> createBookDatabase(int bookId, List<String> sentences) async {
+    String dbName = '$bookId.db';
+    String path = join(await getDatabasesPath(), dbName);
+    print('Creating book database at path: $path'); // Print the database path
+    Database bookDb = await openDatabase(
+      path,
+      onCreate: (db, version) {
+        return db.execute(
+          'CREATE TABLE sentences(id INTEGER PRIMARY KEY, sentence TEXT)',
+        );
+      },
+      version: 1,
+    );
+
+    for (int i = 0; i < sentences.length; i++) {
+      await bookDb.insert(
+        'sentences',
+        {'id': i + 1, 'sentence': sentences[i]},
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+  }
+
   Future<List<Book>> booksByLanguage(String language) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = 
@@ -62,8 +86,37 @@ class BookRepository {
     );
   }
 
+  // Delete a book and its associated database
   Future<void> deleteBook(int id) async {
     final db = await database;
+    final book = await db.query(
+      'books',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (book.isNotEmpty) {
+      final bookId = book.first['id'];
+      String dbName = '$bookId.db';
+      String path = join(await getDatabasesPath(), dbName);
+
+      // Close the book-related database connection if it is open
+      Database? bookDb;
+      try {
+        bookDb = await openDatabase(path);
+        await bookDb.close();
+      } catch (e) {
+        // Handle any errors that occur while closing the database
+        print('Error closing book database: $e');
+      }
+
+      // Delete the book-related database file
+      final file = File(path);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    }
+
     await db.delete(
       'books',
       where: 'id = ?',

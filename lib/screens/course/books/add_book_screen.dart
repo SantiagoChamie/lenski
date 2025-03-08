@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
+import 'package:lenski/data/book_creator.dart';
 
 class AddBookScreen extends StatelessWidget {
   final VoidCallback onBackPressed;
+  final String languageCode;
 
-  const AddBookScreen({super.key, required this.onBackPressed});
+  const AddBookScreen({super.key, required this.onBackPressed, required this.languageCode});
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController textController = TextEditingController();
     final p = Proportions(context);
     return Scaffold(
       body: Center(
@@ -29,7 +32,7 @@ class AddBookScreen extends StatelessWidget {
                 ),
                 width: p.mainScreenWidth() - p.standardPadding() * 4,
                 child: Padding(
-                  padding: EdgeInsets.all(p.standardPadding()*2),
+                  padding: EdgeInsets.all(p.standardPadding() * 2),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -38,12 +41,15 @@ class AddBookScreen extends StatelessWidget {
                       Expanded(
                         child: Padding(
                           padding: EdgeInsets.all(p.standardPadding()),
-                          child: const TextField(
-                            //TODO: fix style
-                            decoration: InputDecoration(
+                          child: TextField(
+                            controller: textController,
+                            decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                               hintText: 'Paste the text here',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                              ),
                             ),
                             maxLines: null,
                             expands: true,
@@ -54,7 +60,10 @@ class AddBookScreen extends StatelessWidget {
                       SizedBox(
                         height: p.sidebarButtonWidth(),
                         child: ElevatedButton(
-                          onPressed: onBackPressed,
+                          onPressed: () {
+                            BookCreator().processBook(textController.text, languageCode);
+                            onBackPressed();
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF2C73DE),
                             shape: RoundedRectangleBorder(
@@ -78,7 +87,6 @@ class AddBookScreen extends StatelessWidget {
                   onPressed: onBackPressed, 
                   icon: const Icon(Icons.close)),
                 )
-                
             ],
           ),
         ),

@@ -23,7 +23,7 @@ class _CourseNavigatorState extends State<CourseNavigator> {
   @override
   Widget build(BuildContext context) {
     return _showAddBookScreen
-        ? AddBookScreen(onBackPressed: _toggleAddBookScreen)
+        ? AddBookScreen(onBackPressed: _toggleAddBookScreen, languageCode: widget.course.code)
         : Row(
             children: [
               const Placeholder(),

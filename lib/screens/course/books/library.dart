@@ -27,6 +27,12 @@ class _LibraryState extends State<Library> {
     return await BookRepository().booksByLanguage(widget.languageCode);
   }
 
+  void _refreshBooks() {
+    setState(() {
+      _booksFuture = _fetchBooks();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
@@ -48,6 +54,7 @@ class _LibraryState extends State<Library> {
               name: book.name,
               totalLines: book.totalLines,
               currentLine: book.currentLine,
+              onDelete: _refreshBooks,
             )).toList();
           }
 
