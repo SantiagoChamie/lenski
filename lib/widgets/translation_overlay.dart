@@ -65,13 +65,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
                 ),
               ],
             ),
-            child: const Text(
-              '...loading',
-              style: TextStyle(
-                fontSize: 16.0,
-                fontFamily: 'Varela Round',
-              ),
-            ),
+            child: const CircularProgressIndicator(color: Color(0xFF2C73DE))
           );
         } else if (snapshot.hasError) {
           return Container(

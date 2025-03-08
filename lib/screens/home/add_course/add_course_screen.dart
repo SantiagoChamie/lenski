@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lenski/screens/home/add_course/buttons/competence_selector_button.dart';
 import 'package:lenski/screens/home/add_course/course_difficulty_text.dart';
 import 'package:lenski/screens/home/add_course/buttons/language_selector_button.dart';
+import 'package:lenski/utils/languages.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/data/course_repository.dart';
@@ -37,9 +38,14 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   final _courseDescriptionController = TextEditingController();
   final CourseRepository _courseRepository = CourseRepository();
 
+  //TODO: make this elegant
   String _selectedLanguage = 'English';
-  String _selectedFlagUrl = 'https://upload.wikimedia.org/wikipedia/en/thumb/a/ae/Flag_of_the_United_Kingdom.svg/640px-Flag_of_the_United_Kingdom.svg.png';
+  String _selectedLanguageCode = languageCodes['English']!;
+  String _selectedFlagUrl = languageFlags['English']!;
+  
   String _selectedOriginLanguage = 'Español';
+  String _selectedOriginLanguageCode = languageCodes['Español']!;
+
   final List<String> _selectedCompetences = [];
   bool _isMessageDisplayed = false;
 
@@ -80,8 +86,8 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
     final newCourse = Course(
       name: _selectedLanguage,
       level: 'A1',
-      code: _selectedLanguage.substring(0, 2).toLowerCase(),
-      fromCode: _selectedOriginLanguage.substring(0, 2).toLowerCase(),
+      code: _selectedLanguageCode,
+      fromCode: _selectedOriginLanguageCode,
       listening: _selectedCompetences.contains('listening'),
       speaking: _selectedCompetences.contains('speaking'),
       reading: _selectedCompetences.contains('reading'),
@@ -112,16 +118,18 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
     }
   }
 
-  void _updateSelectedLanguage(String language, String flagUrl) {
+  void _updateSelectedLanguage(String language, String flagUrl, String code) {
     setState(() {
       _selectedLanguage = language;
       _selectedFlagUrl = flagUrl;
+      _selectedLanguageCode = code;
     });
   }
 
-  void _updatedSelectedOriginLanguage(String language, String flagUrl) {
+  void _updatedSelectedOriginLanguage(String language, String flagUrl, String code) {
     setState(() {
       _selectedOriginLanguage = language;
+      _selectedOriginLanguageCode = code;
     });
   }
 
@@ -166,8 +174,9 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                             const Text("Language", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
                             SizedBox(height: p.standardPadding() * 3),
                             LanguageSelectorButton(
-                              onLanguageSelected: (language, flagUrl) => _updatedSelectedOriginLanguage(language, flagUrl),
+                              onLanguageSelected: (language, flagUrl, code) => _updatedSelectedOriginLanguage(language, flagUrl, code),
                               startingLanguage: _selectedOriginLanguage,
+                              isSource: false,
                             ),
                             SizedBox(height: p.standardPadding()),
                             SizedBox(
@@ -177,7 +186,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                             ),
                             SizedBox(height: p.standardPadding()),
                             LanguageSelectorButton(
-                              onLanguageSelected: (language, flagUrl) => _updateSelectedLanguage(language, flagUrl),
+                              onLanguageSelected: (language, flagUrl, code) => _updateSelectedLanguage(language, flagUrl, code),
                               startingLanguage: _selectedLanguage,
                             ),
                           ],

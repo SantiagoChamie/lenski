@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/screens/home/courses/flag_icon.dart';
+import 'package:lenski/utils/languages.dart';
 
 class LanguageSelectorButton extends StatefulWidget {
-  final Function(String, String) onLanguageSelected;
+  final Function(String, String, String) onLanguageSelected;
   final String startingLanguage;
+  final bool isSource; // New parameter to determine if it's a 'from' language
 
-  const LanguageSelectorButton({super.key, required this.onLanguageSelected, required this.startingLanguage});
+  const LanguageSelectorButton({
+    super.key,
+    required this.onLanguageSelected,
+    this.startingLanguage = 'English',
+    this.isSource = true, // Default to true
+  });
 
   @override
   _LanguageSelectorButtonState createState() => _LanguageSelectorButtonState();
@@ -15,15 +22,6 @@ class LanguageSelectorButton extends StatefulWidget {
 /// Contains the information to create the course
 class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
   late String _selectedLanguage;
-  //TODO: download fonts for non latin characters
-  final List<String> _languages = ['English', 'Español', 'Français', 'Deutsche', '漢語'];
-  final Map<String, String> _languageFlags = {
-    'English': 'https://upload.wikimedia.org/wikipedia/en/thumb/a/ae/Flag_of_the_United_Kingdom.svg/640px-Flag_of_the_United_Kingdom.svg.png',
-    'Español': 'https://upload.wikimedia.org/wikipedia/en/thumb/9/9a/Flag_of_Spain.svg/1920px-Flag_of_Spain.svg.png',
-    'Français': 'https://upload.wikimedia.org/wikipedia/en/thumb/c/c3/Flag_of_France.svg/1920px-Flag_of_France.svg.png',
-    'Deutsche': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Flag_of_Germany.svg/1200px-Flag_of_Germany.svg.png', 
-    '漢語': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Flag_of_the_People%27s_Republic_of_China.svg/1200px-Flag_of_the_People%27s_Republic_of_China.svg.png',
-  };
 
   @override
   void initState() {
@@ -40,14 +38,14 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
           title: const Text('Select a Language'),
           content: SingleChildScrollView(
             child: ListBody(
-              children: _languages.map((language) {
+              children: (widget.isSource ? sourceLanguages : targetLanguages).map((language) {
                 return ListTile(
                   title: Text(language),
                   onTap: () {
                     setState(() {
                       _selectedLanguage = language;
                     });
-                    widget.onLanguageSelected(language, _languageFlags[language]!);
+                    widget.onLanguageSelected(language, languageFlags[language]!, languageCodes[language]!);
                     Navigator.of(context).pop();
                   },
                 );
@@ -76,7 +74,7 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
           FlagIcon(
             size: 30,
             borderWidth: 0,
-            imageUrl: _languageFlags[_selectedLanguage]!,
+            imageUrl: languageFlags[_selectedLanguage]!,
           ),
           const SizedBox(width: 8), // Space between flag icon and text
           Text(_selectedLanguage, style: const TextStyle(fontSize: 20, fontFamily: "Varela Round", color: Colors.black)), // Text on the left
