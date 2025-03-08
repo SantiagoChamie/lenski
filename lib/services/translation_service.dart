@@ -25,7 +25,6 @@ class TranslationService {
     final cacheKey = '$text-$sourceLang-$targetLang-$context';
     
     if (_cache.containsKey(cacheKey)) {
-      print("using cache");
       return _cache[cacheKey]!;
     }
 
@@ -49,7 +48,6 @@ class TranslationService {
     );
 
     if (response.statusCode == 200) {
-      print("sending data to deepl");
       final data = json.decode(response.body);
       final translatedText = data['translations'][0]['text'];
       _cache[cacheKey] = translatedText;
