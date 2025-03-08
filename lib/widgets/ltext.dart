@@ -48,8 +48,8 @@ class _LTextState extends State<LText> {
           child: TranslationOverlay(
             text: text,
             contextText: widget.text,
-            sourceLang: widget.fromLanguage,
-            targetLang: widget.toLanguage,
+            sourceLang: widget.toLanguage,
+            targetLang: widget.fromLanguage,
           ),
         ),
       ),

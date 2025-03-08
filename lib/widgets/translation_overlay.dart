@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
+import 'package:lenski/services/translation_service.dart';
 
-class TranslationOverlay extends StatelessWidget {
+class TranslationOverlay extends StatefulWidget {
   final String text;
   final String contextText;
   final String sourceLang;
@@ -14,6 +15,24 @@ class TranslationOverlay extends StatelessWidget {
     required this.sourceLang,
     required this.targetLang,
   });
+
+  @override
+  _TranslationOverlayState createState() => _TranslationOverlayState();
+}
+
+class _TranslationOverlayState extends State<TranslationOverlay> {
+  late Future<String> _translatedText;
+
+  @override
+  void initState() {
+    super.initState();
+    _translatedText = TranslationService().translate(
+      text: widget.text,
+      sourceLang: widget.sourceLang,
+      targetLang: widget.targetLang,
+      context: widget.contextText,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +57,7 @@ class TranslationOverlay extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '$targetLang.',
+                '${widget.targetLang}.'.toLowerCase(),
                 style: const TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
@@ -46,21 +65,43 @@ class TranslationOverlay extends StatelessWidget {
                 ),
               ),
               SizedBox(width: p.standardPadding()),
-              Text(
-                text,
-                style: const TextStyle(
-                  fontSize: 16.0,
-                  fontFamily: 'Varela Round',
-                ),
+              FutureBuilder<String>(
+                future: _translatedText,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Text('...loading',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        fontFamily: 'Varela Round',
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text(
+                      'Error: ${snapshot.error}',
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                        fontFamily: 'Varela Round',
+                      ),
+                    );
+                  } else {
+                    return Text(
+                      snapshot.data ?? '',
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                        fontFamily: 'Varela Round',
+                      ),
+                    );
+                  }
+                },
               ),
             ],
           ),
-          SizedBox(height: p.standardPadding()/2),
+          SizedBox(height: p.standardPadding() / 2),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '$sourceLang.',
+                '${widget.sourceLang}.'.toLowerCase(),
                 style: const TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
@@ -69,7 +110,7 @@ class TranslationOverlay extends StatelessWidget {
               ),
               SizedBox(width: p.standardPadding()),
               Text(
-                text,
+                widget.text,
                 style: const TextStyle(
                   fontSize: 16.0,
                   fontFamily: 'Varela Round',
@@ -85,7 +126,6 @@ class TranslationOverlay extends StatelessWidget {
                 decoration: const BoxDecoration(
                   color: Color(0xFFD9D0DB),
                   borderRadius: BorderRadius.all(Radius.circular(10.0)),
-
                 ),
                 child: IconButton(
                   icon: const Icon(Icons.add, color: Colors.black, size: 30.0),
@@ -94,12 +134,12 @@ class TranslationOverlay extends StatelessWidget {
                   },
                 ),
               ),
-              const SizedBox(width: 8.0),
+              //TODO: reimplement this when the overlay becomes editable
+              /*SizedBox(width: p.standardPadding()/2),
               Container(
                 decoration: const BoxDecoration(
                   color: Color(0xFFD9D0DB),
                   borderRadius: BorderRadius.all(Radius.circular(10.0)),
-
                 ),
                 child: IconButton(
                   icon: const Icon(Icons.search, color: Colors.black, size: 30.0),
@@ -107,7 +147,7 @@ class TranslationOverlay extends StatelessWidget {
                     // Add your onPressed code here!
                   },
                 ),
-              ),
+              ),*/
             ],
           ),
         ],

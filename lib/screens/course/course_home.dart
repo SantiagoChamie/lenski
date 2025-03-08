@@ -26,9 +26,9 @@ class CourseHome extends StatelessWidget {
                 imageUrl: course.imageUrl,
               ),
               SizedBox(width: p.standardPadding()),
-              const LText(
+              LText(
                 text: 'Welcome!',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 24.0,
                   color: Color.fromARGB(255, 0, 0, 0),
                   fontFamily: "Unbounded",
@@ -36,8 +36,8 @@ class CourseHome extends StatelessWidget {
                   decorationStyle: TextDecorationStyle.dotted,
                   decorationColor: Color.fromARGB(255, 0, 0, 0),
                 ),
-                fromLanguage: 'en',
-                toLanguage: 'es',
+                fromLanguage: course.fromCode,
+                toLanguage: course.code,
                 position: 'below',
               ),
               const Spacer(),
