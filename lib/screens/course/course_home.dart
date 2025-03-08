@@ -38,6 +38,7 @@ class CourseHome extends StatelessWidget {
                 ),
                 fromLanguage: 'en',
                 toLanguage: 'es',
+                position: 'below',
               ),
               const Spacer(),
               Container(
