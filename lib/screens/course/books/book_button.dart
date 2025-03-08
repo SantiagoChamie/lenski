@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:lenski/screens/course/books/add_book_button.dart';
 import 'package:lenski/screens/course/books/empty_book_button.dart';
-
 import 'package:lenski/utils/proportions.dart';
+import 'package:lenski/data/book_repository.dart';
 
 /// BookButton is a widget that displays a book with an image, name, and progress.
 /// If the book is not yet added, it will display an empty book.
@@ -17,6 +17,7 @@ class BookButton extends StatelessWidget {
   final int? totalLines;
   final int? currentLine;
   final VoidCallback? onPressed;
+  final VoidCallback? onDelete;
 
   const BookButton({
     super.key,
@@ -27,15 +28,26 @@ class BookButton extends StatelessWidget {
     this.totalLines,
     this.currentLine,
     this.onPressed,
+    this.onDelete,
   });
 
-  void _printBookType() {
-    if (id == null && add == true) {
-      print('Add Book Button');
-    } else if (id == null) {
-      print('Empty Book');
-    } else {
+  void _printBookType(BuildContext context) {
+    if (add == true) {
+      if (onPressed != null) {
+        onPressed!();
+      }
+    } else if (id != null) {
       print('Full Book');
+    }
+  }
+
+  Future<void> _deleteBook(BuildContext context) async {
+    if (id != null) {
+      final bookRepository = BookRepository();
+      await bookRepository.deleteBook(int.parse(id!));
+      if (onDelete != null) {
+        onDelete!();
+      }
     }
   }
 
@@ -45,7 +57,7 @@ class BookButton extends StatelessWidget {
     const double bookWidth = 150;
     final randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
     final percentage = (totalLines != null && currentLine != null && totalLines! > 0)
-        ? (currentLine! / totalLines! * 100).toInt()
+        ? ((currentLine! - 1) / totalLines! * 100).toInt()
         : 100;
 
     double fontSize;
@@ -60,7 +72,7 @@ class BookButton extends StatelessWidget {
     return Column(
       children: [
         InkWell(
-          onTap: id != null || add == true ? _printBookType : onPressed,
+          onTap: id != null || add == true ? () => _printBookType(context) : onPressed,
           child: Stack(
             children: [
               id == null
@@ -117,6 +129,16 @@ class BookButton extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ),
+                )
+              : const SizedBox(),
+              id != null && add == false
+              ? Positioned(
+                  top: 10,
+                  left: 10,
+                  child: IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () => _deleteBook(context),
                   ),
                 )
               : const SizedBox(),
