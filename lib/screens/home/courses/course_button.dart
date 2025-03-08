@@ -62,7 +62,8 @@ class CourseButton extends StatelessWidget {
                   ),
                   const Spacer(),
                   //TODO: Bug: Level not showing when there is only one course
-                  Column(
+                  
+                /*Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Align(
@@ -90,7 +91,7 @@ class CourseButton extends StatelessWidget {
                         ),
                       ),
                     ],
-                  ),
+                  ),*/
                 ],
               ),
             ),

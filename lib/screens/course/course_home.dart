@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/course/books/course_navigator.dart';
 import 'package:lenski/screens/home/courses/flag_icon.dart';
+import 'package:lenski/utils/languages.dart';
 import 'package:lenski/utils/proportions.dart';
+import 'package:lenski/widgets/ltext.dart';
 
 class CourseHome extends StatelessWidget {
   final Course course;
@@ -25,16 +27,19 @@ class CourseHome extends StatelessWidget {
                 imageUrl: course.imageUrl,
               ),
               SizedBox(width: p.standardPadding()),
-              const Text(
-                'Welcome!',
-                style: TextStyle(
+              LText(
+                text: welcomeMessages[course.name]!,
+                style: const TextStyle(
                   fontSize: 24.0,
-                  color: Color(0xFFEE9A1D),
+                  color: Color.fromARGB(255, 0, 0, 0),
                   fontFamily: "Unbounded",
                   decoration: TextDecoration.underline,
                   decorationStyle: TextDecorationStyle.dotted,
-                  decorationColor: Color(0xFFEE9A1D),
+                  decorationColor: Color.fromARGB(255, 0, 0, 0),
                 ),
+                fromLanguage: course.fromCode,
+                toLanguage: course.code,
+                position: 'below',
               ),
               const Spacer(),
               Container(
