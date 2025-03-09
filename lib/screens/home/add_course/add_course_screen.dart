@@ -46,7 +46,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   String _selectedOriginLanguage = 'Español';
   String _selectedOriginLanguageCode = languageCodes['Español']!;
 
-  final List<String> _selectedCompetences = [];
+  // final List<String> _selectedCompetences = [];
   bool _isMessageDisplayed = false;
 
   @override
@@ -58,20 +58,20 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
 
   void _createCourse() async {
     // Check if at least one competence is selected
-    if (_selectedCompetences.isEmpty) {
-      if (!_isMessageDisplayed) {
-        _isMessageDisplayed = true;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please select at least one competence!'),
-            duration: Duration(seconds: 2),
-          ),
-        ).closed.then((_) {
-          _isMessageDisplayed = false;
-        });
-      }
-      return;
-    }
+    // if (_selectedCompetences.isEmpty) {
+    //   if (!_isMessageDisplayed) {
+    //     _isMessageDisplayed = true;
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(
+    //         content: Text('Please select at least one competence!'),
+    //         duration: Duration(seconds: 2),
+    //       ),
+    //     ).closed.then((_) {
+    //       _isMessageDisplayed = false;
+    //     });
+    //   }
+    //   return;
+    // }
 
     //TODO: color selector option
     final List<Color> pastelColors = [
@@ -88,10 +88,10 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       level: 'A1',
       code: _selectedLanguageCode,
       fromCode: _selectedOriginLanguageCode,
-      listening: _selectedCompetences.contains('listening'),
-      speaking: _selectedCompetences.contains('speaking'),
-      reading: _selectedCompetences.contains('reading'),
-      writing: _selectedCompetences.contains('writing'),
+      listening: false, // _selectedCompetences.contains('listening'),
+      speaking: false, // _selectedCompetences.contains('speaking'),
+      reading: false, // _selectedCompetences.contains('reading'),
+      writing: false, // _selectedCompetences.contains('writing'),
       color: randomColor,
       imageUrl: _selectedFlagUrl,
     );
@@ -133,15 +133,15 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
     });
   }
 
-  void _toggleCompetence(String competence) {
-    setState(() {
-      if (_selectedCompetences.contains(competence)) {
-        _selectedCompetences.remove(competence);
-      } else {
-        _selectedCompetences.add(competence);
-      }
-    });
-  }
+  // void _toggleCompetence(String competence) {
+  //   setState(() {
+  //     if (_selectedCompetences.contains(competence)) {
+  //       _selectedCompetences.remove(competence);
+  //     } else {
+  //       _selectedCompetences.add(competence);
+  //     }
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -205,25 +205,29 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                             SizedBox(height: p.createCourseButtonHeight()),
                             const Text("Skills", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
                             SizedBox(height: p.standardPadding() * 3),
-                            CompetenceSelectorButton(
-                              competence: "listening",
-                              onToggle: _toggleCompetence,
+                            Text(
+                              "Coming soon...",
+                              style: TextStyle(fontSize: 20, fontFamily: "Telex", color: Colors.grey[700]),
                             ),
-                            SizedBox(height: p.standardPadding()),
-                            CompetenceSelectorButton(
-                              competence: "speaking",
-                              onToggle: _toggleCompetence,
-                            ),
-                            SizedBox(height: p.standardPadding()),
-                            CompetenceSelectorButton(
-                              competence: "reading",
-                              onToggle: _toggleCompetence,
-                            ),
-                            SizedBox(height: p.standardPadding()),
-                            CompetenceSelectorButton(
-                              competence: "writing",
-                              onToggle: _toggleCompetence,
-                            ),
+                            // CompetenceSelectorButton(
+                            //   competence: "listening",
+                            //   onToggle: _toggleCompetence,
+                            // ),
+                            // SizedBox(height: p.standardPadding()),
+                            // CompetenceSelectorButton(
+                            //   competence: "speaking",
+                            //   onToggle: _toggleCompetence,
+                            // ),
+                            // SizedBox(height: p.standardPadding()),
+                            // CompetenceSelectorButton(
+                            //   competence: "reading",
+                            //   onToggle: _toggleCompetence,
+                            // ),
+                            // SizedBox(height: p.standardPadding()),
+                            // CompetenceSelectorButton(
+                            //   competence: "writing",
+                            //   onToggle: _toggleCompetence,
+                            // ),
                           ],
                         ),
                       ),

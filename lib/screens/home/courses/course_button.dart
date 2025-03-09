@@ -44,7 +44,8 @@ class CourseButton extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   // Icons on the left indicating the competences
-                  CompetenceList(course: course),
+                  //TODO: Uncomment this line to display the competences
+                  //CompetenceList(course: course),
                   const SizedBox(width: 50),
                   // Column with image and text in the center
                   Row(
@@ -61,7 +62,6 @@ class CourseButton extends StatelessWidget {
                     ],
                   ),
                   const Spacer(),
-                  //TODO: Bug: Level not showing when there is only one course
                   
                 /*Column(
                     mainAxisAlignment: MainAxisAlignment.start,
