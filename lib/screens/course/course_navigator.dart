@@ -27,7 +27,7 @@ class _CourseNavigatorState extends State<CourseNavigator> {
         ? AddBookScreen(onBackPressed: _toggleAddBookScreen, languageCode: widget.course.code)
         : Row(
             children: [
-              ReviewPile(languageCode: widget.course.code),
+              ReviewPile(course: widget.course),
               const Spacer(),
               Center(child: Library(languageCode: widget.course.code, onAddBookPressed: _toggleAddBookScreen)),
             ],
