@@ -44,7 +44,6 @@ class BookRepository {
   Future<void> createBookDatabase(int bookId, List<String> sentences) async {
     String dbName = '$bookId.db';
     String path = join(await getDatabasesPath(), dbName);
-    print('Creating book database at path: $path'); // Print the database path
     Database bookDb = await openDatabase(
       path,
       onCreate: (db, version) {

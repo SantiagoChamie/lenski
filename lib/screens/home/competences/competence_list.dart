@@ -12,7 +12,7 @@ class CompetenceList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
-    final iconSize = p.standardPadding() * 2; // Example size, adjust as needed
+    final iconSize = p.standardPadding() * 1.5; // Example size, adjust as needed
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,

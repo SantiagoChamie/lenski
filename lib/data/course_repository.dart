@@ -18,7 +18,6 @@ class CourseRepository {
     return _database!;
   }
 
-  //TODO: create database for books and review cards
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'courses.db');
     return openDatabase(
