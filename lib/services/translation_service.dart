@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:lenski/data/card_repository.dart'; // Import the CardRepository
 
 /// A service to translate text using the DeepL API.
 /// The service caches the translated text to avoid unnecessary API calls.
@@ -26,6 +27,13 @@ class TranslationService {
     
     if (_cache.containsKey(cacheKey)) {
       return _cache[cacheKey]!;
+    }
+
+    // Check the CardRepository for an existing card
+    final existingCardBack = await _checkCardRepository(text, context);
+    if (existingCardBack != null) {
+      _cache[cacheKey] = existingCardBack;
+      return existingCardBack;
     }
 
     final Map<String, dynamic> requestBody = {
@@ -55,5 +63,13 @@ class TranslationService {
     } else {
       throw Exception('Failed to translate text');
     }
+  }
+
+  Future<String?> _checkCardRepository(String front, String context) async {
+    return await CardRepository().getCardByInfo(front, context);
+  }
+
+  Future<bool> cardExists(String front, String context) async {
+    return await CardRepository().getCardByInfo(front, context) != null;
   }
 }
