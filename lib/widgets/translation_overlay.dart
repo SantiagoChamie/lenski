@@ -26,6 +26,7 @@ class TranslationOverlay extends StatefulWidget {
 class _TranslationOverlayState extends State<TranslationOverlay> {
   late Future<String> _translatedText;
   late Future<bool> _cardExists;
+  bool _cardAdded = false; // Add this state variable
 
   @override
   void initState() {
@@ -62,6 +63,9 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
       language: widget.sourceLang,
     );
     await CardRepository().insertCard(card);
+    setState(() {
+      _cardAdded = true; // Update the state
+    });
   }
 
   @override
@@ -210,9 +214,9 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
                           ),
                         ],
                       ),
-                      if (!cardExistsSnapshot.data!)
+                      if (!cardExistsSnapshot.data! && !_cardAdded)
                       SizedBox(height: p.standardPadding()),
-                      if (!cardExistsSnapshot.data!)
+                      if (!cardExistsSnapshot.data! && !_cardAdded)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
