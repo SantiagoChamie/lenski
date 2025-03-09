@@ -3,7 +3,7 @@ class Card {
   final String front;
   final String back;
   final String context;
-  final DateTime dueDate;
+  final int dueDate; // Store dueDate as an integer
   final String language;
 
   Card({
@@ -11,9 +11,9 @@ class Card {
     required this.front,
     required this.back,
     required this.context,
-    required this.dueDate,
+    required DateTime dueDate, // Accept DateTime in constructor
     required this.language,
-  });
+  }) : dueDate = _dateTimeToInt(dueDate); // Convert DateTime to integer
 
   Map<String, dynamic> toMap() {
     return {
@@ -21,7 +21,7 @@ class Card {
       'front': front,
       'back': back,
       'context': context,
-      'dueDate': dueDate.toIso8601String(), // Convert DateTime to ISO 8601 string
+      'dueDate': dueDate, // Store as integer
       'language': language,
     };
   }
@@ -32,8 +32,16 @@ class Card {
       front: map['front'],
       back: map['back'],
       context: map['context'],
-      dueDate: DateTime.parse(map['dueDate']), // Parse ISO 8601 string to DateTime
+      dueDate: _intToDateTime(map['dueDate']), // Convert integer to DateTime
       language: map['language'],
     );
+  }
+
+  static int _dateTimeToInt(DateTime date) {
+    return date.toUtc().difference(DateTime.utc(1970, 1, 1)).inDays;
+  }
+
+  static DateTime _intToDateTime(int days) {
+    return DateTime.utc(1970, 1, 1).add(Duration(days: days));
   }
 }

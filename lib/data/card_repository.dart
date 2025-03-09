@@ -10,6 +10,10 @@ class CardRepository {
     return _instance;
   }
 
+  static int _dateTimeToInt(DateTime date) {
+    return date.toUtc().difference(DateTime.utc(1970, 1, 1)).inDays;
+  }
+
   CardRepository._internal();
 
   Future<Database> get database async {
@@ -24,7 +28,7 @@ class CardRepository {
       path,
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE cards(id INTEGER PRIMARY KEY, front TEXT, back TEXT, context TEXT, dueDate TEXT, language TEXT)', // Store dueDate as TEXT
+          'CREATE TABLE cards(id INTEGER PRIMARY KEY, front TEXT, back TEXT, context TEXT, dueDate INTEGER, language TEXT)', // Store dueDate as INTEGER
         );
       },
       version: 1,
@@ -44,8 +48,8 @@ class CardRepository {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'cards',
-      where: 'dueDate = ? AND language = ?',
-      whereArgs: [dueDate.toIso8601String(), language], // Convert DateTime to ISO 8601 string
+      where: 'dueDate <= ? AND language = ?', // Use <= operator to include cards with dueDate less than or equal to the input date
+      whereArgs: [_dateTimeToInt(dueDate), language], // Convert DateTime to integer
     );
     return List.generate(maps.length, (i) {
       return Card.fromMap(maps[i]);

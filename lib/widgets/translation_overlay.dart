@@ -58,8 +58,8 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
       front: widget.text,
       back: backText,
       context: widget.contextText,
-      dueDate: DateTime.now(),
-      language: widget.targetLang,
+      dueDate: DateTime.now(), // Pass DateTime directly
+      language: widget.sourceLang,
     );
     await CardRepository().insertCard(card);
   }
