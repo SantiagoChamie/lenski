@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:lenski/screens/home/add_course/buttons/competence_selector_button.dart';
+//import 'package:lenski/screens/home/add_course/buttons/competence_selector_button.dart';
 import 'package:lenski/screens/home/add_course/course_difficulty_text.dart';
 import 'package:lenski/screens/home/add_course/buttons/language_selector_button.dart';
 import 'package:lenski/utils/languages.dart';

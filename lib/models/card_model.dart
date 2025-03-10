@@ -5,6 +5,7 @@ class Card {
   final String context;
   final int dueDate; // Store dueDate as an integer
   final String language;
+  final int prevInterval; // New parameter
 
   Card({
     this.id,
@@ -13,6 +14,7 @@ class Card {
     required this.context,
     required DateTime dueDate, // Accept DateTime in constructor
     required this.language,
+    this.prevInterval = 0, // Initialize prevInterval as 0
   }) : dueDate = _dateTimeToInt(dueDate); // Convert DateTime to integer
 
   Map<String, dynamic> toMap() {
@@ -23,6 +25,7 @@ class Card {
       'context': context,
       'dueDate': dueDate, // Store as integer
       'language': language,
+      'prevInterval': prevInterval, // Include prevInterval
     };
   }
 
@@ -34,6 +37,7 @@ class Card {
       context: map['context'],
       dueDate: _intToDateTime(map['dueDate']), // Convert integer to DateTime
       language: map['language'],
+      prevInterval: map['prevInterval'], // Include prevInterval
     );
   }
 

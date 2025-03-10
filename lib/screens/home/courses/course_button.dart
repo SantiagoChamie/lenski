@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/screens/course/course_home.dart';
-import 'package:lenski/screens/home/competences/competence_list.dart';
+//import 'package:lenski/screens/home/competences/competence_list.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/course_repository.dart';
 import '../../../models/course_model.dart';
