@@ -14,6 +14,10 @@ class CardRepository {
     return date.toUtc().difference(DateTime.utc(1970, 1, 1)).inDays;
   }
 
+  static DateTime _intToDateTime(int days) {
+    return DateTime.utc(1970, 1, 1).add(Duration(days: days));
+  }
+
   CardRepository._internal();
 
   Future<Database> get database async {
@@ -28,7 +32,7 @@ class CardRepository {
       path,
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE cards(id INTEGER PRIMARY KEY, front TEXT, back TEXT, context TEXT, dueDate INTEGER, language TEXT)', // Store dueDate as INTEGER
+          'CREATE TABLE cards(id INTEGER PRIMARY KEY, front TEXT, back TEXT, context TEXT, dueDate INTEGER, language TEXT, prevInterval INTEGER)', // Add prevInterval column
         );
       },
       version: 1,
@@ -64,6 +68,39 @@ class CardRepository {
       where: 'id = ?',
       whereArgs: [card.id],
     );
+  }
+
+  Future<void> postponeCard(Card card, {int interval=0}) async {
+    final int newInterval;
+    if (interval == 0) {
+      newInterval = card.prevInterval == 0 ? 1 : card.prevInterval * 2;
+    } else {
+      newInterval = interval;
+    }
+    final newDueDate = DateTime.now().add(Duration(days: newInterval));
+    final updatedCard = Card(
+      id: card.id,
+      front: card.front,
+      back: card.back,
+      context: card.context,
+      dueDate: newDueDate,
+      language: card.language,
+      prevInterval: newInterval,
+    );
+    await updateCard(updatedCard);
+  }
+
+  Future<void> restartCard(Card card) async {
+    final updatedCard = Card(
+      id: card.id,
+      front: card.front,
+      back: card.back,
+      context: card.context,
+      language: card.language,
+      dueDate: DateTime.now(),
+      prevInterval: 0,
+    );
+    await updateCard(updatedCard);
   }
 
   Future<void> deleteCard(int? id) async {

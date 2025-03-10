@@ -27,6 +27,7 @@ class CourseHome extends StatelessWidget {
                 imageUrl: course.imageUrl,
               ),
               SizedBox(width: p.standardPadding()),
+              //TODO: fix bug where the text keeps displaying even after navigation event
               LText(
                 text: welcomeMessages[course.name]!,
                 style: const TextStyle(
@@ -42,7 +43,7 @@ class CourseHome extends StatelessWidget {
                 position: 'below',
               ),
               const Spacer(),
-              Container(
+              /*Container(
                 decoration: const BoxDecoration(
                   color: Color(0xFFD9D0DB),
                   borderRadius: BorderRadius.only(topLeft: Radius.circular(10.0), bottomLeft: Radius.circular(10.0)),
@@ -54,7 +55,7 @@ class CourseHome extends StatelessWidget {
                     // Add your onPressed code here!
                   },
                 ),
-              ),
+              ),*/
             ],
           ),
         ),
