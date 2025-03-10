@@ -45,9 +45,20 @@ class _ReviewScreenState extends State<ReviewScreen> {
     toggleCard();
   }
 
-  void handleMediumOrHard() async {
+  void handleMedium() async {
     final currentCard = cards.removeAt(0);
-    await repository.restartCard(currentCard);
+    if (currentCard.prevInterval != 0) {
+      await repository.postponeCard(currentCard, interval: currentCard.prevInterval);
+    }
+    cards.add(currentCard);
+    toggleCard();
+  }
+
+  void handleHard() async {
+    final currentCard = cards.removeAt(0);
+    if (currentCard.prevInterval != 0) {
+      await repository.restartCard(currentCard);
+    }
     cards.add(currentCard);
     toggleCard();
   }
@@ -148,12 +159,45 @@ class _ReviewScreenState extends State<ReviewScreen> {
                           fontFamily: "Varela Round",
                         ),
                       ),
-                      Text(isFront ? currentCard.front : currentCard.back,
-                        style: const TextStyle(
-                          fontSize: 24.0,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                          fontFamily: "Varela Round",
-                        ),
+                      Column(
+                        children: [
+                          Text(isFront ? currentCard.front : currentCard.back,
+                            style: const TextStyle(
+                              fontSize: 24.0,
+                              color: Color.fromARGB(255, 0, 0, 0),
+                              fontFamily: "Varela Round",
+                            ),
+                          ),
+                          if (isFront) Text.rich(
+                            TextSpan(
+                              text: currentCard.context.substring(0, currentCard.context.indexOf(currentCard.front)),
+                              style: const TextStyle(
+                                fontSize: 18.0,
+                                color: Color(0xFF99909B),
+                                fontFamily: "Varela Round",
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: currentCard.front,
+                                  style: const TextStyle(
+                                    fontSize: 18.0,
+                                    color: Color(0xFF99909B),
+                                    fontFamily: "Varela Round",
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: currentCard.context.substring(currentCard.context.indexOf(currentCard.front) + currentCard.front.length),
+                                  style: const TextStyle(
+                                    fontSize: 18.0,
+                                    color: Color(0xFF99909B),
+                                    fontFamily: "Varela Round",
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                       isFront ? ElevatedButton(
                         onPressed: toggleCard,
@@ -169,8 +213,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ElevatedButton(
-                            onPressed: handleEasy,
-                            child: const Text('Easy',
+                            onPressed: handleHard,
+                            child: const Text('Hard',
                               style: TextStyle(
                                 fontSize: 18.0,
                                 color: Color(0xFF000000),
@@ -180,7 +224,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                           ),
                           SizedBox(width: p.standardPadding()),
                           ElevatedButton(
-                            onPressed: handleMediumOrHard,
+                            onPressed: handleMedium,
                             child: const Text('Medium',
                               style: TextStyle(
                                 fontSize: 18.0,
@@ -191,15 +235,15 @@ class _ReviewScreenState extends State<ReviewScreen> {
                           ),
                           SizedBox(width: p.standardPadding()),
                           ElevatedButton(
-                            onPressed: handleMediumOrHard,
-                            child: const Text('Hard',
+                            onPressed: handleEasy,
+                            child: const Text('Easy',
                               style: TextStyle(
                                 fontSize: 18.0,
                                 color: Color(0xFF000000),
                                 fontFamily: "Sansation",
                               ),
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ],

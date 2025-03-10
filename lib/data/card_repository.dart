@@ -70,8 +70,13 @@ class CardRepository {
     );
   }
 
-  Future<void> postponeCard(Card card) async {
-    final newInterval = card.prevInterval == 0 ? 1 : card.prevInterval * 2;
+  Future<void> postponeCard(Card card, {int interval=0}) async {
+    final int newInterval;
+    if (interval == 0) {
+      newInterval = card.prevInterval == 0 ? 1 : card.prevInterval * 2;
+    } else {
+      newInterval = interval;
+    }
     final newDueDate = DateTime.now().add(Duration(days: newInterval));
     final updatedCard = Card(
       id: card.id,
