@@ -50,6 +50,7 @@ class _LTextState extends State<LText> {
             contextText: widget.text,
             sourceLang: widget.toLanguage,
             targetLang: widget.fromLanguage,
+            onClose: () => hideOverlay(instant: true), // Pass the hideOverlay method
           ),
         ),
       ),
@@ -57,12 +58,18 @@ class _LTextState extends State<LText> {
     Overlay.of(context).insert(overlayEntry!);
   }
 
-  void hideOverlay() {
+  void hideOverlay({bool instant=false}) {
     hideTimer?.cancel();
-    hideTimer = Timer(const Duration(milliseconds: 200), () {
+    if (instant) {
       overlayEntry?.remove();
       overlayEntry = null;
-    });
+      return;
+    } else {
+      hideTimer = Timer(const Duration(milliseconds: 200), () {
+        overlayEntry?.remove();
+        overlayEntry = null;
+      });
+    }
   }
 
   @override
