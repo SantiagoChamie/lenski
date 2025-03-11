@@ -8,7 +8,7 @@ import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/screens/course/books/book_screen.dart';
 
-class BookButton extends StatelessWidget {
+class BookButton extends StatefulWidget {
   final Book? book;
   final Course? course;
   final bool? add;
@@ -24,18 +24,37 @@ class BookButton extends StatelessWidget {
     this.onDelete,
   });
 
+  @override
+  _BookButtonState createState() => _BookButtonState();
+}
+
+class _BookButtonState extends State<BookButton> {
+  Book? book;
+
+  @override
+  void initState() {
+    super.initState();
+    book = widget.book;
+  }
+
   void _printBookType(BuildContext context) {
-    if (add == true) {
-      if (onPressed != null) {
-        onPressed!();
+    if (widget.add == true) {
+      if (widget.onPressed != null) {
+        widget.onPressed!();
       }
     } else if (book != null) {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => BookScreen(book: book!, course: course!),
+          builder: (context) => BookScreen(book: book!, course: widget.course!),
         ),
-      );
+      ).then((updatedBook) {
+        if (updatedBook != null && updatedBook is Book) {
+          setState(() {
+            book = updatedBook;
+          });
+        }
+      });
     }
   }
 
@@ -43,8 +62,8 @@ class BookButton extends StatelessWidget {
     if (book != null) {
       final bookRepository = BookRepository();
       await bookRepository.deleteBook(book!.id!);
-      if (onDelete != null) {
-        onDelete!();
+      if (widget.onDelete != null) {
+        widget.onDelete!();
       }
     }
   }
@@ -70,11 +89,11 @@ class BookButton extends StatelessWidget {
     return Column(
       children: [
         InkWell(
-          onTap: book != null || add == true ? () => _printBookType(context) : onPressed,
+          onTap: book != null || widget.add == true ? () => _printBookType(context) : widget.onPressed,
           child: Stack(
             children: [
               book == null
-                ? add == true ? const AddBookButton(bookWidth: bookWidth) 
+                ? widget.add == true ? const AddBookButton(bookWidth: bookWidth) 
               : const EmptyBookButton(bookWidth: bookWidth)
                 : Container(
                     width: bookWidth,
@@ -90,7 +109,7 @@ class BookButton extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-              book != null && add == false
+              book != null && widget.add == false
               ? Positioned(
                   bottom: 10,
                   right: 10,
@@ -130,7 +149,7 @@ class BookButton extends StatelessWidget {
                   ),
                 )
               : const SizedBox(),
-              book != null && add == false
+              book != null && widget.add == false
               ? Positioned(
                   top: 10,
                   left: 10,

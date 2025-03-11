@@ -35,10 +35,17 @@ class _BookScreenState extends State<BookScreen> {
     return sentences;
   }
 
+  void _updateCurrentLine(int newLine) async {
+    final bookRepository = BookRepository();
+    widget.book.currentLine = newLine;
+    await bookRepository.updateBook(widget.book);
+  }
+
   void _nextSentence() {
     setState(() {
       if (_currentLine < widget.book.totalLines) {
         _currentLine++;
+        _updateCurrentLine(_currentLine);
       }
     });
   }
@@ -47,6 +54,7 @@ class _BookScreenState extends State<BookScreen> {
     setState(() {
       if (_currentLine > 1) {
         _currentLine--;
+        _updateCurrentLine(_currentLine);
       }
     });
   }
@@ -161,7 +169,7 @@ class _BookScreenState extends State<BookScreen> {
             right: boxPadding + 10,
             child: IconButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(widget.book); // Return the updated book
               },
               icon: const Icon(Icons.close_rounded),
             ),
