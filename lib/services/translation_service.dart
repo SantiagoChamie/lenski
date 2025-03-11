@@ -13,7 +13,7 @@ class TranslationService {
   factory TranslationService() {
     return _instance;
   }
-
+  //TODO : fix bug with accidentals in the translation
   final String _apiKey = dotenv.env['DEEPL_KEY'] ?? '';
   final Map<String, String> _cache = {};
 

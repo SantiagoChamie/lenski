@@ -68,6 +68,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
     setState(() {
       _cardAdded = true; // Update the state
     });
+    widget.onClose(); // Call the onClose callback
   }
 
   @override

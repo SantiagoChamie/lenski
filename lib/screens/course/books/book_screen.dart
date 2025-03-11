@@ -8,6 +8,8 @@ import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/widgets/ltext.dart';
 
+/// Screen to display a book
+/// Allows the user to read the book sentence by sentence
 class BookScreen extends StatefulWidget {
   final Book book;
   final Course course;
