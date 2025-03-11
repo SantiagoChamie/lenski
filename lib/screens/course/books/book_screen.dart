@@ -90,47 +90,50 @@ class _BookScreenState extends State<BookScreen> {
                         } else {
                           final sentences = snapshot.data!;
                           final currentSentence = sentences[_currentLine - 1].sentence;
-                          return Stack(
+                          return Column(
                             children: [
-                              Center(
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: p.standardPadding() * 2),
-                                  child: LText(
-                                    text: currentSentence,
-                                    fromLanguage: widget.course.fromCode,
-                                    toLanguage: widget.course.code,
-                                    style: const TextStyle(
-                                      fontSize: 30.0,
-                                      color: Color.fromARGB(255, 0, 0, 0),
-                                      fontFamily: "Varela Round",
-                                    ),
+                              Expanded(
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.arrow_back_ios_rounded),
+                                        onPressed: _previousSentence,
+                                      ),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: p.standardPadding() * 2),
+                                          child: Center( // Center horizontally
+                                            child: LText(
+                                              text: currentSentence,
+                                              fromLanguage: widget.course.fromCode,
+                                              toLanguage: widget.course.code,
+                                              style: const TextStyle(
+                                                fontSize: 30.0,
+                                                color: Color.fromARGB(255, 0, 0, 0),
+                                                fontFamily: "Varela Round",
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.arrow_forward_ios_rounded),
+                                        onPressed: _nextSentence,
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
-                              Positioned(
-                                left: 0,
-                                top: 0,
-                                bottom: 0,
-                                child: IconButton(
-                                  icon: const Icon(Icons.arrow_back_ios_rounded),
-                                  onPressed: _previousSentence,
-                                ),
-                              ),
-                              Positioned(
-                                right: 0,
-                                top: 0,
-                                bottom: 0,
-                                child: IconButton(
-                                  icon: const Icon(Icons.arrow_forward_ios_rounded),
-                                  onPressed: _nextSentence,
-                                ),
-                              ),
-                              Positioned(
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
+                              Padding(
+                                padding: const EdgeInsets.only(top: 20.0),
                                 child: LinearProgressIndicator(
                                   value: _currentLine / widget.book.totalLines,
+                                  backgroundColor: const Color(0xFFD9D0DB),
+                                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2C73DE)),
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  minHeight: 10,
                                 ),
                               ),
                             ],
