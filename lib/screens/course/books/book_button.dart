@@ -1,32 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:lenski/models/book_model.dart';
+import 'package:lenski/models/course_model.dart';
 import 'dart:math';
 import 'package:lenski/screens/course/books/add_book_button.dart';
 import 'package:lenski/screens/course/books/empty_book_button.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
+import 'package:lenski/screens/course/books/book_screen.dart';
 
-/// BookButton is a widget that displays a book with an image, name, and progress.
-/// If the book is not yet added, it will display an empty book.
-/// It will also display an add book button if it is the last book in the list.
-// TODO: could work better with a book button selector as intermediary
 class BookButton extends StatelessWidget {
-  final String? id;
+  final Book? book;
+  final Course? course;
   final bool? add;
-  final String? imageUrl;
-  final String? name;
-  final int? totalLines;
-  final int? currentLine;
   final VoidCallback? onPressed;
   final VoidCallback? onDelete;
 
   const BookButton({
     super.key,
-    this.id,
+    this.book,
+    this.course,
     this.add = false,
-    this.imageUrl,
-    this.name,
-    this.totalLines,
-    this.currentLine,
     this.onPressed,
     this.onDelete,
   });
@@ -36,15 +29,20 @@ class BookButton extends StatelessWidget {
       if (onPressed != null) {
         onPressed!();
       }
-    } else if (id != null) {
-      print('Full Book');
+    } else if (book != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BookScreen(book: book!, course: course!),
+        ),
+      );
     }
   }
 
   Future<void> _deleteBook(BuildContext context) async {
-    if (id != null) {
+    if (book != null) {
       final bookRepository = BookRepository();
-      await bookRepository.deleteBook(int.parse(id!));
+      await bookRepository.deleteBook(book!.id!);
       if (onDelete != null) {
         onDelete!();
       }
@@ -56,8 +54,8 @@ class BookButton extends StatelessWidget {
     final p = Proportions(context);
     const double bookWidth = 150;
     final randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
-    final percentage = (totalLines != null && currentLine != null && totalLines! > 0)
-        ? ((currentLine! - 1) / totalLines! * 100).toInt()
+    final percentage = (book != null && book!.totalLines > 0)
+        ? ((book!.currentLine - 1) / book!.totalLines * 100).toInt()
         : 100;
 
     double fontSize;
@@ -72,27 +70,27 @@ class BookButton extends StatelessWidget {
     return Column(
       children: [
         InkWell(
-          onTap: id != null || add == true ? () => _printBookType(context) : onPressed,
+          onTap: book != null || add == true ? () => _printBookType(context) : onPressed,
           child: Stack(
             children: [
-              id == null
+              book == null
                 ? add == true ? const AddBookButton(bookWidth: bookWidth) 
               : const EmptyBookButton(bookWidth: bookWidth)
                 : Container(
                     width: bookWidth,
                     height: bookWidth * 1.5,
                     decoration: BoxDecoration(
-                      color: imageUrl == null ? randomColor : null,
-                      image: imageUrl != null
+                      color: book!.imageUrl == null ? randomColor : null,
+                      image: book!.imageUrl != null
                           ? DecorationImage(
-                              image: NetworkImage(imageUrl!),
+                              image: NetworkImage(book!.imageUrl!),
                               fit: BoxFit.cover,
                             )
                           : null,
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-              id != null && add == false
+              book != null && add == false
               ? Positioned(
                   bottom: 10,
                   right: 10,
@@ -132,7 +130,7 @@ class BookButton extends StatelessWidget {
                   ),
                 )
               : const SizedBox(),
-              id != null && add == false
+              book != null && add == false
               ? Positioned(
                   top: 10,
                   left: 10,
@@ -149,7 +147,7 @@ class BookButton extends StatelessWidget {
         SizedBox(
           width: 100 + p.standardPadding() * 2,
           child: Text(
-            name ?? ' ',
+            book?.name ?? ' ',
             style: const TextStyle(
               fontSize: 16,
               fontFamily: 'Varela Round',

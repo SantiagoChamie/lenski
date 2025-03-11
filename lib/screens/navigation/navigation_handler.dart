@@ -3,6 +3,8 @@ import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/home/courses.dart';
 import 'package:lenski/screens/course/course_home.dart';
 import 'package:lenski/screens/course/review_cards/review_screen.dart';
+import 'package:lenski/screens/course/books/book_screen.dart';
+import 'package:lenski/models/book_model.dart';
 import 'sidebar.dart';
 
 class NavigationHandler extends StatefulWidget {
@@ -47,6 +49,12 @@ class NavigationHandlerState extends State<NavigationHandler> {
                   case 'Review':
                     final course = settings.arguments as Course;
                     builder = (BuildContext _) => ReviewScreen(course: course);
+                    break;
+                  case 'Book':
+                    final args = settings.arguments as Map<String, dynamic>;
+                    final book = args['book'] as Book;
+                    final course = args['course'] as Course;
+                    builder = (BuildContext _) => BookScreen(book: book, course: course);
                     break;
                   default:
                     builder = (BuildContext _) => const Courses();

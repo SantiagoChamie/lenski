@@ -1,3 +1,4 @@
+import 'package:lenski/models/sentence_model.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import 'dart:io';
@@ -61,6 +62,16 @@ class BookRepository {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
+  }
+
+  Future<List<Sentence>> getSentences(int bookId) async {
+    String dbName = '$bookId.db';
+    String path = join(await getDatabasesPath(), dbName);
+    Database bookDb = await openDatabase(path);
+    final List<Map<String, dynamic>> maps = await bookDb.query('sentences');
+    return List.generate(maps.length, (i) {
+      return Sentence.fromMap(maps[i]);
+    });
   }
 
   Future<List<Book>> booksByLanguage(String language) async {

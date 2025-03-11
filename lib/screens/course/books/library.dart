@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/course/books/book_button.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/models/book_model.dart';
 
 class Library extends StatefulWidget {
-  final String languageCode;
+  final Course course;
   final VoidCallback onAddBookPressed;
 
-  const Library({super.key, required this.languageCode, required this.onAddBookPressed});
+  const Library({super.key, required this.course, required this.onAddBookPressed});
 
   @override
   _LibraryState createState() => _LibraryState();
@@ -24,7 +25,7 @@ class _LibraryState extends State<Library> {
   }
 
   Future<List<Book>> _fetchBooks() async {
-    return await BookRepository().booksByLanguage(widget.languageCode);
+    return await BookRepository().booksByLanguage(widget.course.code);
   }
 
   void _refreshBooks() {
@@ -49,12 +50,9 @@ class _LibraryState extends State<Library> {
           if (snapshot.hasData && snapshot.data!.isNotEmpty) {
             final books = snapshot.data!;
             bookButtons = books.map((book) => BookButton(
-              id: book.id.toString(),
-              imageUrl: book.imageUrl,
-              name: book.name,
-              totalLines: book.totalLines,
-              currentLine: book.currentLine,
+              book: book,
               onDelete: _refreshBooks,
+              course: widget.course,
             )).toList();
           }
 

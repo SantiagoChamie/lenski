@@ -29,7 +29,7 @@ class _CourseNavigatorState extends State<CourseNavigator> {
             children: [
               ReviewPile(course: widget.course),
               const Spacer(),
-              Center(child: Library(languageCode: widget.course.code, onAddBookPressed: _toggleAddBookScreen)),
+              Center(child: Library(course: widget.course, onAddBookPressed: _toggleAddBookScreen)),
             ],
           );
   }
