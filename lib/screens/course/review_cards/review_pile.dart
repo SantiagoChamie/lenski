@@ -4,9 +4,13 @@ import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
 import 'dart:math'; // Add this import for randomization
 
+/// A widget that displays a pile of review cards for a course.
 class ReviewPile extends StatefulWidget {
   final Course course;
 
+  /// Creates a ReviewPile widget.
+  /// 
+  /// [course] is the course for which the review pile is being created.
   const ReviewPile({super.key, required this.course});
 
   @override
@@ -23,6 +27,7 @@ class _ReviewPileState extends State<ReviewPile> {
     _fetchFirstWord();
   }
 
+  /// Fetches the first word to be displayed from the repository.
   Future<void> _fetchFirstWord() async {
     final repository = CardRepository();
     final cards = await repository.cards(DateTime.now(), widget.course.code);
@@ -37,6 +42,7 @@ class _ReviewPileState extends State<ReviewPile> {
     });
   }
 
+  /// Refreshes the word to be displayed.
   Future<void> _refreshWord() async {
     if (cardFronts.isNotEmpty) {
       final repository = CardRepository();

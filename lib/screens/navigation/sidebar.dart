@@ -52,9 +52,6 @@ class Sidebar extends StatelessWidget {
       icon: Icon(icon, color: Colors.black, size: p.sidebarButtonWidth() / 2),
       onPressed: () {
         onItemSelected(title);
-        if (title == 'Home') {
-          navigatorKey.currentState?.popUntil((route) => route.isFirst);
-        }
       },
       style: FilledButton.styleFrom(
         backgroundColor: const Color(0xFFD9D0DB), // Button color

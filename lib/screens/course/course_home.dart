@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/course/course_navigator.dart';
-import 'package:lenski/screens/home/courses/flag_icon.dart';
+import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/languages.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/widgets/ltext.dart';
 
+/// A screen that displays the home page for a specific course.
 class CourseHome extends StatelessWidget {
   final Course course;
+
+  /// Creates a CourseHome widget.
+  /// 
+  /// [course] is the course for which the home screen is being created.
   const CourseHome({super.key, required this.course});
 
   @override
@@ -17,7 +22,7 @@ class CourseHome extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(top: p.standardPadding()*2, left: p.standardPadding()*2, bottom: p.standardPadding()*2),
+          padding: EdgeInsets.only(top: p.standardPadding() * 2, left: p.standardPadding() * 2, bottom: p.standardPadding() * 2),
           child: Row(
             children: [
               FlagIcon(
@@ -47,7 +52,6 @@ class CourseHome extends StatelessWidget {
                 decoration: const BoxDecoration(
                   color: Color(0xFFD9D0DB),
                   borderRadius: BorderRadius.only(topLeft: Radius.circular(10.0), bottomLeft: Radius.circular(10.0)),
-
                 ),
                 child: IconButton(
                   icon: const Icon(Icons.star, color: Colors.black, size: 30.0),
@@ -60,7 +64,7 @@ class CourseHome extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: CourseNavigator(course: course)
+          child: CourseNavigator(course: course),
         ),
       ],
     );

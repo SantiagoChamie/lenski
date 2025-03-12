@@ -8,6 +8,7 @@ import 'package:lenski/models/book_model.dart';
 import 'package:lenski/screens/settings/settings_screen.dart';
 import 'sidebar.dart';
 
+/// A widget that handles navigation within the app.
 class NavigationHandler extends StatefulWidget {
   const NavigationHandler({super.key});
 
@@ -17,18 +18,28 @@ class NavigationHandler extends StatefulWidget {
 
 class NavigationHandlerState extends State<NavigationHandler> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  String _currentRoute = 'Home';
 
+  /// Handles item selection from the sidebar.
+  /// Navigates to the selected route if it is different from the current route.
   void _onItemSelected(String item) {
     if (item == 'Home') {
+      // If the selected item is 'Home', pop all routes until the first route.
       if (_navigatorKey.currentState?.canPop() == true) {
         _navigatorKey.currentState?.popUntil((route) => route.isFirst);
       }
-    } else {
-      final currentRoute = ModalRoute.of(context)?.settings.name;
-      if (currentRoute != item) {
-        _navigatorKey.currentState?.pushNamed(item);
-      }
+    } else if (_shouldNavigate(item)) {
+      // Push the named route onto the navigator stack.
+      _navigatorKey.currentState?.pushNamed(item);
     }
+    setState(() {
+      _currentRoute = item;
+    });
+  }
+
+  /// Determines if navigation should occur based on the selected item.
+  bool _shouldNavigate(String item) {
+    return _currentRoute != item;
   }
 
   @override
@@ -36,6 +47,7 @@ class NavigationHandlerState extends State<NavigationHandler> {
     return Scaffold(
       body: Row(
         children: [
+          // Sidebar widget for navigation.
           Sidebar(onItemSelected: _onItemSelected, navigatorKey: _navigatorKey),
           Expanded(
             child: Navigator(

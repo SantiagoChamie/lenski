@@ -7,6 +7,12 @@ class FlagIcon extends StatelessWidget {
   final String imageUrl;
   final Color? borderColor;
 
+  /// Creates a FlagIcon widget.
+  /// 
+  /// [size] is the diameter of the circular icon.
+  /// [borderWidth] is the width of the border around the icon.
+  /// [imageUrl] is the URL of the image to be displayed inside the icon.
+  /// [borderColor] is the color of the border around the icon. If not provided, defaults to white.
   const FlagIcon({
     super.key,
     required this.size,

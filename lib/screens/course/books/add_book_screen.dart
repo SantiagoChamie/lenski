@@ -2,18 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_creator.dart';
 
+/// A screen for adding a new book to the course.
 class AddBookScreen extends StatelessWidget {
   final VoidCallback onBackPressed;
   final String languageCode;
 
+  /// Creates an AddBookScreen widget.
+  /// 
+  /// [onBackPressed] is the callback function to be called when the back button is pressed.
+  /// [languageCode] is the language code for the book being added.
   const AddBookScreen({super.key, required this.onBackPressed, required this.languageCode});
 
   @override
   Widget build(BuildContext context) {
     final TextEditingController textController = TextEditingController();
-    final TextEditingController titleController = TextEditingController();
     final p = Proportions(context);
-    final ValueNotifier<bool> isSong = ValueNotifier<bool>(false);
+    final ValueNotifier<bool> isSong = ValueNotifier<bool>(true);
 
     return Scaffold(
       body: Center(
@@ -40,38 +44,6 @@ class AddBookScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('Add your own!', style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
-                      ValueListenableBuilder<bool>(
-                        valueListenable: isSong,
-                        builder: (context, value, child) {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const SizedBox(width: 20),
-                              SizedBox(
-                                width: 400,
-                                child: TextField(
-                                  controller: titleController,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    hintText: 'Enter title',
-                                    hintStyle: TextStyle()
-                                  ),
-                                ),
-                              ),
-                              const Spacer(),
-                              const Text('Text'),
-                              Switch(
-                                value: value,
-                                activeColor: const Color(0xFF2C73DE),
-                                onChanged: (newValue) {
-                                  isSong.value = newValue;
-                                },
-                              ),
-                              const Text('Song'),
-                            ],
-                          );
-                        },
-                      ),
                       Expanded(
                         child: Padding(
                           padding: EdgeInsets.all(p.standardPadding()),
@@ -98,7 +70,6 @@ class AddBookScreen extends StatelessWidget {
                               textController.text,
                               languageCode,
                               isSong.value,
-                              title: titleController.text,
                             );
                             onBackPressed();
                           },
@@ -124,7 +95,30 @@ class AddBookScreen extends StatelessWidget {
                 child: IconButton(
                   onPressed: onBackPressed, 
                   icon: const Icon(Icons.close)),
-                )
+              ),
+              Positioned(
+                bottom: 40,
+                right: 40,
+                child: ValueListenableBuilder<bool>(
+                valueListenable: isSong,
+                builder: (context, value, child) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Text'),
+                      Switch(
+                        value: value,
+                        activeColor: const Color(0xFF2C73DE),
+                        onChanged: (newValue) {
+                          isSong.value = newValue;
+                        },
+                      ),
+                      const Text('Song'),
+                    ],
+                  );
+                },
+              ),
+              )
             ],
           ),
         ),

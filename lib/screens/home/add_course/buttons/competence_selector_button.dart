@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:lenski/screens/home/competences/competence_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 
+/// A button widget for selecting a competence.
 class CompetenceSelectorButton extends StatefulWidget {
   final String competence;
   final Function(String) onToggle;
 
+  /// Creates a CompetenceSelectorButton widget.
+  /// 
+  /// [competence] is the name of the competence to be displayed.
+  /// [onToggle] is the callback function to be called when the competence is toggled.
   const CompetenceSelectorButton({super.key, required this.competence, required this.onToggle});
 
   @override
@@ -15,6 +20,7 @@ class CompetenceSelectorButton extends StatefulWidget {
 class _CompetenceSelectorButtonState extends State<CompetenceSelectorButton> {
   bool _isSelected = false;
 
+  /// Toggles the selection state of the competence.
   void _toggleSelection() {
     setState(() {
       _isSelected = !_isSelected;

@@ -5,10 +5,15 @@ import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/models/book_model.dart';
 
+/// A widget that displays a library of books for a specific course.
 class Library extends StatefulWidget {
   final Course course;
   final VoidCallback onAddBookPressed;
 
+  /// Creates a Library widget.
+  /// 
+  /// [course] is the course for which the library is being created.
+  /// [onAddBookPressed] is the callback function to be called when the add book button is pressed.
   const Library({super.key, required this.course, required this.onAddBookPressed});
 
   @override
@@ -24,10 +29,12 @@ class _LibraryState extends State<Library> {
     _booksFuture = _fetchBooks();
   }
 
+  /// Fetches the list of books for the course from the repository.
   Future<List<Book>> _fetchBooks() async {
     return await BookRepository().booksByLanguage(widget.course.code);
   }
 
+  /// Refreshes the list of books by fetching the latest data from the repository.
   void _refreshBooks() {
     setState(() {
       _booksFuture = _fetchBooks();

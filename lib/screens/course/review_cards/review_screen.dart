@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/card_model.dart' as lenski_card;
 import 'package:lenski/models/course_model.dart';
-import 'package:lenski/screens/home/courses/flag_icon.dart';
+import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
 
+/// A screen for reviewing flashcards within a course.
 class ReviewScreen extends StatefulWidget {
   final Course course;
 
+  /// Creates a ReviewScreen widget.
+  /// 
+  /// [course] is the course for which the review screen is being created.
   const ReviewScreen({super.key, required this.course});
 
   @override
@@ -25,6 +29,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
     _loadCards();
   }
 
+  /// Loads the cards to be reviewed from the repository.
   Future<void> _loadCards() async {
     final today = DateTime.now();
     final fetchedCards = await repository.cards(today, widget.course.code);
@@ -33,18 +38,21 @@ class _ReviewScreenState extends State<ReviewScreen> {
     });
   }
 
+  /// Toggles the visibility of the card (front/back).
   void toggleCard() {
     setState(() {
       isFront = !isFront;
     });
   }
 
+  /// Handles the "Easy" button press.
   void handleEasy() async {
     final currentCard = cards.removeAt(0);
     await repository.postponeCard(currentCard);
     toggleCard();
   }
 
+  /// Handles the "Medium" button press.
   void handleMedium() async {
     final currentCard = cards.removeAt(0);
     if (currentCard.prevInterval != 0) {
@@ -54,6 +62,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
     toggleCard();
   }
 
+  /// Handles the "Hard" button press.
   void handleHard() async {
     final currentCard = cards.removeAt(0);
     if (currentCard.prevInterval != 0) {
@@ -69,6 +78,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
     final boxPadding = p.standardPadding() * 4;
     const iconSize = 80.0;
 
+    //TODO: make this conditional into the text widget
     if (cards.isEmpty) {
       return Stack(
         children: [
@@ -161,7 +171,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                       ),
                       Column(
                         children: [
-                          Text(isFront ? currentCard.front : currentCard.back,
+                          Text(cards.isEmpty ? '???' :isFront ? currentCard.front : currentCard.back,
                             style: const TextStyle(
                               fontSize: 24.0,
                               color: Color.fromARGB(255, 0, 0, 0),

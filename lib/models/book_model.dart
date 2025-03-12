@@ -1,3 +1,4 @@
+/// A model class representing a book.
 class Book {
   int? id;
   String name;
@@ -6,6 +7,14 @@ class Book {
   int currentLine;
   String language;
 
+  /// Creates a Book object.
+  /// 
+  /// [id] is the unique identifier for the book.
+  /// [name] is the name of the book.
+  /// [imageUrl] is the URL of the book's image.
+  /// [totalLines] is the total number of lines in the book.
+  /// [currentLine] is the current line being read in the book.
+  /// [language] is the language code of the book.
   Book({
     required this.id,
     required this.name,
@@ -14,7 +23,9 @@ class Book {
     required this.currentLine,
     required this.language,
   });
-  // Convert a Course into a Map. The keys must correspond to the names of the columns in the database.
+
+  /// Converts a Book object into a Map.
+  /// The keys must correspond to the names of the columns in the database.
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -26,7 +37,7 @@ class Book {
     };
   }
 
-  // Extract a Course object from a Map.
+  /// Extracts a Book object from a Map.
   factory Book.fromMap(Map<String, dynamic> map) {
     return Book(
       id: map['id'],

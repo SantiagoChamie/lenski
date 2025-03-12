@@ -6,6 +6,10 @@ class CompetenceIcon extends StatelessWidget {
   final double size;
   final String type;
 
+  /// Creates a CompetenceIcon widget.
+  /// 
+  /// [size] is the size of the icon.
+  /// [type] is the type of competence (e.g., listening, speaking, reading, writing).
   const CompetenceIcon({super.key, required this.size, required this.type});
 
   @override
@@ -21,10 +25,11 @@ class CompetenceIcon extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(4),
-      child: Icon(iconData, color: Colors.white, size: size*2/3,),
+      child: Icon(iconData, color: Colors.white, size: size * 2 / 3),
     );
   }
 
+  /// Returns the appropriate icon data based on the type of competence.
   IconData _getIconData(String type) {
     switch (type) {
       case 'listening':
@@ -40,6 +45,7 @@ class CompetenceIcon extends StatelessWidget {
     }
   }
 
+  /// Returns the appropriate color based on the type of competence.
   Color _getColor(String type) {
     switch (type) {
       case 'listening':
