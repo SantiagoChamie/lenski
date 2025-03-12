@@ -2,14 +2,19 @@ import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/models/book_model.dart';
 
 /// A class that processes the book text.
-/// First it will divide the text by sentences
-/// The first sentence will be assigned as the title of the book
-/// The rest of the sentences will be assigned as the content of the book
-/// The book will be saved to the database
-/// A special database is then created for the book
+/// First it will divide the text by sentences.
+/// The first sentence will be assigned as the title of the book.
+/// The rest of the sentences will be assigned as the content of the book.
+/// The book will be saved to the database.
+/// A special database is then created for the book.
 class BookCreator {
   final BookRepository _bookRepository = BookRepository();
 
+  /// Processes the book text and saves it to the database.
+  /// 
+  /// [text] is the text of the book to be processed.
+  /// [code] is the language code of the book.
+  /// [isSong] indicates whether the text is a song.
   void processBook(String text, String code, bool isSong) async {
     final sentences = isSong
         ? text.split('\n').where((s) => s.trim().isNotEmpty).toList()
