@@ -11,7 +11,10 @@ class AddBookScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextEditingController textController = TextEditingController();
+    final TextEditingController titleController = TextEditingController();
     final p = Proportions(context);
+    final ValueNotifier<bool> isSong = ValueNotifier<bool>(false);
+
     return Scaffold(
       body: Center(
         child: Padding(
@@ -37,7 +40,38 @@ class AddBookScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('Add your own!', style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
-
+                      ValueListenableBuilder<bool>(
+                        valueListenable: isSong,
+                        builder: (context, value, child) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(width: 20),
+                              SizedBox(
+                                width: 400,
+                                child: TextField(
+                                  controller: titleController,
+                                  decoration: const InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    hintText: 'Enter title',
+                                    hintStyle: TextStyle()
+                                  ),
+                                ),
+                              ),
+                              const Spacer(),
+                              const Text('Text'),
+                              Switch(
+                                value: value,
+                                activeColor: const Color(0xFF2C73DE),
+                                onChanged: (newValue) {
+                                  isSong.value = newValue;
+                                },
+                              ),
+                              const Text('Song'),
+                            ],
+                          );
+                        },
+                      ),
                       Expanded(
                         child: Padding(
                           padding: EdgeInsets.all(p.standardPadding()),
@@ -56,12 +90,16 @@ class AddBookScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      
                       SizedBox(
                         height: p.sidebarButtonWidth(),
                         child: ElevatedButton(
                           onPressed: () {
-                            BookCreator().processBook(textController.text, languageCode);
+                            BookCreator().processBook(
+                              textController.text,
+                              languageCode,
+                              isSong.value,
+                              title: titleController.text,
+                            );
                             onBackPressed();
                           },
                           style: ElevatedButton.styleFrom(
