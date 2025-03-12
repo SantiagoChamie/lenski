@@ -8,6 +8,7 @@ import 'package:lenski/models/book_model.dart';
 import 'package:lenski/screens/settings/settings_screen.dart';
 import 'sidebar.dart';
 
+/// NavigationHandler widget that manages navigation within the app
 class NavigationHandler extends StatefulWidget {
   const NavigationHandler({super.key});
 
@@ -18,6 +19,7 @@ class NavigationHandler extends StatefulWidget {
 class NavigationHandlerState extends State<NavigationHandler> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
+  /// Handles item selection from the sidebar
   void _onItemSelected(String item) {
     if (item == 'Home') {
       if (_navigatorKey.currentState?.canPop() == true) {
@@ -36,6 +38,7 @@ class NavigationHandlerState extends State<NavigationHandler> {
     return Scaffold(
       body: Row(
         children: [
+          // Sidebar widget for navigation
           Sidebar(onItemSelected: _onItemSelected, navigatorKey: _navigatorKey),
           Expanded(
             child: Navigator(
