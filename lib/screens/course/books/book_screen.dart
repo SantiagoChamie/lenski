@@ -14,6 +14,10 @@ class BookScreen extends StatefulWidget {
   final Book book;
   final Course course;
 
+  /// Creates a BookScreen widget.
+  /// 
+  /// [book] is the book to be displayed.
+  /// [course] is the course to which the book belongs.
   const BookScreen({super.key, required this.book, required this.course});
 
   @override
@@ -35,6 +39,7 @@ class _BookScreenState extends State<BookScreen> {
     });
   }
 
+  /// Fetches the sentences for the book from the repository.
   Future<List<Sentence>> _fetchSentences() async {
     final bookRepository = BookRepository();
     final sentences = await bookRepository.getSentences(widget.book.id!);
@@ -42,12 +47,14 @@ class _BookScreenState extends State<BookScreen> {
     return sentences;
   }
 
+  /// Updates the current line of the book in the repository.
   void _updateCurrentLine(int newLine) async {
     final bookRepository = BookRepository();
     widget.book.currentLine = newLine;
     await bookRepository.updateBook(widget.book);
   }
 
+  /// Moves to the next sentence in the book.
   void _nextSentence() {
     setState(() {
       if (_currentLine < widget.book.totalLines) {
@@ -57,6 +64,7 @@ class _BookScreenState extends State<BookScreen> {
     });
   }
 
+  /// Moves to the previous sentence in the book.
   void _previousSentence() {
     setState(() {
       if (_currentLine > 1) {
@@ -66,6 +74,7 @@ class _BookScreenState extends State<BookScreen> {
     });
   }
 
+  /// Handles key events for navigating through sentences.
   void _handleKeyEvent(KeyEvent event) {
     if (event is KeyDownEvent) {
       if (event.logicalKey == LogicalKeyboardKey.arrowRight || event.logicalKey == LogicalKeyboardKey.keyD) {

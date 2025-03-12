@@ -8,6 +8,7 @@ import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/screens/course/books/book_screen.dart';
 
+/// A button widget for displaying a book.
 class BookButton extends StatefulWidget {
   final Book? book;
   final Course? course;
@@ -15,6 +16,13 @@ class BookButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final VoidCallback? onDelete;
 
+  /// Creates a BookButton widget.
+  /// 
+  /// [book] is the book to be displayed.
+  /// [course] is the course to which the book belongs.
+  /// [add] indicates whether this button is for adding a new book.
+  /// [onPressed] is the callback function to be called when the button is pressed.
+  /// [onDelete] is the callback function to be called when the delete button is pressed.
   const BookButton({
     super.key,
     this.book,
@@ -37,6 +45,7 @@ class _BookButtonState extends State<BookButton> {
     book = widget.book;
   }
 
+  /// Handles the button press event.
   void _printBookType(BuildContext context) {
     if (widget.add == true) {
       if (widget.onPressed != null) {
@@ -58,6 +67,7 @@ class _BookButtonState extends State<BookButton> {
     }
   }
 
+  /// Deletes the book from the repository.
   Future<void> _deleteBook(BuildContext context) async {
     if (book != null) {
       final bookRepository = BookRepository();
@@ -74,7 +84,7 @@ class _BookButtonState extends State<BookButton> {
     const double bookWidth = 150;
     final randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
     final percentage = (book != null && book!.totalLines > 0)
-        ? book!.currentLine==1 ? 0 : ((book!.currentLine) / book!.totalLines * 100).toInt()
+        ? book!.currentLine == 1 ? 0 : ((book!.currentLine) / book!.totalLines * 100).toInt()
         : 100;
 
     double fontSize;
@@ -93,72 +103,72 @@ class _BookButtonState extends State<BookButton> {
           child: Stack(
             children: [
               book == null
-                ? widget.add == true ? const AddBookButton(bookWidth: bookWidth) 
-              : const EmptyBookButton(bookWidth: bookWidth)
-                : Container(
-                    width: bookWidth,
-                    height: bookWidth * 1.5,
-                    decoration: BoxDecoration(
-                      color: book!.imageUrl == null ? randomColor : null,
-                      image: book!.imageUrl != null
-                          ? DecorationImage(
-                              image: NetworkImage(book!.imageUrl!),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
-                      borderRadius: BorderRadius.circular(8),
+                  ? widget.add == true ? const AddBookButton(bookWidth: bookWidth) 
+                  : const EmptyBookButton(bookWidth: bookWidth)
+                  : Container(
+                      width: bookWidth,
+                      height: bookWidth * 1.5,
+                      decoration: BoxDecoration(
+                        color: book!.imageUrl == null ? randomColor : null,
+                        image: book!.imageUrl != null
+                            ? DecorationImage(
+                                image: NetworkImage(book!.imageUrl!),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
-                  ),
               book != null && widget.add == false
-              ? Positioned(
-                  bottom: 10,
-                  right: 10,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                        ),
-                        child: Center(
-                          child: Text(
-                            '$percentage%',
-                            style: TextStyle(
-                              fontSize: fontSize,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Sansation',
-                              color: const Color.fromARGB(255, 0, 0, 0),
+                  ? Positioned(
+                      bottom: 10,
+                      right: 10,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                            child: Center(
+                              child: Text(
+                                '$percentage%',
+                                style: TextStyle(
+                                  fontSize: fontSize,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Sansation',
+                                  color: const Color.fromARGB(255, 0, 0, 0),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                          SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: CircularProgressIndicator(
+                              value: percentage / 100,
+                              strokeWidth: 5,
+                              backgroundColor: Colors.white,
+                              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2C73DE)),
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(
-                        width: 40,
-                        height: 40,
-                        child: CircularProgressIndicator(
-                          value: percentage / 100,
-                          strokeWidth: 5,
-                          backgroundColor: Colors.white,
-                          valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2C73DE)),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : const SizedBox(),
+                    )
+                  : const SizedBox(),
               book != null && widget.add == false
-              ? Positioned(
-                  top: 10,
-                  left: 10,
-                  child: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => _deleteBook(context),
-                  ),
-                )
-              : const SizedBox(),
+                  ? Positioned(
+                      top: 10,
+                      left: 10,
+                      child: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _deleteBook(context),
+                      ),
+                    )
+                  : const SizedBox(),
             ],
           ),
         ),
