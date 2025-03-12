@@ -254,7 +254,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
           },
         ),
         Positioned(
-          bottom: 0,
+          top: 0,
           right: 0,
           child: IconButton(
             icon: const Icon(Icons.close, color: Colors.black),

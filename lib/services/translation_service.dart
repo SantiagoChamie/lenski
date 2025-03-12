@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lenski/data/card_repository.dart'; // Import the CardRepository
 
 /// A service to translate text using the DeepL API.
@@ -14,7 +14,6 @@ class TranslationService {
     return _instance;
   }
 
-  final String _apiKey = dotenv.env['DEEPL_KEY'] ?? '';
   final Map<String, String> _cache = {};
 
   Future<String> translate({
@@ -36,6 +35,11 @@ class TranslationService {
       return existingCardBack;
     }
 
+    final String apiKey = await _getApiKey();
+    if (apiKey.isEmpty) {
+      throw Exception('API Key is not set');
+    }
+
     final Map<String, dynamic> requestBody = {
       'text': [text],
       'source_lang': sourceLang,
@@ -49,7 +53,7 @@ class TranslationService {
     final response = await http.post(
       Uri.parse('https://api-free.deepl.com/v2/translate'),
       headers: {
-        'Authorization': 'DeepL-Auth-Key $_apiKey',
+        'Authorization': 'DeepL-Auth-Key $apiKey',
         'Content-Type': 'application/json; charset=utf-8',
       },
       body: utf8.encode(json.encode(requestBody)),
@@ -71,5 +75,10 @@ class TranslationService {
 
   Future<bool> cardExists(String front, String context) async {
     return await CardRepository().getCardByInfo(front, context) != null;
+  }
+
+  Future<String> _getApiKey() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('deepl_api_key') ?? '';
   }
 }

@@ -32,9 +32,11 @@ class Sidebar extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(p.standardPadding()),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center, 
+              mainAxisAlignment: MainAxisAlignment.center,
               // Sidebar buttons
               children: [
+                _buildMenuButton(p, 'Settings', Icons.settings_rounded),
+                const SizedBox(height: 20), // Add some space between buttons
                 _buildMenuButton(p, 'Home', Icons.home_rounded),
               ],
             ),
@@ -50,6 +52,9 @@ class Sidebar extends StatelessWidget {
       icon: Icon(icon, color: Colors.black, size: p.sidebarButtonWidth() / 2),
       onPressed: () {
         onItemSelected(title);
+        if (title == 'Home') {
+          navigatorKey.currentState?.popUntil((route) => route.isFirst);
+        }
       },
       style: FilledButton.styleFrom(
         backgroundColor: const Color(0xFFD9D0DB), // Button color
