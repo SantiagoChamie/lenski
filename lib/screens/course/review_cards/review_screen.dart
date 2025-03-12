@@ -72,6 +72,15 @@ class _ReviewScreenState extends State<ReviewScreen> {
     toggleCard();
   }
 
+  /// Handles the deletion of the current card.
+  void handleDelete() async {
+    if (cards.isNotEmpty) {
+      final currentCard = cards.removeAt(0);
+      await repository.deleteCard(currentCard.id);
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
@@ -281,6 +290,15 @@ class _ReviewScreenState extends State<ReviewScreen> {
               Navigator.of(context).pop();
             },
             icon: const Icon(Icons.close_rounded),
+          ),
+        ),
+        Positioned(
+          bottom: boxPadding + 20,
+          right: boxPadding + 20,
+          child: FloatingActionButton(
+            onPressed: handleDelete,
+            backgroundColor: const Color(0xFFFFD38D),
+            child: const Icon(Icons.delete, color: Colors.black),
           ),
         ),
       ],
