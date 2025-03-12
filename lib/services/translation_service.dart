@@ -13,7 +13,7 @@ class TranslationService {
   factory TranslationService() {
     return _instance;
   }
-  //TODO : fix bug with accidentals in the translation
+
   final String _apiKey = dotenv.env['DEEPL_KEY'] ?? '';
   final Map<String, String> _cache = {};
 
@@ -50,13 +50,13 @@ class TranslationService {
       Uri.parse('https://api-free.deepl.com/v2/translate'),
       headers: {
         'Authorization': 'DeepL-Auth-Key $_apiKey',
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
       },
-      body: json.encode(requestBody),
+      body: utf8.encode(json.encode(requestBody)),
     );
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      final data = json.decode(utf8.decode(response.bodyBytes));
       final translatedText = data['translations'][0]['text'];
       _cache[cacheKey] = translatedText;
       return translatedText;
