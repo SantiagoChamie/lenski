@@ -5,10 +5,15 @@ import 'package:lenski/utils/proportions.dart';
 
 const int animationDuration = 300;
 
+/// A widget that navigates between the add course button and the add course screen.
 class AddCourseNavigator extends StatefulWidget {
   final VoidCallback onToggle;
   final bool isExpanded;
 
+  /// Creates an AddCourseNavigator widget.
+  /// 
+  /// [onToggle] is the callback function to be called when the add course screen is toggled.
+  /// [isExpanded] indicates whether the add course screen is expanded or not.
   const AddCourseNavigator({
     super.key,
     required this.onToggle,
@@ -22,6 +27,7 @@ class AddCourseNavigator extends StatefulWidget {
 class _AddCourseNavigatorState extends State<AddCourseNavigator> {
   bool _isAddCourseScreenVisible = false;
 
+  /// Toggles the visibility of the add course screen.
   void _toggleAddCourseScreen() {
     setState(() {
       _isAddCourseScreenVisible = !_isAddCourseScreenVisible;
@@ -39,7 +45,7 @@ class _AddCourseNavigatorState extends State<AddCourseNavigator> {
         builder: (context, constraints) {
           return AnimatedSwitcher(
             // Set the duration to be slightly less than the parent container to avoid clipping issue
-            duration: Duration(milliseconds: (animationDuration-1).floor()),
+            duration: Duration(milliseconds: (animationDuration - 1).floor()),
             transitionBuilder: (Widget child, Animation<double> animation) {
               return FadeTransition(opacity: animation, child: child);
             },

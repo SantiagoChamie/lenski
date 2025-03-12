@@ -3,7 +3,7 @@ import 'package:flutter/services.dart'; // Import this for KeyEvent
 import 'package:lenski/models/book_model.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/models/sentence_model.dart';
-import 'package:lenski/screens/home/courses/flag_icon.dart';
+import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/widgets/ltext.dart';

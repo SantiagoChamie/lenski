@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/card_model.dart' as lenski_card;
 import 'package:lenski/models/course_model.dart';
-import 'package:lenski/screens/home/courses/flag_icon.dart';
+import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
 

@@ -23,20 +23,18 @@ class NavigationHandlerState extends State<NavigationHandler> {
   /// Handles item selection from the sidebar.
   /// Navigates to the selected route if it is different from the current route.
   void _onItemSelected(String item) {
-    if (_shouldNavigate(item)) {
-      if (item == 'Home') {
-        // If the selected item is 'Home', pop all routes until the first route.
-        if (_navigatorKey.currentState?.canPop() == true) {
-          _navigatorKey.currentState?.popUntil((route) => route.isFirst);
-        }
-      } else {
-        // Push the named route onto the navigator stack.
-        _navigatorKey.currentState?.pushNamed(item);
+    if (item == 'Home') {
+      // If the selected item is 'Home', pop all routes until the first route.
+      if (_navigatorKey.currentState?.canPop() == true) {
+        _navigatorKey.currentState?.popUntil((route) => route.isFirst);
       }
-      setState(() {
-        _currentRoute = item;
-      });
+    } else if (_shouldNavigate(item)) {
+      // Push the named route onto the navigator stack.
+      _navigatorKey.currentState?.pushNamed(item);
     }
+    setState(() {
+      _currentRoute = item;
+    });
   }
 
   /// Determines if navigation should occur based on the selected item.

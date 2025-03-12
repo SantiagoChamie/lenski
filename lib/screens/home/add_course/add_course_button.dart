@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
 
+/// A button widget for adding a new course.
 class AddCourseButton extends StatelessWidget {
   final VoidCallback onPressed;
 
+  /// Creates an AddCourseButton widget.
+  /// 
+  /// [onPressed] is the callback function to be called when the button is pressed.
   const AddCourseButton({super.key, required this.onPressed});
 
   @override
