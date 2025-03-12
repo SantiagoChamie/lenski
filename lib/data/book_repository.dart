@@ -4,22 +4,27 @@ import 'package:path/path.dart';
 import 'dart:io';
 import '../../models/book_model.dart';
 
+/// A repository class for managing books in the database.
 class BookRepository {
   static final BookRepository _instance = BookRepository._internal();
   Database? _database;
 
+  /// Factory constructor to return the singleton instance of BookRepository.
   factory BookRepository() {
     return _instance;
   }
 
+  /// Internal constructor for singleton pattern.
   BookRepository._internal();
 
+  /// Getter for the database. Initializes the database if it is not already initialized.
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDatabase();
     return _database!;
   }
 
+  /// Initializes the database and creates the books table if it does not exist.
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'books.db');
     return openDatabase(
@@ -33,6 +38,9 @@ class BookRepository {
     );
   }
 
+  /// Inserts a new book into the database.
+  /// 
+  /// [book] is the book to be inserted.
   Future<void> insertBook(Book book) async {
     final db = await database;
     await db.insert(
@@ -42,6 +50,10 @@ class BookRepository {
     );
   }
 
+  /// Creates a new database for a book and inserts its sentences.
+  /// 
+  /// [bookId] is the ID of the book.
+  /// [sentences] is the list of sentences to be inserted.
   Future<void> createBookDatabase(int bookId, List<String> sentences) async {
     String dbName = '$bookId.db';
     String path = join(await getDatabasesPath(), dbName);
@@ -64,6 +76,10 @@ class BookRepository {
     }
   }
 
+  /// Retrieves the sentences for a book from its database.
+  /// 
+  /// [bookId] is the ID of the book.
+  /// Returns a list of sentences.
   Future<List<Sentence>> getSentences(int bookId) async {
     String dbName = '$bookId.db';
     String path = join(await getDatabasesPath(), dbName);
@@ -74,6 +90,10 @@ class BookRepository {
     });
   }
 
+  /// Retrieves all books for a specific language from the database.
+  /// 
+  /// [language] is the language code of the books.
+  /// Returns a list of books.
   Future<List<Book>> booksByLanguage(String language) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = 
@@ -86,6 +106,9 @@ class BookRepository {
     });
   }
 
+  /// Updates an existing book in the database.
+  /// 
+  /// [book] is the book to be updated.
   Future<void> updateBook(Book book) async {
     final db = await database;
     await db.update(
@@ -96,7 +119,9 @@ class BookRepository {
     );
   }
 
-  // Delete a book and its associated database
+  /// Deletes a book and its associated database.
+  /// 
+  /// [id] is the ID of the book to be deleted.
   Future<void> deleteBook(int id) async {
     final db = await database;
     final book = await db.query(

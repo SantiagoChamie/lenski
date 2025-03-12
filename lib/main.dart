@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/screens/navigation/navigation_handler.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+/// Main function to run the app
 void main() async {
-  sqfliteFfiInit();
-  databaseFactory = databaseFactoryFfi;
-  await dotenv.load(fileName: ".env");
-  runApp(const MyApp());
+  sqfliteFfiInit(); // Initialize FFI
+  databaseFactory = databaseFactoryFfi; // Set the database factory to FFI
+  runApp(const MyApp()); // Run the Flutter app
 }
 
+/// Root widget of the application
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'LenSki Beta',
-      debugShowCheckedModeBanner: false,
+      title: 'LenSki Beta', // Title of the app
+      debugShowCheckedModeBanner: false, // Disable debug banner
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.blue, // Set the primary color theme
       ),
-      home: const NavigationHandler(),
+      home: const NavigationHandler(), // Set the home widget
     );
   }
 }

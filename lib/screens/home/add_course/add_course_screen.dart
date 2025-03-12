@@ -2,13 +2,14 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 //import 'package:lenski/screens/home/add_course/buttons/competence_selector_button.dart';
-import 'package:lenski/screens/home/add_course/course_difficulty_text.dart';
+//import 'package:lenski/screens/home/add_course/course_difficulty_text.dart';
 import 'package:lenski/screens/home/add_course/buttons/language_selector_button.dart';
 import 'package:lenski/utils/languages.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/data/course_repository.dart';
 
+/// A screen for adding a new course
 class AddCourseScreen extends StatefulWidget {
   final VoidCallback onBack;
   final String lightText;
@@ -18,6 +19,15 @@ class AddCourseScreen extends StatefulWidget {
   final String durationText;
   final String dailyTimeText;
 
+  /// Creates an AddCourseScreen widget.
+  /// 
+  /// [onBack] is the callback function to be called when the back button is pressed.
+  /// [lightText] is the text for the light difficulty level.
+  /// [lightColor] is the color for the light difficulty level.
+  /// [mediumText] is the text for the medium difficulty level.
+  /// [mediumColor] is the color for the medium difficulty level.
+  /// [durationText] is the text for the course duration.
+  /// [dailyTimeText] is the text for the daily time commitment.
   const AddCourseScreen({
     super.key,
     required this.onBack,
@@ -56,6 +66,8 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
     super.dispose();
   }
 
+  /// Creates a new course and adds it to the repository.
+  /// If the course already exists, displays a message.
   void _createCourse() async {
     // Check if at least one competence is selected
     // if (_selectedCompetences.isEmpty) {
@@ -118,6 +130,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
     }
   }
 
+  /// Updates the selected language and its associated flag URL and code.
   void _updateSelectedLanguage(String language, String flagUrl, String code) {
     setState(() {
       _selectedLanguage = language;
@@ -126,6 +139,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
     });
   }
 
+  /// Updates the selected origin language and its associated flag URL and code.
   void _updatedSelectedOriginLanguage(String language, String flagUrl, String code) {
     setState(() {
       _selectedOriginLanguage = language;
@@ -266,19 +280,21 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                   child: Padding(
                     padding: EdgeInsets.all(p.standardPadding()),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center, //TODO remove when returning difficulty text
                       children: [
-                        const Expanded(
+                        //TODO: implement difficulty text
+                        /* const Expanded(
                           child: Center(
                             child: CourseDifficultyText(difficulty: "Light", intensity: "medium"),
                           ),
-                        ),
+                        ), 
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(widget.durationText, style: const TextStyle(fontFamily: "Sansation", fontSize: 20)),
                             Text(widget.dailyTimeText, style: const TextStyle(fontFamily: "Sansation", fontSize: 20)),
                           ],
-                        ),
+                        ), */
                         const SizedBox(width: 16),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,

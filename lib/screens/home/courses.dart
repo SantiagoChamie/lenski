@@ -5,6 +5,7 @@ import 'courses/course_list.dart';
 import '../../models/course_model.dart';
 import '../../data/course_repository.dart';
 
+/// A StatefulWidget that displays a list of courses and an option to add new courses.
 class Courses extends StatefulWidget {
   const Courses({super.key});
 
@@ -16,6 +17,7 @@ class _CoursesState extends State<Courses> {
   bool _isExpanded = false;
   final CourseRepository _courseRepository = CourseRepository();
 
+  /// Toggles the visibility of the add course screen.
   void _toggleAddCourseScreen() {
     setState(() {
       _isExpanded = !_isExpanded;
@@ -24,6 +26,7 @@ class _CoursesState extends State<Courses> {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize Proportions with the current context
     final p = Proportions(context);
 
     return Center(

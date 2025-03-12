@@ -4,8 +4,13 @@ import 'package:lenski/screens/course/books/library.dart';
 import 'package:lenski/screens/course/books/add_book_screen.dart';
 import 'package:lenski/screens/course/review_cards/review_pile.dart';
 
+/// A widget that navigates between different screens within a course.
 class CourseNavigator extends StatefulWidget {
   final Course course;
+
+  /// Creates a CourseNavigator widget.
+  /// 
+  /// [course] is the course for which the navigator is being created.
   const CourseNavigator({super.key, required this.course});
 
   @override
@@ -15,6 +20,7 @@ class CourseNavigator extends StatefulWidget {
 class _CourseNavigatorState extends State<CourseNavigator> {
   bool _showAddBookScreen = false;
 
+  /// Toggles the visibility of the add book screen.
   void _toggleAddBookScreen() {
     setState(() {
       _showAddBookScreen = !_showAddBookScreen;

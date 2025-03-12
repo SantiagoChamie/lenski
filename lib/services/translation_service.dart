@@ -16,6 +16,10 @@ class TranslationService {
 
   final Map<String, String> _cache = {};
 
+  /// Translates the given text from the source language to the target language.
+  /// Caches the translated text to avoid unnecessary API calls.
+  /// Checks the CardRepository for an existing card before making an API call.
+  /// Throws an exception if the API key is not set or the translation fails.
   Future<String> translate({
     required String text,
     required String sourceLang,
@@ -69,14 +73,17 @@ class TranslationService {
     }
   }
 
+  /// Checks the CardRepository for an existing card with the given front and context.
   Future<String?> _checkCardRepository(String front, String context) async {
     return await CardRepository().getCardByInfo(front, context);
   }
 
+  /// Determines if a card with the given front and context exists in the CardRepository.
   Future<bool> cardExists(String front, String context) async {
     return await CardRepository().getCardByInfo(front, context) != null;
   }
 
+  /// Retrieves the DeepL API key from shared preferences.
   Future<String> _getApiKey() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('deepl_api_key') ?? '';

@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+/// A model class representing a course.
 class Course {
   String name;
   String level;
@@ -12,6 +13,18 @@ class Course {
   Color color;
   String imageUrl;
 
+  /// Creates a Course object.
+  /// 
+  /// [name] is the name of the course.
+  /// [level] is the level of the course.
+  /// [code] is the language code of the course.
+  /// [fromCode] is the language code from which the course is being learned.
+  /// [listening] indicates if the course includes listening competence.
+  /// [speaking] indicates if the course includes speaking competence.
+  /// [reading] indicates if the course includes reading competence.
+  /// [writing] indicates if the course includes writing competence.
+  /// [color] is the color associated with the course.
+  /// [imageUrl] is the URL of the course's image.
   Course({
     required this.name,
     required this.level,
@@ -24,7 +37,9 @@ class Course {
     required this.color,
     required this.imageUrl,
   });
-  // Convert a Course into a Map. The keys must correspond to the names of the columns in the database.
+
+  /// Converts a Course object into a Map.
+  /// The keys must correspond to the names of the columns in the database.
   Map<String, dynamic> toMap() {
     return {
       'name': name,
@@ -40,7 +55,7 @@ class Course {
     };
   }
 
-  // Extract a Course object from a Map.
+  /// Extracts a Course object from a Map.
   factory Course.fromMap(Map<String, dynamic> map) {
     return Course(
       name: map['name'],

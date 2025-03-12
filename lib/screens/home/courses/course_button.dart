@@ -4,7 +4,7 @@ import 'package:lenski/screens/course/course_home.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/course_repository.dart';
 import '../../../models/course_model.dart';
-import 'flag_icon.dart';
+import '../../../widgets/flag_icon.dart';
 
 /// CourseButton is a widget that displays a course as a button.
 /// It shows the competences, the course name, the flag, and the level.
@@ -13,6 +13,11 @@ class CourseButton extends StatelessWidget {
   final VoidCallback onDelete;
   final int courseCount;
 
+  /// Creates a CourseButton widget.
+  /// 
+  /// [course] is the course to be displayed.
+  /// [onDelete] is the callback function to be called when the delete button is pressed.
+  /// [courseCount] is the total number of courses.
   const CourseButton({super.key, required this.course, required this.onDelete, required this.courseCount});
 
   @override
@@ -27,6 +32,7 @@ class CourseButton extends StatelessWidget {
             height: p.courseButtonHeight(courseCount),
             child: ElevatedButton(
               onPressed: () {
+                // Navigate to the CourseHome screen when the button is pressed
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -96,12 +102,14 @@ class CourseButton extends StatelessWidget {
               ),
             ),
           ),
+          // Positioned delete button
           Positioned(
             bottom: 10,
             right: 10,
             child: IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
               onPressed: () async {
+                // Delete the course and call the onDelete callback
                 await CourseRepository().deleteCourse(course.code);
                 onDelete();
               },

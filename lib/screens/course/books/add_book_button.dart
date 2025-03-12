@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
+/// A button widget for adding a new book.
 class AddBookButton extends StatelessWidget {
   final double bookWidth;
 
+  /// Creates an AddBookButton widget.
+  /// 
+  /// [bookWidth] is the width of the book button.
   const AddBookButton({super.key, required this.bookWidth});
 
   @override

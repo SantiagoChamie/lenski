@@ -5,12 +5,13 @@ import 'package:lenski/data/card_repository.dart';
 import 'package:lenski/models/card_model.dart' as custom_card; // Alias the import
 import 'dart:io';
 
+/// A widget that displays a translation overlay for the selected text.
 class TranslationOverlay extends StatefulWidget {
   final String text;
   final String contextText;
   final String sourceLang;
   final String targetLang;
-  final VoidCallback onClose; // Add this callback
+  final VoidCallback onClose; // Callback to close the overlay
 
   const TranslationOverlay({
     super.key,
@@ -28,7 +29,7 @@ class TranslationOverlay extends StatefulWidget {
 class _TranslationOverlayState extends State<TranslationOverlay> {
   late Future<String> _translatedText;
   late Future<bool> _cardExists;
-  bool _cardAdded = false; // Add this state variable
+  bool _cardAdded = false; // State variable to track if the card is added
 
   @override
   void initState() {
@@ -37,6 +38,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
     _cardExists = _checkCardExists();
   }
 
+  /// Fetches the translation for the selected text using the TranslationService.
   Future<String> _fetchTranslation() async {
     try {
       return await TranslationService().translate(
@@ -52,23 +54,25 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
     }
   }
 
+  /// Checks if a card with the given text and context already exists in the CardRepository.
   Future<bool> _checkCardExists() async {
     return await TranslationService().cardExists(widget.text, widget.contextText);
   }
 
+  /// Adds a new card to the CardRepository.
   Future<void> _addCard(String backText) async {
-    final card = custom_card.Card( // Use the alias here
+    final card = custom_card.Card(
       front: widget.text,
       back: backText,
       context: widget.contextText,
-      dueDate: DateTime.now(), // Pass DateTime directly
+      dueDate: DateTime.now(),
       language: widget.sourceLang,
     );
     await CardRepository().insertCard(card);
     setState(() {
-      _cardAdded = true; // Update the state
+      _cardAdded = true;
     });
-    widget.onClose(); // Call the onClose callback
+    widget.onClose();
   }
 
   @override

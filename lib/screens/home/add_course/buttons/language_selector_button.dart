@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
-import 'package:lenski/screens/home/courses/flag_icon.dart';
+import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/languages.dart';
 
+/// A button widget for selecting a language.
 class LanguageSelectorButton extends StatefulWidget {
   final Function(String, String, String) onLanguageSelected;
   final String startingLanguage;
   final bool isSource; // New parameter to determine if it's a 'from' language
 
+  /// Creates a LanguageSelectorButton widget.
+  /// 
+  /// [onLanguageSelected] is the callback function to be called when a language is selected.
+  /// [startingLanguage] is the initial language to be displayed.
+  /// [isSource] determines if it's a 'from' language. Defaults to true.
   const LanguageSelectorButton({
     super.key,
     required this.onLanguageSelected,
@@ -29,6 +35,7 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
     _selectedLanguage = widget.startingLanguage;
   }
 
+  /// Displays a dialog for selecting a language.
   void _showLanguageSelector(BuildContext context) {
     showDialog(
       context: context,

@@ -7,6 +7,9 @@ import 'package:lenski/data/course_repository.dart';
 class CourseList extends StatefulWidget {
   final List<Course> courses;
 
+  /// Creates a CourseList widget.
+  /// 
+  /// [courses] is the initial list of courses to be displayed.
   const CourseList({super.key, required this.courses});
 
   @override
@@ -22,6 +25,7 @@ class _CourseListState extends State<CourseList> {
     _courses = widget.courses;
   }
 
+  /// Refreshes the list of courses by fetching the latest data from the repository.
   void _refreshCourses() async {
     final courses = await CourseRepository().courses();
     setState(() {

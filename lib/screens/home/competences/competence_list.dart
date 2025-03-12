@@ -7,6 +7,9 @@ import 'competence_icon.dart';
 class CompetenceList extends StatelessWidget {
   final Course course;
 
+  /// Creates a CompetenceList widget.
+  /// 
+  /// [course] is the course containing the competences to be displayed.
   const CompetenceList({super.key, required this.course});
 
   @override
