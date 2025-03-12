@@ -74,7 +74,7 @@ class _BookButtonState extends State<BookButton> {
     const double bookWidth = 150;
     final randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
     final percentage = (book != null && book!.totalLines > 0)
-        ? ((book!.currentLine - 1) / book!.totalLines * 100).toInt()
+        ? book!.currentLine==1 ? 0 : ((book!.currentLine) / book!.totalLines * 100).toInt()
         : 100;
 
     double fontSize;
