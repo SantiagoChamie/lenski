@@ -45,30 +45,13 @@ class _ReviewScreenState extends State<ReviewScreen> {
     });
   }
 
-  /// Handles the "Easy" button press.
-  void handleEasy() async {
+  /// Handles the difficulty selection.
+  void handleDifficulty(int quality) async {
     final currentCard = cards.removeAt(0);
-    await repository.postponeCard(currentCard);
-    toggleCard();
-  }
-
-  /// Handles the "Medium" button press.
-  void handleMedium() async {
-    final currentCard = cards.removeAt(0);
-    if (currentCard.prevInterval != 0) {
-      await repository.postponeCard(currentCard, interval: currentCard.prevInterval);
+    final nextDue = await repository.updateCardEFactor(currentCard, quality);
+    if (nextDue < 1) {
+      cards.add(currentCard);
     }
-    cards.add(currentCard);
-    toggleCard();
-  }
-
-  /// Handles the "Hard" button press.
-  void handleHard() async {
-    final currentCard = cards.removeAt(0);
-    if (currentCard.prevInterval != 0) {
-      await repository.restartCard(currentCard);
-    }
-    cards.add(currentCard);
     toggleCard();
   }
 
@@ -232,7 +215,18 @@ class _ReviewScreenState extends State<ReviewScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ElevatedButton(
-                            onPressed: handleHard,
+                            onPressed: () => handleDifficulty(1),
+                            child: const Text('Again',
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                color: Color(0xFF000000),
+                                fontFamily: "Sansation",
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: p.standardPadding()),
+                          ElevatedButton(
+                            onPressed: () => handleDifficulty(2),
                             child: const Text('Hard',
                               style: TextStyle(
                                 fontSize: 18.0,
@@ -243,7 +237,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                           ),
                           SizedBox(width: p.standardPadding()),
                           ElevatedButton(
-                            onPressed: handleMedium,
+                            onPressed: () => handleDifficulty(3),
                             child: const Text('Medium',
                               style: TextStyle(
                                 fontSize: 18.0,
@@ -254,7 +248,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                           ),
                           SizedBox(width: p.standardPadding()),
                           ElevatedButton(
-                            onPressed: handleEasy,
+                            onPressed: () => handleDifficulty(4),
                             child: const Text('Easy',
                               style: TextStyle(
                                 fontSize: 18.0,
