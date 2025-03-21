@@ -82,7 +82,7 @@ class _BookButtonState extends State<BookButton> {
   Widget build(BuildContext context) {
     final p = Proportions(context);
     const double bookWidth = 150;
-    final randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
+    final randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withValues(alpha: 1.0);
     final percentage = (book != null && book!.totalLines > 0)
         ? book!.currentLine == 1 ? 0 : ((book!.currentLine) / book!.totalLines * 100).toInt()
         : 100;
