@@ -170,7 +170,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                               fontFamily: "Varela Round",
                             ),
                           ),
-                          if (isFront) Text.rich(
+                          if (isFront && currentCard.context != currentCard.front) Text.rich(
                             TextSpan(
                               text: currentCard.context.substring(0, currentCard.context.indexOf(currentCard.front)),
                               style: const TextStyle(
