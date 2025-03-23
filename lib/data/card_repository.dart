@@ -4,6 +4,8 @@ import '../../models/card_model.dart';
 
 /// A repository class for managing flashcards in the database.
 class CardRepository {
+  final int startingInterval = 6; // New parameter
+  
   static final CardRepository _instance = CardRepository._internal();
   Database? _database;
 
@@ -11,7 +13,6 @@ class CardRepository {
   factory CardRepository() {
     return _instance;
   }
-
   /// Internal constructor for singleton pattern.
   CardRepository._internal();
 
@@ -39,7 +40,17 @@ class CardRepository {
       path,
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE cards(id INTEGER PRIMARY KEY, front TEXT, back TEXT, context TEXT, dueDate INTEGER, language TEXT, prevInterval INTEGER)', // Add prevInterval column
+          'CREATE TABLE cards('
+          'id INTEGER PRIMARY KEY, '
+          'front TEXT, '
+          'back TEXT, '
+          'context TEXT, '
+          'dueDate INTEGER, '
+          'language TEXT, '
+          'prevInterval INTEGER, '
+          'eFactor REAL, ' // Add eFactor column
+          'repetition INTEGER' // Add repetition column
+          ')',
         );
       },
       version: 1,
@@ -88,17 +99,33 @@ class CardRepository {
     );
   }
 
-  /// Postpones the review date of a card.
+  /// Updates the easiness factor, repetition count, and interval of a card based on the quality of the review.
   /// 
-  /// [card] is the card to be postponed.
-  /// [interval] is the interval to postpone the card by. Defaults to 0.
-  Future<void> postponeCard(Card card, {int interval = 0}) async {
-    final int newInterval;
-    if (interval == 0) {
-      newInterval = card.prevInterval == 0 ? 1 : card.prevInterval * 2;
+  /// [card] is the card to be updated.
+  /// [quality] is the quality of the review.
+  /// Returns the new interval in days.
+  Future<int> updateCardEFactor(Card card, int quality) async {
+    int newRepetition;
+    int newInterval;
+    double newEFactor;
+
+    if (quality >= 3) {
+      if (card.repetition == 0) {
+        newInterval = 1;
+      } else if (card.repetition == 1) {
+        newInterval = startingInterval;
+      } else {
+        newInterval = (card.prevInterval * card.eFactor).round();
+      }
+      newRepetition = card.repetition + 1;
+      newEFactor = card.eFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+      if (newEFactor < 1.3) newEFactor = 1.3;
     } else {
-      newInterval = interval;
+      newRepetition = 0;
+      newInterval = 0;
+      newEFactor = card.eFactor;
     }
+
     final newDueDate = DateTime.now().add(Duration(days: newInterval));
     final updatedCard = Card(
       id: card.id,
@@ -108,24 +135,11 @@ class CardRepository {
       dueDate: newDueDate,
       language: card.language,
       prevInterval: newInterval,
+      eFactor: newEFactor,
+      repetition: newRepetition,
     );
     await updateCard(updatedCard);
-  }
-
-  /// Restarts the review date of a card.
-  /// 
-  /// [card] is the card to be restarted.
-  Future<void> restartCard(Card card) async {
-    final updatedCard = Card(
-      id: card.id,
-      front: card.front,
-      back: card.back,
-      context: card.context,
-      language: card.language,
-      dueDate: DateTime.now(),
-      prevInterval: 0,
-    );
-    await updateCard(updatedCard);
+    return newInterval;
   }
 
   /// Deletes a card from the database.

@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
-import 'dart:math'; // Add this import for randomization
+import 'dart:math';
 
 /// A widget that displays a pile of review cards for a course.
 class ReviewPile extends StatefulWidget {
   final Course course;
+  final VoidCallback? onNewPressed;
 
   /// Creates a ReviewPile widget.
   /// 
   /// [course] is the course for which the review pile is being created.
-  const ReviewPile({super.key, required this.course});
+  const ReviewPile({super.key, required this.course, required this.onNewPressed});
 
   @override
   _ReviewPileState createState() => _ReviewPileState();
@@ -62,6 +63,10 @@ class _ReviewPileState extends State<ReviewPile> {
     }
   }
 
+  void _navigateToAddCardScreen() {
+    widget.onNewPressed!();
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
@@ -103,6 +108,15 @@ class _ReviewPileState extends State<ReviewPile> {
             child: IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: _refreshWord,
+            ),
+          ),
+          Positioned(
+            bottom: 60,
+            right: 60,
+            child: FloatingActionButton(
+              onPressed: _navigateToAddCardScreen,
+              backgroundColor: const Color(0xFFD9D0DB),
+              child: const Icon(Icons.add, color: Colors.black),
             ),
           ),
         ],

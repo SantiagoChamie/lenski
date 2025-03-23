@@ -74,7 +74,7 @@ class _LibraryState extends State<Library> {
           return SizedBox(
             width: p.mainScreenWidth() / 2,
             child: Padding(
-              padding: EdgeInsets.only(left: p.standardPadding()),
+              padding: EdgeInsets.only(right: p.standardPadding(), top: p.standardPadding()),
               child: SingleChildScrollView(
                 child: Center(
                   child: Wrap(

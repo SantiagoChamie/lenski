@@ -45,30 +45,13 @@ class _ReviewScreenState extends State<ReviewScreen> {
     });
   }
 
-  /// Handles the "Easy" button press.
-  void handleEasy() async {
+  /// Handles the difficulty selection.
+  void handleDifficulty(int quality) async {
     final currentCard = cards.removeAt(0);
-    await repository.postponeCard(currentCard);
-    toggleCard();
-  }
-
-  /// Handles the "Medium" button press.
-  void handleMedium() async {
-    final currentCard = cards.removeAt(0);
-    if (currentCard.prevInterval != 0) {
-      await repository.postponeCard(currentCard, interval: currentCard.prevInterval);
+    final nextDue = await repository.updateCardEFactor(currentCard, quality);
+    if (nextDue < 1) {
+      cards.add(currentCard);
     }
-    cards.add(currentCard);
-    toggleCard();
-  }
-
-  /// Handles the "Hard" button press.
-  void handleHard() async {
-    final currentCard = cards.removeAt(0);
-    if (currentCard.prevInterval != 0) {
-      await repository.restartCard(currentCard);
-    }
-    cards.add(currentCard);
     toggleCard();
   }
 
@@ -78,6 +61,21 @@ class _ReviewScreenState extends State<ReviewScreen> {
       final currentCard = cards.removeAt(0);
       await repository.deleteCard(currentCard.id);
       setState(() {});
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Card deleted'),
+          action: SnackBarAction(
+            label: 'Undo',
+            textColor: const Color(0xFFFFD38D),
+            onPressed: () async {
+              cards.insert(0, currentCard);
+              await repository.insertCard(currentCard);
+              setState(() {});
+            },
+          ),
+        ),
+      );
     }
   }
 
@@ -187,7 +185,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                               fontFamily: "Varela Round",
                             ),
                           ),
-                          if (isFront) Text.rich(
+                          if (isFront && currentCard.context != currentCard.front) Text.rich(
                             TextSpan(
                               text: currentCard.context.substring(0, currentCard.context.indexOf(currentCard.front)),
                               style: const TextStyle(
@@ -232,7 +230,18 @@ class _ReviewScreenState extends State<ReviewScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ElevatedButton(
-                            onPressed: handleHard,
+                            onPressed: () => handleDifficulty(1),
+                            child: const Text('Again',
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                color: Color(0xFF000000),
+                                fontFamily: "Sansation",
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: p.standardPadding()),
+                          ElevatedButton(
+                            onPressed: () => handleDifficulty(2),
                             child: const Text('Hard',
                               style: TextStyle(
                                 fontSize: 18.0,
@@ -243,7 +252,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                           ),
                           SizedBox(width: p.standardPadding()),
                           ElevatedButton(
-                            onPressed: handleMedium,
+                            onPressed: () => handleDifficulty(3),
                             child: const Text('Medium',
                               style: TextStyle(
                                 fontSize: 18.0,
@@ -254,7 +263,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                           ),
                           SizedBox(width: p.standardPadding()),
                           ElevatedButton(
-                            onPressed: handleEasy,
+                            onPressed: () => handleDifficulty(4),
                             child: const Text('Easy',
                               style: TextStyle(
                                 fontSize: 18.0,
