@@ -61,6 +61,21 @@ class _ReviewScreenState extends State<ReviewScreen> {
       final currentCard = cards.removeAt(0);
       await repository.deleteCard(currentCard.id);
       setState(() {});
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Card deleted'),
+          action: SnackBarAction(
+            label: 'Undo',
+            textColor: const Color(0xFFFFD38D),
+            onPressed: () async {
+              cards.insert(0, currentCard);
+              await repository.insertCard(currentCard);
+              setState(() {});
+            },
+          ),
+        ),
+      );
     }
   }
 
