@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/services/translation_service.dart';
+import 'package:lenski/services/tts_service.dart'; // Import the TTS service
 import 'package:lenski/data/card_repository.dart';
 import 'package:lenski/models/card_model.dart' as custom_card; // Alias the import
 import 'dart:io';
@@ -243,6 +244,27 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
                                           const SnackBar(content: Text('Card added successfully')),
                                         );
                                       }
+                                    },
+                                  ),
+                                ),
+                                SizedBox(width: p.standardPadding()/2),
+                                Container(
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFD9D0DB),
+                                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                  ),
+                                  child: IconButton(
+                                    icon: const Icon(Icons.volume_up, color: Colors.black, size: 30.0),
+                                    onPressed: () async {
+                                      try{
+                                      if (snapshot.hasData) {
+                                        await TtsService().speak(widget.text, widget.sourceLang);
+                                      }
+                                    }catch(e){ 
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Install the text-to-speech for this language in your device to access this functinality')),
+                                      );
+                                    }
                                     },
                                   ),
                                 ),
