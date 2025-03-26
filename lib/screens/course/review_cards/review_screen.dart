@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/card_model.dart' as lenski_card;
 import 'package:lenski/models/course_model.dart';
+import 'package:lenski/services/tts_service.dart';
 import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// A screen for reviewing flashcards within a course.
 class ReviewScreen extends StatefulWidget {
@@ -20,13 +22,32 @@ class ReviewScreen extends StatefulWidget {
 
 class _ReviewScreenState extends State<ReviewScreen> {
   bool isFront = true;
+  bool isAudioEnabled = true; // Default value
   List<lenski_card.Card> cards = [];
   final CardRepository repository = CardRepository();
 
   @override
   void initState() {
     super.initState();
+    _loadAudioPreference();
     _loadCards();
+  }
+
+  /// Loads the audio preference from SharedPreferences.
+  Future<void> _loadAudioPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isAudioEnabled = prefs.getBool('isAudioEnabled') ?? true;
+    });
+  }
+
+  /// Toggles the audio preference and saves it to SharedPreferences.
+  Future<void> _toggleAudioPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isAudioEnabled = !isAudioEnabled;
+    });
+    await prefs.setBool('isAudioEnabled', isAudioEnabled);
   }
 
   /// Loads the cards to be reviewed from the repository.
@@ -40,6 +61,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
   /// Toggles the visibility of the card (front/back).
   void toggleCard() {
+    if (isFront && isAudioEnabled) {
+      TtsService().speak(cards.first.front, widget.course.code);
+    }
     setState(() {
       isFront = !isFront;
     });
@@ -214,6 +238,14 @@ class _ReviewScreenState extends State<ReviewScreen> {
                               ],
                             ),
                           ),
+                          if (!isFront)
+                          Text(currentCard.front,
+                            style: const TextStyle(
+                              fontSize: 18.0,
+                              color: Color(0xFF99909B),
+                              fontFamily: "Varela Round",
+                            ),
+                          ),
                         ],
                       ),
                       isFront ? ElevatedButton(
@@ -299,6 +331,17 @@ class _ReviewScreenState extends State<ReviewScreen> {
               Navigator.of(context).pop();
             },
             icon: const Icon(Icons.close_rounded),
+          ),
+        ),
+        Positioned(
+          bottom: boxPadding + 10,
+          left: boxPadding + 10,
+          child: IconButton(
+            onPressed: _toggleAudioPreference,
+            icon: Icon(
+              isAudioEnabled ? Icons.volume_up : Icons.volume_off,
+              color: Colors.black,
+            ),
           ),
         ),
         Positioned(
