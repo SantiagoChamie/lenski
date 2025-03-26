@@ -17,23 +17,26 @@ class TtsService {
   /// Converts the given text to speech in the specified language.
   /// Returns a Future that completes when the speech is finished.
   Future<void> speak(String text, String languageCode) async {
-    final String? ttsLanguageCode;
-    if(_previousLanguageCode == languageCode) {
+  String? ttsLanguageCode;
+
+  // Ensure plugin calls happen on the platform thread
+  await Future(() async {
+    if (_previousLanguageCode == languageCode) {
       ttsLanguageCode = _previousTtsLanguageCode;
     } else {
       final List<dynamic> availableLanguages = await _flutterTts.getLanguages;
       ttsLanguageCode = availableLanguages.firstWhere(
-      (lang) => lang.toString().substring(0, 2).toLowerCase() == languageCode.toLowerCase(),
-      orElse: () => null,
-    );
+        (lang) => lang.toString().substring(0, 2).toLowerCase() == languageCode.toLowerCase(),
+        orElse: () => null,
+      );
     }
-    
+
     if (ttsLanguageCode == null) {
-      throw Exception();
+      throw Exception("Language code not supported");
     }
 
     if (_previousLanguageCode != languageCode) {
-      await _flutterTts.setLanguage(ttsLanguageCode);
+      await _flutterTts.setLanguage(ttsLanguageCode!);
       _previousLanguageCode = languageCode;
       _previousTtsLanguageCode = ttsLanguageCode;
     }
@@ -41,7 +44,8 @@ class TtsService {
     await _flutterTts.setPitch(1.0);
     await _flutterTts.setSpeechRate(0.5);
     await _flutterTts.speak(text);
-  }
+  });
+}
 
   /// Stops the current speech.
   Future<void> stop() async {
