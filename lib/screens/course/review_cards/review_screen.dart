@@ -60,9 +60,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
 
   /// Toggles the visibility of the card (front/back).
-  void toggleCard() {
+  /// If the card is on the front and audio is enabled, it reads the front of the card.
+  void toggleCard() async {
     if (isFront && isAudioEnabled) {
-      TtsService().speak(cards.first.front, widget.course.code);
+      // ignore: empty_catches
+      try {await TtsService().speak(cards.first.front, widget.course.code);} catch (e) {}
     }
     setState(() {
       isFront = !isFront;

@@ -33,17 +33,18 @@ class TtsService {
 
     if (ttsLanguageCode == null) {
       throw Exception("Language code not supported");
-    }
+    } else {
 
-    if (_previousLanguageCode != languageCode) {
-      await _flutterTts.setLanguage(ttsLanguageCode!);
-      _previousLanguageCode = languageCode;
-      _previousTtsLanguageCode = ttsLanguageCode;
-    }
+      if (_previousLanguageCode != languageCode) {
+        await _flutterTts.setLanguage(ttsLanguageCode!);
+        _previousLanguageCode = languageCode;
+        _previousTtsLanguageCode = ttsLanguageCode;
+      }
 
-    await _flutterTts.setPitch(1.0);
-    await _flutterTts.setSpeechRate(0.5);
-    await _flutterTts.speak(text);
+      await _flutterTts.setPitch(1.0);
+      await _flutterTts.setSpeechRate(0.5);
+      await _flutterTts.speak(text);
+    }
   });
 }
 
