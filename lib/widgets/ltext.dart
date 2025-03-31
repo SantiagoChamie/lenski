@@ -30,6 +30,7 @@ class _LTextState extends State<LText> {
   Timer? hideTimer;
   String? selectedText;
   OverlayEntry? overlayEntry;
+  Offset? mousePosition; // Store the current mouse position
 
   @override
   void dispose() {
@@ -45,10 +46,16 @@ class _LTextState extends State<LText> {
     // Remove newline characters from the text
     final sanitizedText = text.replaceAll('\n', ' ');
 
+    if (mousePosition != null) {
+      print('Mouse Position: x=${mousePosition!.dx}, y=${mousePosition!.dy}');
+    } else {
+      print('Mouse Position: Unable to retrieve pointer data.');
+    }
+
     overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
-        top: widget.position == 'above' ? rect.top - 125 : rect.bottom + 50, // Adjust based on position
-        left: rect.left - 100, // Adjust this value based on your requirements
+        top: widget.position == 'above' ? mousePosition!.dy - 200 : rect.bottom + 50, // Adjust based on position
+        left: mousePosition!.dx - 150, // Adjust this value based on your requirements
         child: Material(
           color: Colors.transparent,
           child: TranslationOverlay(
@@ -64,7 +71,7 @@ class _LTextState extends State<LText> {
     Overlay.of(context).insert(overlayEntry!);
   }
 
-  void hideOverlay({bool instant=false}) {
+  void hideOverlay({bool instant = false}) {
     hideTimer?.cancel();
     if (instant) {
       overlayEntry?.remove();
@@ -80,49 +87,56 @@ class _LTextState extends State<LText> {
 
   @override
   Widget build(BuildContext context) {
-    return TextSelectionTheme(
-      data: const TextSelectionThemeData(
-        selectionColor: Color(0xFFFFD38D),
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return SelectableText(
-            widget.text,
-            style: widget.style,
-            textAlign: widget.textAlign,
-            onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
-              if (selection.baseOffset != selection.extentOffset) {
-                hideTimer?.cancel();
-                timer?.cancel();
-                timer = Timer(const Duration(milliseconds: 200), () {
-                  setState(() {
-                    selectedText = widget.text.substring(selection.start, selection.end);
-                    final renderBox = context.findRenderObject() as RenderBox;
-                    final textPainter = TextPainter(
-                      text: TextSpan(text: widget.text, style: widget.style),
-                      textDirection: TextDirection.ltr,
-                    );
-                    textPainter.layout();
-                    final startOffset = textPainter.getOffsetForCaret(
-                      TextPosition(offset: selection.start),
-                      Rect.zero,
-                    );
-                    final endOffset = textPainter.getOffsetForCaret(
-                      TextPosition(offset: selection.end),
-                      Rect.zero,
-                    );
-                    final startGlobalOffset = renderBox.localToGlobal(startOffset);
-                    final endGlobalOffset = renderBox.localToGlobal(endOffset);
-                    final rect = Rect.fromPoints(startGlobalOffset, endGlobalOffset);
-                    showOverlay(context, selectedText!, rect);
+    return MouseRegion(
+      onHover: (event) {
+        setState(() {
+          mousePosition = event.position; // Update mouse position on hover
+        });
+      },
+      child: TextSelectionTheme(
+        data: const TextSelectionThemeData(
+          selectionColor: Color(0xFFFFD38D),
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SelectableText(
+              widget.text,
+              style: widget.style,
+              textAlign: widget.textAlign,
+              onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+                if (selection.baseOffset != selection.extentOffset) {
+                  hideTimer?.cancel();
+                  timer?.cancel();
+                  timer = Timer(const Duration(milliseconds: 200), () {
+                    setState(() {
+                      selectedText = widget.text.substring(selection.start, selection.end);
+                      final renderBox = context.findRenderObject() as RenderBox;
+                      final textPainter = TextPainter(
+                        text: TextSpan(text: widget.text, style: widget.style),
+                        textDirection: TextDirection.ltr,
+                      );
+                      textPainter.layout();
+                      final startOffset = textPainter.getOffsetForCaret(
+                        TextPosition(offset: selection.start),
+                        Rect.zero,
+                      );
+                      final endOffset = textPainter.getOffsetForCaret(
+                        TextPosition(offset: selection.end),
+                        Rect.zero,
+                      );
+                      final startGlobalOffset = renderBox.localToGlobal(startOffset);
+                      final endGlobalOffset = renderBox.localToGlobal(endOffset);
+                      final rect = Rect.fromPoints(startGlobalOffset, endGlobalOffset);
+                      showOverlay(context, selectedText!, rect);
+                    });
                   });
-                });
-              } else {
-                hideOverlay();
-              }
-            },
-          );
-        },
+                } else {
+                  hideOverlay();
+                }
+              },
+            );
+          },
+        ),
       ),
     );
   }
