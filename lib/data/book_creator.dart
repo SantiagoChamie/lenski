@@ -14,12 +14,11 @@ class BookCreator {
   /// 
   /// [text] is the text of the book to be processed.
   /// [code] is the language code of the book.
-  /// [isSong] indicates whether the text is a song.
-  void processBook(String text, String code, bool isSong) async {
-    final sentences = isSong
-        ? text.split('\n').where((s) => s.trim().isNotEmpty).toList()
-        : text.split(RegExp(r'(?<=[.!?])\s+|\n{2,}')).where((s) => s.trim().isNotEmpty).toList();
+  void processBook(String text, String code) async {
+    // Split the text by \n and include empty lines as separate sentences
+    final sentences = text.split('\n').toList();
     if (sentences.isEmpty) return;
+
     final bookTitle = sentences.first;
     final content = sentences;
     final book = Book(

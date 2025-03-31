@@ -41,14 +41,18 @@ class _LTextState extends State<LText> {
 
   void showOverlay(BuildContext context, String text, Rect rect) {
     overlayEntry?.remove();
+
+    // Remove newline characters from the text
+    final sanitizedText = text.replaceAll('\n', ' ');
+
     overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
-        top: widget.position == 'above' ? rect.top - 175 : rect.bottom + 50, // Adjust based on position
+        top: widget.position == 'above' ? rect.top - 125 : rect.bottom + 50, // Adjust based on position
         left: rect.left - 100, // Adjust this value based on your requirements
         child: Material(
           color: Colors.transparent,
           child: TranslationOverlay(
-            text: text,
+            text: sanitizedText, // Use sanitized text here
             contextText: widget.text,
             sourceLang: widget.toLanguage,
             targetLang: widget.fromLanguage,

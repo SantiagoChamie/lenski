@@ -125,45 +125,37 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                         } else {
                           final sentences = snapshot.data!;
 
+                          // Concatenate all sentences into a single string
+                          final textContent = List.generate(11, (index) {
+                            final int sentenceIndex = _currentLine - 6 + index;
+
+                            // Handle empty lines at the top and bottom
+                            if (sentenceIndex < 0 || sentenceIndex >= sentences.length) {
+                              return ''; // Empty line
+                            }
+
+                            final sentence = sentences[sentenceIndex];
+                            return sentence.sentence;
+                          }).join('\n'); // Join sentences with a newline
+
                           return Row(
                             children: [
                               Expanded(
                                 child: Center( // Ensures horizontal centering
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center, // Vertically center the list
-                                    children: List.generate(11, (index) {
-                                      final int sentenceIndex = _currentLine - 6 + index;
-
-                                      // Handle empty lines at the top and bottom
-                                      if (sentenceIndex < 0 || sentenceIndex >= sentences.length) {
-                                        return const Padding(
-                                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                                          child: Text(
-                                            '',
-                                            style: TextStyle(fontSize: 20.0), // Empty line style
-                                          ),
-                                        );
-                                      }
-
-                                      final sentence = sentences[sentenceIndex];
-                                      final isCurrent = sentenceIndex + 1 == _currentLine;
-
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                        child: LText(
-                                          text: sentence.sentence,
-                                          position: 'below',
-                                          fromLanguage: widget.course.fromCode,
-                                          toLanguage: widget.course.code,
-                                          style: TextStyle(
-                                            fontSize: isCurrent ? 30.0 : 20.0,
-                                            color: isCurrent ? Colors.black : Colors.grey,
-                                            fontFamily: "Varela Round",
-                                          ),
-                                          textAlign: TextAlign.justify, // Justified text alignment
-                                        ),
-                                      );
-                                    }),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                    child: LText(
+                                      text: textContent,
+                                      position: 'above',
+                                      fromLanguage: widget.course.fromCode,
+                                      toLanguage: widget.course.code,
+                                      style: const TextStyle(
+                                        fontSize: 30.0,
+                                        color: Color.fromARGB(255, 0, 0, 0),
+                                        fontFamily: "Varela Round",
+                                      ),
+                                      textAlign: TextAlign.justify, // Justified text alignment
+                                    ),
                                   ),
                                 ),
                               ),
