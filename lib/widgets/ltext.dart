@@ -7,6 +7,7 @@ class LText extends StatefulWidget {
   final String fromLanguage;
   final String toLanguage;
   final TextStyle style;
+  final TextAlign textAlign;
   //TODO: make position work with a widget
   final String position;
 
@@ -16,6 +17,7 @@ class LText extends StatefulWidget {
     required this.fromLanguage,
     required this.toLanguage,
     required this.style,
+    this.textAlign = TextAlign.center,
     this.position = 'above',
   });
 
@@ -83,6 +85,7 @@ class _LTextState extends State<LText> {
           return SelectableText(
             widget.text,
             style: widget.style,
+            textAlign: widget.textAlign,
             onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
               if (selection.baseOffset != selection.extentOffset) {
                 hideTimer?.cancel();
