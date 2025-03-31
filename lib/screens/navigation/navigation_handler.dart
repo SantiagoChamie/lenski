@@ -30,7 +30,14 @@ class NavigationHandlerState extends State<NavigationHandler> {
       }
     } else if (_shouldNavigate(item)) {
       // Push the named route onto the navigator stack.
-      _navigatorKey.currentState?.pushNamed(item);
+      _navigatorKey.currentState?.pushNamed(item).then((_) {
+        // Reset the current route when the screen is popped
+        if (_currentRoute == item) {
+          setState(() {
+            _currentRoute = 'Home'; // Default to 'Home' after pop
+          });
+        }
+      });
     }
     setState(() {
       _currentRoute = item;

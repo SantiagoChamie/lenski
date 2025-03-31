@@ -51,7 +51,7 @@ class Sidebar extends StatelessWidget {
     return IconButton(
       icon: Icon(icon, color: Colors.black, size: p.sidebarButtonWidth() / 2),
       onPressed: () {
-        onItemSelected(title);
+        onItemSelected(title); // Use the NavigationHandler's method
       },
       style: FilledButton.styleFrom(
         backgroundColor: const Color(0xFFD9D0DB), // Button color

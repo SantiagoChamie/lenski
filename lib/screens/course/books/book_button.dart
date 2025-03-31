@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/book_model.dart';
 import 'package:lenski/models/course_model.dart';
-import 'dart:math';
+//import 'dart:math';
 import 'package:lenski/screens/course/books/add_book_button.dart';
 import 'package:lenski/screens/course/books/empty_book_button.dart';
 import 'package:lenski/utils/proportions.dart';
@@ -52,11 +52,10 @@ class _BookButtonState extends State<BookButton> {
         widget.onPressed!();
       }
     } else if (book != null) {
-      Navigator.push(
+      Navigator.pushNamed(
         context,
-        MaterialPageRoute(
-          builder: (context) => BookScreen(book: book!, course: widget.course!),
-        ),
+        'Book',
+        arguments: {'book': book!, 'course': widget.course!},
       ).then((updatedBook) {
         if (updatedBook != null && updatedBook is Book) {
           setState(() {

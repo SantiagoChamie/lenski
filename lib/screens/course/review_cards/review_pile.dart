@@ -73,7 +73,11 @@ class _ReviewPileState extends State<ReviewPile> {
 
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).pushNamed('Review', arguments: widget.course);
+        final navigatorKey = Navigator.of(context).widget.key as GlobalKey<NavigatorState>;
+        navigatorKey.currentState?.pushNamed(
+          'Review',
+          arguments: widget.course,
+        );
       },
       child: Stack(
         children: [

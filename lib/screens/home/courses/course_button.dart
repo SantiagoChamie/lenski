@@ -32,12 +32,11 @@ class CourseButton extends StatelessWidget {
             height: p.courseButtonHeight(courseCount),
             child: ElevatedButton(
               onPressed: () {
-                // Navigate to the CourseHome screen when the button is pressed
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CourseHome(course: course),
-                  ),
+                // Navigate to the CourseHome screen using NavigationHandler
+                final navigatorKey = Navigator.of(context).widget.key as GlobalKey<NavigatorState>;
+                navigatorKey.currentState?.pushNamed(
+                  'Course',
+                  arguments: course,
                 );
               },
               style: ElevatedButton.styleFrom(
