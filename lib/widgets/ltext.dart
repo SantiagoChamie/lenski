@@ -8,7 +8,6 @@ class LText extends StatefulWidget {
   final String toLanguage;
   final TextStyle style;
   final TextAlign textAlign;
-  //TODO: make position work with a widget
   final String position;
 
   const LText({
@@ -46,10 +45,16 @@ class _LTextState extends State<LText> {
     // Remove newline characters from the text
     final sanitizedText = text.replaceAll('\n', ' ');
 
-    if (mousePosition != null) {
-      print('Mouse Position: x=${mousePosition!.dx}, y=${mousePosition!.dy}');
-    } else {
-      print('Mouse Position: Unable to retrieve pointer data.');
+    // Split the widget's text into lines
+    final lines = widget.text.split('\n');
+
+    // Find the line containing the selected text
+    String contextLine = '';
+    for (final line in lines) {
+      if (line.contains(text)) {
+        contextLine = line;
+        break;
+      }
     }
 
     overlayEntry = OverlayEntry(
@@ -60,7 +65,7 @@ class _LTextState extends State<LText> {
           color: Colors.transparent,
           child: TranslationOverlay(
             text: sanitizedText, // Use sanitized text here
-            contextText: widget.text,
+            contextText: contextLine, // Use only the line containing the selected text
             sourceLang: widget.toLanguage,
             targetLang: widget.fromLanguage,
             onClose: () => hideOverlay(instant: true), // Pass the hideOverlay method
