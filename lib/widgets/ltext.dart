@@ -7,7 +7,7 @@ class LText extends StatefulWidget {
   final String fromLanguage;
   final String toLanguage;
   final TextStyle style;
-  //TODO: make position work with a widget
+  final TextAlign textAlign;
   final String position;
 
   const LText({
@@ -16,6 +16,7 @@ class LText extends StatefulWidget {
     required this.fromLanguage,
     required this.toLanguage,
     required this.style,
+    this.textAlign = TextAlign.center,
     this.position = 'above',
   });
 
@@ -28,6 +29,7 @@ class _LTextState extends State<LText> {
   Timer? hideTimer;
   String? selectedText;
   OverlayEntry? overlayEntry;
+  Offset? mousePosition; // Store the current mouse position
 
   @override
   void dispose() {
@@ -39,15 +41,31 @@ class _LTextState extends State<LText> {
 
   void showOverlay(BuildContext context, String text, Rect rect) {
     overlayEntry?.remove();
+
+    // Remove newline characters from the text
+    final sanitizedText = text.replaceAll('\n', ' ');
+
+    // Split the widget's text into lines
+    final lines = widget.text.split('\n');
+
+    // Find the line containing the selected text
+    String contextLine = '';
+    for (final line in lines) {
+      if (line.contains(text)) {
+        contextLine = line;
+        break;
+      }
+    }
+
     overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
-        top: widget.position == 'above' ? rect.top - 175 : rect.bottom + 50, // Adjust based on position
-        left: rect.left - 100, // Adjust this value based on your requirements
+        top: widget.position == 'above' ? mousePosition!.dy - 200 : rect.bottom + 50, // Adjust based on position
+        left: mousePosition!.dx - 150, // Adjust this value based on your requirements
         child: Material(
           color: Colors.transparent,
           child: TranslationOverlay(
-            text: text,
-            contextText: widget.text,
+            text: sanitizedText, // Use sanitized text here
+            contextText: contextLine, // Use only the line containing the selected text
             sourceLang: widget.toLanguage,
             targetLang: widget.fromLanguage,
             onClose: () => hideOverlay(instant: true), // Pass the hideOverlay method
@@ -58,7 +76,7 @@ class _LTextState extends State<LText> {
     Overlay.of(context).insert(overlayEntry!);
   }
 
-  void hideOverlay({bool instant=false}) {
+  void hideOverlay({bool instant = false}) {
     hideTimer?.cancel();
     if (instant) {
       overlayEntry?.remove();
@@ -74,48 +92,56 @@ class _LTextState extends State<LText> {
 
   @override
   Widget build(BuildContext context) {
-    return TextSelectionTheme(
-      data: const TextSelectionThemeData(
-        selectionColor: Color(0xFFFFD38D),
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return SelectableText(
-            widget.text,
-            style: widget.style,
-            onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
-              if (selection.baseOffset != selection.extentOffset) {
-                hideTimer?.cancel();
-                timer?.cancel();
-                timer = Timer(const Duration(milliseconds: 200), () {
-                  setState(() {
-                    selectedText = widget.text.substring(selection.start, selection.end);
-                    final renderBox = context.findRenderObject() as RenderBox;
-                    final textPainter = TextPainter(
-                      text: TextSpan(text: widget.text, style: widget.style),
-                      textDirection: TextDirection.ltr,
-                    );
-                    textPainter.layout();
-                    final startOffset = textPainter.getOffsetForCaret(
-                      TextPosition(offset: selection.start),
-                      Rect.zero,
-                    );
-                    final endOffset = textPainter.getOffsetForCaret(
-                      TextPosition(offset: selection.end),
-                      Rect.zero,
-                    );
-                    final startGlobalOffset = renderBox.localToGlobal(startOffset);
-                    final endGlobalOffset = renderBox.localToGlobal(endOffset);
-                    final rect = Rect.fromPoints(startGlobalOffset, endGlobalOffset);
-                    showOverlay(context, selectedText!, rect);
+    return MouseRegion(
+      onHover: (event) {
+        setState(() {
+          mousePosition = event.position; // Update mouse position on hover
+        });
+      },
+      child: TextSelectionTheme(
+        data: const TextSelectionThemeData(
+          selectionColor: Color(0xFFFFD38D),
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SelectableText(
+              widget.text,
+              style: widget.style,
+              textAlign: widget.textAlign,
+              onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+                if (selection.baseOffset != selection.extentOffset) {
+                  hideTimer?.cancel();
+                  timer?.cancel();
+                  timer = Timer(const Duration(milliseconds: 200), () {
+                    setState(() {
+                      selectedText = widget.text.substring(selection.start, selection.end);
+                      final renderBox = context.findRenderObject() as RenderBox;
+                      final textPainter = TextPainter(
+                        text: TextSpan(text: widget.text, style: widget.style),
+                        textDirection: TextDirection.ltr,
+                      );
+                      textPainter.layout();
+                      final startOffset = textPainter.getOffsetForCaret(
+                        TextPosition(offset: selection.start),
+                        Rect.zero,
+                      );
+                      final endOffset = textPainter.getOffsetForCaret(
+                        TextPosition(offset: selection.end),
+                        Rect.zero,
+                      );
+                      final startGlobalOffset = renderBox.localToGlobal(startOffset);
+                      final endGlobalOffset = renderBox.localToGlobal(endOffset);
+                      final rect = Rect.fromPoints(startGlobalOffset, endGlobalOffset);
+                      showOverlay(context, selectedText!, rect);
+                    });
                   });
-                });
-              } else {
-                hideOverlay();
-              }
-            },
-          );
-        },
+                } else {
+                  hideOverlay();
+                }
+              },
+            );
+          },
+        ),
       ),
     );
   }

@@ -52,6 +52,7 @@ class AddCardScreen extends StatelessWidget {
                       children: [
                         TextField(
                           controller: frontController,
+                          style: const TextStyle(fontFamily: "Sansation"),
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
                             hintText: 'Front text',
@@ -68,6 +69,7 @@ class AddCardScreen extends StatelessWidget {
                             Expanded(
                               child: TextField(
                                 controller: backController,
+                                style: const TextStyle(fontFamily: "Sansation"),
                                 decoration: const InputDecoration(
                                   border: OutlineInputBorder(),
                                   hintText: 'Back text',
@@ -97,6 +99,7 @@ class AddCardScreen extends StatelessWidget {
                         Expanded(
                           child: TextField(
                             controller: contextController,
+                            style: const TextStyle(fontFamily: "Sansation"),
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                               hintText: 'Context (optional)',

@@ -17,7 +17,6 @@ class AddBookScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextEditingController textController = TextEditingController();
     final p = Proportions(context);
-    final ValueNotifier<bool> isSong = ValueNotifier<bool>(true);
 
     return Scaffold(
       body: Center(
@@ -69,7 +68,6 @@ class AddBookScreen extends StatelessWidget {
                             BookCreator().processBook(
                               textController.text,
                               languageCode,
-                              isSong.value,
                             );
                             onBackPressed();
                           },
@@ -96,29 +94,6 @@ class AddBookScreen extends StatelessWidget {
                   onPressed: onBackPressed, 
                   icon: const Icon(Icons.close)),
               ),
-              Positioned(
-                bottom: 40,
-                right: 40,
-                child: ValueListenableBuilder<bool>(
-                valueListenable: isSong,
-                builder: (context, value, child) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('Text'),
-                      Switch(
-                        value: value,
-                        activeColor: const Color(0xFF2C73DE),
-                        onChanged: (newValue) {
-                          isSong.value = newValue;
-                        },
-                      ),
-                      const Text('Song'),
-                    ],
-                  );
-                },
-              ),
-              )
             ],
           ),
         ),

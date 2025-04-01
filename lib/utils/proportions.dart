@@ -54,6 +54,9 @@ class Proportions {
   /// Returns the width of a book in the library screen.
   double bookWidth() => libraryWidth() / 3 - 4 * standardPadding();
 
+  /// Returns the width of the reading widget in the book screen.
+  double textWidth() => createCourseWidth()*0.75; // Fixed width for the text
+
   /// Returns the height of a course button based on the quantity.
   /// The maximum allowed quantity is 3.
   double courseButtonHeight(int quantity) {
