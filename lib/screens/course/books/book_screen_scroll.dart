@@ -164,20 +164,26 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                               return Row(
                                 children: [
                                   Expanded(
-                                    child: Center( // Ensures horizontal centering
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                        child: LText(
-                                          text: textContent,
-                                          position: 'above',
-                                          fromLanguage: widget.course.fromCode,
-                                          toLanguage: widget.course.code,
-                                          style: const TextStyle(
-                                            fontSize: 30.0,
-                                            color: Color.fromARGB(255, 0, 0, 0),
-                                            fontFamily: "Varela Round",
+                                    child: Center(
+                                      child: ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          minWidth: p.textWidth(),
+                                          maxWidth: p.textWidth(), 
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                          child: LText(
+                                            text: textContent,
+                                            position: 'above',
+                                            fromLanguage: widget.course.fromCode,
+                                            toLanguage: widget.course.code,
+                                            style: const TextStyle(
+                                              fontSize: 30.0,
+                                              color: Color.fromARGB(255, 0, 0, 0),
+                                              fontFamily: "Varela Round",
+                                            ),
+                                            textAlign: TextAlign.justify,
                                           ),
-                                          textAlign: TextAlign.justify, // Justified text alignment
                                         ),
                                       ),
                                     ),
