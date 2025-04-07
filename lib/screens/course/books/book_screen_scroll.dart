@@ -190,14 +190,38 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.only(top: 40.0, right: 4.5),
-                                    child: RotatedBox(
-                                      quarterTurns: 1,
-                                      child: LinearProgressIndicator(
-                                        value: _currentLine / widget.book.totalLines,
-                                        backgroundColor: const Color(0xFFD9D0DB),
-                                        valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2C73DE)),
-                                        minHeight: 10,
-                                        borderRadius: BorderRadius.circular(5.0),
+                                    child: GestureDetector(
+                                      onTapDown: (TapDownDetails details) {
+                                        final RenderBox box = context.findRenderObject() as RenderBox;
+                                        final localPosition = box.globalToLocal(details.globalPosition);
+                                        
+                                        // Since the progress bar is rotated, we use the x coordinate
+                                        // to calculate the progress percentage
+                                        final progressBarWidth = box.size.height; // Due to rotation
+                                        final tapPosition = localPosition.dy;
+                                        final paddingCorrection = 40*2 * (tapPosition / progressBarWidth) - 50;
+                                        
+                                        // Calculate new line number
+                                        final percentage = (tapPosition + paddingCorrection) / progressBarWidth;
+                                        final newLine = (percentage * widget.book.totalLines).round();
+                                        
+                                        // Ensure the new line is within bounds
+                                        final boundedLine = newLine.clamp(1, widget.book.totalLines);
+                                        
+                                        setState(() {
+                                          _currentLine = boundedLine;
+                                          _updateCurrentLine(boundedLine);
+                                        });
+                                      },
+                                      child: RotatedBox(
+                                        quarterTurns: 1,
+                                        child: LinearProgressIndicator(
+                                          value: _currentLine / widget.book.totalLines,
+                                          backgroundColor: const Color(0xFFD9D0DB),
+                                          valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2C73DE)),
+                                          minHeight: 10,
+                                          borderRadius: BorderRadius.circular(5.0),
+                                        ),
                                       ),
                                     ),
                                   ),
