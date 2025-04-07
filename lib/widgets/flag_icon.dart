@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 /// A circular flag icon with a border
 class FlagIcon extends StatelessWidget {
@@ -31,11 +32,19 @@ class FlagIcon extends StatelessWidget {
         border: Border.all(color: borderColor ?? Colors.white, width: borderWidth),
       ),
       child: ClipOval(
-        child: Image.network(
-          imageUrl,
+        child: CachedNetworkImage(
+          imageUrl: imageUrl,
           fit: BoxFit.cover,
           width: size,
           height: size,
+          placeholder: (context, url) => Container(
+            color: const Color(0xFFF5F0F6),
+            child: const Icon(Icons.language, color: Colors.black54),
+          ),
+          errorWidget: (context, url, error) => Container(
+            color: const Color(0xFFF5F0F6),
+            child: const Icon(Icons.language, color: Colors.black54),
+          ),
         ),
       ),
     );

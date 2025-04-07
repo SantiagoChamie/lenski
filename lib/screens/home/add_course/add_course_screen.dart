@@ -184,6 +184,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                               onLanguageSelected: (language, flagUrl, code) => _updatedSelectedOriginLanguage(language, flagUrl, code),
                               startingLanguage: _selectedOriginLanguage,
                               isSource: false,
+                              selectorTitle: "Select source language",
                             ),
                             SizedBox(height: p.standardPadding()),
                             SizedBox(
@@ -195,6 +196,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                             LanguageSelectorButton(
                               onLanguageSelected: (language, flagUrl, code) => _updateSelectedLanguage(language, flagUrl, code),
                               startingLanguage: _selectedLanguage,
+                              selectorTitle: "Select target language",
                             ),
                           ],
                         ),
