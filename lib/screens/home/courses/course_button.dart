@@ -3,12 +3,13 @@ import 'package:lenski/screens/course/course_home.dart';
 //import 'package:lenski/screens/home/competences/competence_list.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/course_repository.dart';
+import 'package:lenski/utils/course_colors.dart';
 import '../../../models/course_model.dart';
 import '../../../widgets/flag_icon.dart';
 
 /// CourseButton is a widget that displays a course as a button.
 /// It shows the competences, the course name, the flag, and the level.
-class CourseButton extends StatelessWidget {
+class CourseButton extends StatefulWidget {
   final Course course;
   final VoidCallback onDelete;
   final int courseCount;
@@ -21,6 +22,13 @@ class CourseButton extends StatelessWidget {
   const CourseButton({super.key, required this.course, required this.onDelete, required this.courseCount});
 
   @override
+  State<CourseButton> createState() => _CourseButtonState();
+}
+
+class _CourseButtonState extends State<CourseButton> {
+  bool _showColorMenu = false;
+
+  @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
     return Padding(
@@ -29,18 +37,18 @@ class CourseButton extends StatelessWidget {
         children: [
           SizedBox(
             width: double.infinity,
-            height: p.courseButtonHeight(courseCount),
+            height: p.courseButtonHeight(widget.courseCount),
             child: ElevatedButton(
               onPressed: () {
                 // Navigate to the CourseHome screen using NavigationHandler
                 final navigatorKey = Navigator.of(context).widget.key as GlobalKey<NavigatorState>;
                 navigatorKey.currentState?.pushNamed(
                   'Course',
-                  arguments: course,
+                  arguments: widget.course,
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: course.color, // Example of using a parameter
+                backgroundColor: widget.course.color, // Example of using a parameter
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(33), // Adjust the radius as needed
                 ),
@@ -60,57 +68,89 @@ class CourseButton extends StatelessWidget {
                       FlagIcon(
                         size: 150,
                         borderWidth: 7,
-                        imageUrl: course.imageUrl,
+                        imageUrl: widget.course.imageUrl,
                       ),
                       const SizedBox(height: 20, width: 20),
-                      Text(course.name, style: const TextStyle(fontSize: 40, fontFamily: "Unbounded", color: Colors.white)),
+                      Text(widget.course.name, style: const TextStyle(fontSize: 40, fontFamily: "Unbounded", color: Colors.white)),
                     ],
                   ),
                   const Spacer(),
-                  
-                /*Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Align(
-                        alignment: Alignment.topCenter,
-                        child: Transform.translate(
-                          offset: const Offset(0, -12), // Adjust the value as needed
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              const Icon(
-                                Icons.bookmark_sharp,
-                                color: Colors.green,
-                                size: 100,
-                              ),
-                              Text(
-                                course.level,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontFamily: "Unbounded",
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),*/
                 ],
               ),
             ),
           ),
-          // Positioned delete button
+          // Settings button
+          Positioned(
+            top: 10,
+            right: 10,
+            child: IconButton(
+              icon: const Icon(Icons.settings, color: Colors.white),
+              onPressed: () {
+                setState(() {
+                  _showColorMenu = !_showColorMenu;
+                });
+              },
+            ),
+          ),
+          // Color menu
+          if (_showColorMenu)
+            Positioned(
+              top: 10,
+              right: 50,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[850],
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(51),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: CourseColors.colors.map((Color color) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: InkWell(
+                        onTap: () async {
+                          final updatedCourse = widget.course.copyWith(color: color);
+                          await CourseRepository().updateCourse(updatedCourse);
+                          widget.onDelete();
+                          setState(() {
+                            _showColorMenu = false;
+                          });
+                        },
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          // Delete button
           Positioned(
             bottom: 10,
             right: 10,
             child: IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
               onPressed: () async {
-                // Delete the course and call the onDelete callback
-                await CourseRepository().deleteCourse(course.code);
-                onDelete();
+                await CourseRepository().deleteCourse(widget.course.code);
+                widget.onDelete();
               },
             ),
           ),

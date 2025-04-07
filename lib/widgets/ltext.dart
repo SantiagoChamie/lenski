@@ -42,33 +42,24 @@ class _LTextState extends State<LText> {
   void showOverlay(BuildContext context, String text, Rect rect) {
     overlayEntry?.remove();
 
-    // Remove newline characters from the text
+    // Remove newline characters from the selected text
     final sanitizedText = text.replaceAll('\n', ' ');
-
-    // Split the widget's text into lines
-    final lines = widget.text.split('\n');
-
-    // Find the line containing the selected text
-    String contextLine = '';
-    for (final line in lines) {
-      if (line.contains(text)) {
-        contextLine = line;
-        break;
-      }
-    }
+    
+    // Find the context using our new algorithm
+    final contextText = findContext(sanitizedText, widget.text);
 
     overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
-        top: widget.position == 'above' ? mousePosition!.dy - 200 : rect.bottom + 50, // Adjust based on position
-        left: mousePosition!.dx - 150, // Adjust this value based on your requirements
+        top: widget.position == 'above' ? mousePosition!.dy - 200 : rect.bottom + 50,
+        left: mousePosition!.dx - 150,
         child: Material(
           color: Colors.transparent,
           child: TranslationOverlay(
-            text: sanitizedText, // Use sanitized text here
-            contextText: contextLine, // Use only the line containing the selected text
+            text: sanitizedText,
+            contextText: contextText,
             sourceLang: widget.toLanguage,
             targetLang: widget.fromLanguage,
-            onClose: () => hideOverlay(instant: true), // Pass the hideOverlay method
+            onClose: () => hideOverlay(instant: true),
           ),
         ),
       ),
@@ -88,6 +79,52 @@ class _LTextState extends State<LText> {
         overlayEntry = null;
       });
     }
+  }
+
+  // Add this method to _LTextState class:
+  String findContext(String selectedText, String fullText, {int maxLength = 75}) {
+    // First, create a sanitized version of the full text
+    String sanitizedText = fullText.replaceAll('\n', ' ');
+    
+    // Approach 1: Split by sentence-ending punctuation
+    final sentences = sanitizedText.split(RegExp(r'(?<=[.!?])\s+'));
+    for (final sentence in sentences) {
+      if (sentence.contains(selectedText) && sentence.length <= maxLength) {
+        return sentence.trim();
+      }
+    }
+
+    // Approach 2: Split by all punctuation (including sentence-ending)
+    // Using positive lookbehind (?<=...) to keep the punctuation marks
+    final fragments = sanitizedText.split(RegExp(r'(?<=[.!?,;:()\[\]{}<>\-])\s*'));
+    for (final fragment in fragments) {
+      if (fragment.contains(selectedText) && fragment.length <= maxLength) {
+        return fragment.trim();
+      }
+    }
+
+    // Approach 3: Split by original line breaks
+    final lines = fullText.split('\n');
+    for (final line in lines) {
+      if (line.contains(selectedText) && line.length <= maxLength) {
+        return line.trim();
+      }
+    }
+
+    // Fallback: If no suitable context found, return a substring around the selected text
+    int selectedIndex = sanitizedText.indexOf(selectedText);
+    if (selectedIndex != -1) {
+      int contextStart = selectedIndex - 50;
+      int contextEnd = selectedIndex + selectedText.length + 50;
+      
+      if (contextStart < 0) contextStart = 0;
+      if (contextEnd > sanitizedText.length) contextEnd = sanitizedText.length;
+      
+      return sanitizedText.substring(contextStart, contextEnd).trim();
+    }
+
+    // Last resort: return the selected text itself
+    return selectedText;
   }
 
   @override

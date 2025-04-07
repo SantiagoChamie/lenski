@@ -23,6 +23,7 @@ class ReviewScreen extends StatefulWidget {
 class _ReviewScreenState extends State<ReviewScreen> {
   bool isFront = true;
   bool isAudioEnabled = true; // Default value
+  bool isTtsAvailable = false; // New state variable
   List<lenski_card.Card> cards = [];
   final CardRepository repository = CardRepository();
 
@@ -31,6 +32,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
     super.initState();
     _loadAudioPreference();
     _loadCards();
+    _checkTtsAvailability(); // Add this new method call
   }
 
   /// Loads the audio preference from SharedPreferences.
@@ -57,6 +59,28 @@ class _ReviewScreenState extends State<ReviewScreen> {
     setState(() {
       cards = fetchedCards;
     });
+  }
+
+  /// Checks the availability of TTS for the current course language.
+  Future<void> _checkTtsAvailability() async {
+    try {
+      final List<dynamic> availableLanguages = await TtsService().getLanguages();
+      final bool available = availableLanguages.any(
+        (lang) => lang.toString().substring(0, 2).toLowerCase() == widget.course.code.toLowerCase()
+      );
+      setState(() {
+        isTtsAvailable = available;
+        // If TTS is not available, disable audio
+        if (!available) {
+          isAudioEnabled = false;
+        }
+      });
+    } catch (e) {
+      setState(() {
+        isTtsAvailable = false;
+        isAudioEnabled = false;
+      });
+    }
   }
 
   /// Toggles the visibility of the card (front/back).
@@ -265,29 +289,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                         children: [
                           ElevatedButton(
                             onPressed: () => handleDifficulty(1),
-                            child: const Text('Again',
-                              style: TextStyle(
-                                fontSize: 18.0,
-                                color: Color(0xFF000000),
-                                fontFamily: "Sansation",
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: p.standardPadding()),
-                          ElevatedButton(
-                            onPressed: () => handleDifficulty(2),
                             child: const Text('Hard',
-                              style: TextStyle(
-                                fontSize: 18.0,
-                                color: Color(0xFF000000),
-                                fontFamily: "Sansation",
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: p.standardPadding()),
-                          ElevatedButton(
-                            onPressed: () => handleDifficulty(3),
-                            child: const Text('Medium',
                               style: TextStyle(
                                 fontSize: 18.0,
                                 color: Color(0xFF000000),
@@ -305,7 +307,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                                 fontFamily: "Sansation",
                               ),
                             ),
-                          ),
+                          )
                         ],
                       ),
                     ],
@@ -335,7 +337,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
             icon: const Icon(Icons.close_rounded),
           ),
         ),
-        Positioned(
+        if (isTtsAvailable) Positioned(
           bottom: boxPadding + 10,
           left: boxPadding + 10,
           child: IconButton(
