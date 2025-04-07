@@ -50,7 +50,7 @@ class Course {
       'speaking': speaking ? 1 : 0,
       'reading': reading ? 1 : 0,
       'writing': writing ? 1 : 0,
-      'color': color.value,
+      'color': color.toARGB32(), // Using toARGB32() instead of .value
       'imageUrl': imageUrl,
     };
   }
@@ -68,6 +68,33 @@ class Course {
       writing: map['writing'] == 1,
       color: Color(map['color']),
       imageUrl: map['imageUrl'],
+    );
+  }
+
+  /// Creates a copy of the Course object with updated fields.
+  Course copyWith({
+    String? name,
+    String? level,
+    String? code,
+    String? fromCode,
+    bool? listening,
+    bool? speaking,
+    bool? reading,
+    bool? writing,
+    Color? color,
+    String? imageUrl,
+  }) {
+    return Course(
+      name: name ?? this.name,
+      level: level ?? this.level,
+      code: code ?? this.code,
+      fromCode: fromCode ?? this.fromCode,
+      listening: listening ?? this.listening,
+      speaking: speaking ?? this.speaking,
+      reading: reading ?? this.reading,
+      writing: writing ?? this.writing,
+      color: color ?? this.color,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 }
