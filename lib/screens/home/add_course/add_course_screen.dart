@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 //import 'package:lenski/screens/home/add_course/buttons/competence_selector_button.dart';
 //import 'package:lenski/screens/home/add_course/course_difficulty_text.dart';
 import 'package:lenski/screens/home/add_course/buttons/language_selector_button.dart';
+import 'package:lenski/utils/course_colors.dart';
 import 'package:lenski/utils/languages.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/models/course_model.dart';
@@ -85,15 +86,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
     //   return;
     // }
 
-    //TODO: color selector option
-    final List<Color> pastelColors = [
-      const Color(0xFFFFCC85), // Light Orange
-      const Color(0xFF99CCFF), // Light Blue
-      const Color(0xFFFFAEAE), // Light Red
-    ];
-
-    final random = Random();
-    final randomColor = pastelColors[random.nextInt(pastelColors.length)];
+    final randomColor = CourseColors.getRandomColor();
 
     final newCourse = Course(
       name: _selectedLanguage,

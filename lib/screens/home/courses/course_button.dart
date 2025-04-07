@@ -3,6 +3,7 @@ import 'package:lenski/screens/course/course_home.dart';
 //import 'package:lenski/screens/home/competences/competence_list.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/course_repository.dart';
+import 'package:lenski/utils/course_colors.dart';
 import '../../../models/course_model.dart';
 import '../../../widgets/flag_icon.dart';
 
@@ -29,15 +30,6 @@ class _CourseButtonState extends State<CourseButton> {
 
   @override
   Widget build(BuildContext context) {
-    // Predefined colors for the course button
-    // These colors can be used to set the background color of the button
-    const List<Color> predefinedColors = [
-      Color.fromARGB(255, 99, 176, 240), // Blue
-      Color.fromARGB(255, 132, 185, 134), // Green
-      Color.fromARGB(255, 240, 161, 156), // Red
-      Color.fromARGB(255, 171, 120, 180), // Purple
-      Color.fromARGB(255, 247, 203, 136), // Orange
-    ];
     final p = Proportions(context);
     return Padding(
       padding: EdgeInsets.only(bottom: p.standardPadding()),
@@ -111,7 +103,7 @@ class _CourseButtonState extends State<CourseButton> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.2),
+                      color: Colors.black.withAlpha(51),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -120,7 +112,7 @@ class _CourseButtonState extends State<CourseButton> {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: predefinedColors.map((Color color) {
+                  children: CourseColors.colors.map((Color color) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: InkWell(
