@@ -41,13 +41,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         GestureDetector(
-          onTap: () {
-            if (!isFileMode) {
-              setState(() {
-                isFileMode = true;
-              });
-            }
-          },
+          onTap: () => _switchMode(true),
           child: Container(
             width: 10,
             height: 10,
@@ -59,13 +53,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
           ),
         ),
         GestureDetector(
-          onTap: () {
-            if (isFileMode) {
-              setState(() {
-                isFileMode = false;
-              });
-            }
-          },
+          onTap: () => _switchMode(false),
           child: Container(
             width: 10,
             height: 10,
@@ -81,27 +69,48 @@ class _AddBookScreenState extends State<AddBookScreen> {
   }
 
   Widget _buildAnimatedSection() {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      transitionBuilder: (Widget child, Animation<double> animation) {
-        // Determine slide direction based on mode change
-        final bool slideLeft = child.key == const ValueKey('file');
-        
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: Offset(slideLeft ? -1.0 : 1.0, 0.0),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeInOut,
-          )),
-          child: child,
-        );
-      },
-      child: isFileMode
-          ? _buildFileSelector().copyWith(key: const ValueKey('file'))
-          : _buildTextInput().copyWith(key: const ValueKey('text')),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          final bool slideLeft = child.key == const ValueKey('file');
+          
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: Offset(slideLeft ? -1.0 : 1.0, 0.0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+            )),
+            child: child,
+          );
+        },
+        child: isFileMode
+            ? _buildFileSelector().copyWith(key: const ValueKey('file'))
+            : _buildTextInput().copyWith(key: const ValueKey('text')),
+      ),
     );
+  }
+
+  bool _hasText() {
+    return isFileMode 
+        ? selectedFilePath != null 
+        : textController.text.trim().isNotEmpty;
+  }
+
+  void _switchMode(bool toFileMode) {
+    if (isFileMode != toFileMode) {
+      setState(() {
+        if (toFileMode) {
+          textController.clear();
+        } else {
+          selectedFilePath = null;
+        }
+        isFileMode = toFileMode;
+      });
+    }
   }
 
   @override
@@ -142,17 +151,29 @@ class _AddBookScreenState extends State<AddBookScreen> {
                       ),
                       Column(
                         children: [
-                          _buildPageIndicator(), // Add page indicator
-                          SizedBox(height: p.standardPadding()), // Add spacing
+                          _buildPageIndicator(),
+                          SizedBox(height: p.standardPadding()),
                           SizedBox(
                             height: p.sidebarButtonWidth(),
                             child: ElevatedButton(
-                              onPressed: () {
-                                BookCreator().processBook(
-                                  textController.text,
-                                  widget.languageCode,
-                                );
-                                widget.onBackPressed();
+                              onPressed: () async {
+                                if (!_hasText()) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Please add some text or file before creating a book'),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                
+                                if (isFileMode) {
+                                  await BookCreator().processFile(selectedFilePath!, widget.languageCode);
+                                  widget.onBackPressed();
+                                } else {
+                                  BookCreator().processBook(textController.text, widget.languageCode);
+                                  widget.onBackPressed();
+                                }
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF2C73DE),
@@ -186,17 +207,13 @@ class _AddBookScreenState extends State<AddBookScreen> {
               ),
               Positioned(
                 top: p.createCourseHeight() / 3,
-                left: isFileMode ? null : 0, // Show on left when in text mode
-                right: isFileMode ? 0 : null, // Show on right when in file mode
+                left: isFileMode ? null : 0,
+                right: isFileMode ? 0 : null,
                 child: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      isFileMode = !isFileMode;
-                    });
-                  },
+                  onPressed: () => _switchMode(!isFileMode),
                   icon: Icon(
                     isFileMode 
-                      ? Icons.keyboard_arrow_right  // Changed direction
+                      ? Icons.keyboard_arrow_right
                       : Icons.keyboard_arrow_left
                   ),
                   iconSize: 40,
@@ -214,7 +231,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
       controller: textController,
       decoration: const InputDecoration(
         border: OutlineInputBorder(),
-        hintText: 'Paste the text here',
+        hintText: 'Place the text here',
         floatingLabelBehavior: FloatingLabelBehavior.always,
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.blue, width: 2.0),
@@ -234,7 +251,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
       padding: EdgeInsets.zero,
       dashPattern: const [12, 4],
       child: Container(
-        width: double.infinity,  // Makes container take full available width
+        width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
         ),
