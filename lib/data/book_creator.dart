@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/models/book_model.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 class BookCreator {
   final BookRepository _bookRepository = BookRepository();
@@ -16,13 +17,10 @@ class BookCreator {
   /// Processes a file and creates a book based on its contents
   Future<void> processFile(String filePath, String code) async {
 
-    print('Processing file: $filePath with code: $code');
     if (filePath.isEmpty) return;
 
     final extension = path.extension(filePath).toLowerCase();
     List<String> content = [];
-    print('File content: ${content.length} lines');
-    print('File extension: $extension');
     try {
       switch (extension) {
         case '.txt':
@@ -72,9 +70,59 @@ class BookCreator {
   }
 
   Future<List<String>> _processPdfFile(String filePath) async {
-    // Implement PDF processing logic here
-    // For now, we'll just return an empty list
-    return [];
+    final List<String> sentences = [];
+    final File file = File(filePath);
+    final PdfDocument document = PdfDocument(inputBytes: await file.readAsBytes());
+
+    try {
+      for (int pageIndex = 0; pageIndex < document.pages.count; pageIndex++) {
+        // Add an empty line between pages (except for the first page)
+        if (pageIndex > 0) {
+          sentences.add('');
+        }
+
+        final PdfTextExtractor extractor = PdfTextExtractor(document);
+        final List<TextLine> textLines = extractor.extractTextLines(startPageIndex: pageIndex);
+
+        // Group text elements by their vertical position (y-coordinate)
+        final Map<double, List<TextWord>> lineGroups = {};
+        const double yThreshold = 2.0; // Tolerance for considering words on the same line
+
+        for (var line in textLines) {
+          for (var word in line.wordCollection) {
+            // Find the closest existing y-coordinate within the threshold
+            final double matchingY = lineGroups.keys.firstWhere(
+              (y) => (y - word.bounds.top).abs() <= yThreshold,
+              orElse: () => word.bounds.top,
+            );
+
+            if (!lineGroups.containsKey(matchingY)) {
+              lineGroups[matchingY] = [];
+            }
+            lineGroups[matchingY]!.add(word);
+          }
+        }
+
+        // Sort words horizontally within each line and combine them
+        for (var words in lineGroups.values) {
+          words.sort((a, b) => a.bounds.left.compareTo(b.bounds.left));
+          // Join words and normalize spaces
+          final String lineText = words
+              .map((word) => word.text)
+              .join(' ')
+              .trim()
+              .replaceAll(RegExp(r'\s+'), ' '); // Replace multiple spaces with single space
+          
+          if (lineText.isNotEmpty) {
+            sentences.add(lineText);
+          }
+        }
+      }
+    } finally {
+      document.dispose();
+    }
+
+    return sentences;
   }
 
   Future<void> _createBook(List<String> content, String code) async {
