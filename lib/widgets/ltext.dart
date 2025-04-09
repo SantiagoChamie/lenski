@@ -82,14 +82,16 @@ class _LTextState extends State<LText> {
   }
 
   // Add this method to _LTextState class:
-  String findContext(String selectedText, String fullText, {int maxLength = 75}) {
+  String findContext(String selectedText, String fullText, {int maxLength = 100}) {
     // First, create a sanitized version of the full text
     String sanitizedText = fullText.replaceAll('\n', ' ');
-    
+    print(selectedText);
+    print(sanitizedText);
     // Approach 1: Split by sentence-ending punctuation
     final sentences = sanitizedText.split(RegExp(r'(?<=[.!?])\s+'));
     for (final sentence in sentences) {
       if (sentence.contains(selectedText) && sentence.length <= maxLength) {
+        print('sentence: $sentence');
         return sentence.trim();
       }
     }
@@ -99,6 +101,7 @@ class _LTextState extends State<LText> {
     final fragments = sanitizedText.split(RegExp(r'(?<=[.!?,;:()\[\]{}<>\-])\s*'));
     for (final fragment in fragments) {
       if (fragment.contains(selectedText) && fragment.length <= maxLength) {
+        print('fragment: $fragment');
         return fragment.trim();
       }
     }
@@ -107,6 +110,7 @@ class _LTextState extends State<LText> {
     final lines = fullText.split('\n');
     for (final line in lines) {
       if (line.contains(selectedText) && line.length <= maxLength) {
+        print('line: $line');
         return line.trim();
       }
     }

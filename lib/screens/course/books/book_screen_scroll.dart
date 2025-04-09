@@ -8,6 +8,7 @@ import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/widgets/ltext.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import this for SharedPreferences
 
 /// Screen to display a book
 /// Allows the user to read the book sentence by sentence
@@ -26,15 +27,44 @@ class BookScreenScroll extends StatefulWidget {
 }
 
 class _BookScreenScrollState extends State<BookScreenScroll> {
+  // Add these constants at the top of the class
+  static const String _fontSizeKey = 'book_font_size';
+  static const String _lineHeightKey = 'book_line_height';
+  static const String _visibleLinesKey = 'book_visible_lines';
+
+  // Add these methods to handle preferences
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _fontSize = prefs.getDouble(_fontSizeKey) ?? 30.0;
+      _lineHeight = prefs.getDouble(_lineHeightKey) ?? 1.2;
+      _visibleLines = prefs.getInt(_visibleLinesKey) ?? 11;
+    });
+  }
+
+  Future<void> _saveSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_fontSizeKey, _fontSize);
+    await prefs.setDouble(_lineHeightKey, _lineHeight);
+    await prefs.setInt(_visibleLinesKey, _visibleLines);
+  }
+
   late Future<List<Sentence>> _sentencesFuture;
   late int _currentLine;
   final FocusNode _focusNode = FocusNode();
+  double _fontSize = 30.0;
+  bool _showFontSizeSlider = false;
+  double _lineHeight = 1.2;
+  bool _showLineHeightSlider = false;
+  int _visibleLines = 11;
+  bool _showLineCountSlider = false;
 
   @override
   void initState() {
     super.initState();
     _currentLine = widget.book.currentLine;
     _sentencesFuture = _fetchSentences();
+    _loadSettings(); // Load settings when the widget is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(_focusNode);
     });
@@ -149,14 +179,14 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                               final sentences = snapshot.data!;
 
                               // Concatenate all sentences into a single string
-                              final textContent = List.generate(11, (index) {
-                                final int sentenceIndex = _currentLine - 6 + index;
-
+                              final textContent = List.generate(_visibleLines, (index) {
+                                final int sentenceIndex = _currentLine - (_visibleLines ~/ 2) + index;
+                                
                                 // Handle empty lines at the top and bottom
                                 if (sentenceIndex < 0 || sentenceIndex >= sentences.length) {
                                   return ''; // Empty line
                                 }
-
+                              
                                 final sentence = sentences[sentenceIndex];
                                 return sentence.sentence;
                               }).join('\n'); // Join sentences with a newline
@@ -177,9 +207,10 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                                             position: 'above',
                                             fromLanguage: widget.course.fromCode,
                                             toLanguage: widget.course.code,
-                                            style: const TextStyle(
-                                              fontSize: 30.0,
-                                              color: Color.fromARGB(255, 0, 0, 0),
+                                            style: TextStyle(
+                                              fontSize: _fontSize,
+                                              height: _lineHeight,
+                                              color: const Color.fromARGB(255, 0, 0, 0),
                                               fontFamily: "Varela Round",
                                             ),
                                             textAlign: TextAlign.justify,
@@ -252,6 +283,152 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                       Navigator.of(context).pop(widget.book);
                     },
                     icon: const Icon(Icons.close_rounded),
+                  ),
+                ),
+                Positioned(
+                  left: boxPadding + 10,
+                  bottom: boxPadding + 10,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (_showFontSizeSlider) ...[
+                        SizedBox(
+                          height: 200,
+                          child: RotatedBox(
+                            quarterTurns: 3,
+                            child: Slider(
+                              value: _fontSize,
+                              activeColor: const Color(0xFF71BDE0),
+                              min: 16.0,
+                              max: 48.0,
+                              divisions: 16,
+                              label: _fontSize.round().toString(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _fontSize = value;
+                                  _saveSettings();
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                      IconButton(
+                        icon: const Icon(Icons.text_fields_rounded),
+                        onPressed: () {
+                          setState(() {
+                            _showFontSizeSlider = !_showFontSizeSlider;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  left: boxPadding + 10,
+                  bottom: boxPadding + 10,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (_showLineCountSlider) ...[
+                        SizedBox(
+                          height: 200,
+                          child: RotatedBox(
+                            quarterTurns: 3,
+                            child: Slider(
+                              value: _visibleLines.toDouble(),
+                              activeColor: const Color(0xFF71BDE0),
+                              min: 3,
+                              max: 21,
+                              divisions: 9,
+                              label: _visibleLines.toString(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _visibleLines = value.round();
+                                  _saveSettings();
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                      IconButton(
+                        icon: const Icon(Icons.view_headline_rounded),
+                        onPressed: () {
+                          setState(() {
+                            _showLineCountSlider = !_showLineCountSlider;
+                            _showLineHeightSlider = false;
+                            _showFontSizeSlider = false;
+                          });
+                        },
+                      ),
+                      if (_showLineHeightSlider) ...[
+                        SizedBox(
+                          height: 200,
+                          child: RotatedBox(
+                            quarterTurns: 3,
+                            child: Slider(
+                              value: _lineHeight,
+                              activeColor: const Color(0xFF71BDE0),
+                              min: 1.0,
+                              max: 3.0,
+                              divisions: 20,
+                              label: _lineHeight.toStringAsFixed(1),
+                              onChanged: (value) {
+                                setState(() {
+                                  _lineHeight = value;
+                                  _saveSettings();
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                      IconButton(
+                        icon: const Icon(Icons.format_line_spacing_rounded),
+                        onPressed: () {
+                          setState(() {
+                            _showLineHeightSlider = !_showLineHeightSlider;
+                            _showLineCountSlider = false;
+                            _showFontSizeSlider = false;
+                          });
+                        },
+                      ),
+                      if (_showFontSizeSlider) ...[
+                        SizedBox(
+                          height: 200,
+                          child: RotatedBox(
+                            quarterTurns: 3,
+                            child: Slider(
+                              value: _fontSize,
+                              activeColor: const Color(0xFF71BDE0),
+                              min: 16.0,
+                              max: 48.0,
+                              divisions: 16,
+                              label: _fontSize.round().toString(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _fontSize = value;
+                                  _saveSettings();
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                      IconButton(
+                        icon: const Icon(Icons.text_fields_rounded),
+                        onPressed: () {
+                          setState(() {
+                            _showFontSizeSlider = !_showFontSizeSlider;
+                            _showLineCountSlider = false;
+                            _showLineHeightSlider = false;
+                          });
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ],

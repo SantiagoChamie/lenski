@@ -24,6 +24,25 @@ class Book {
     required this.language,
   });
 
+  /// Creates a copy of this Book but with the given fields replaced with the new values.
+  Book copyWith({
+    int? id,
+    String? name,
+    String? imageUrl,
+    int? totalLines,
+    int? currentLine,
+    String? language,
+  }) {
+    return Book(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      imageUrl: imageUrl ?? this.imageUrl,
+      totalLines: totalLines ?? this.totalLines,
+      currentLine: currentLine ?? this.currentLine,
+      language: language ?? this.language,
+    );
+  }
+
   /// Converts a Book object into a Map.
   /// The keys must correspond to the names of the columns in the database.
   Map<String, dynamic> toMap() {

@@ -9,12 +9,18 @@ import 'package:lenski/models/book_model.dart';
 class Library extends StatefulWidget {
   final Course course;
   final VoidCallback onAddBookPressed;
+  final Function(Book) onEditBook;
 
   /// Creates a Library widget.
   /// 
   /// [course] is the course for which the library is being created.
   /// [onAddBookPressed] is the callback function to be called when the add book button is pressed.
-  const Library({super.key, required this.course, required this.onAddBookPressed});
+  const Library({
+    super.key,
+    required this.course,
+    required this.onAddBookPressed,
+    required this.onEditBook,
+  });
 
   @override
   _LibraryState createState() => _LibraryState();
@@ -60,6 +66,7 @@ class _LibraryState extends State<Library> {
               book: book,
               onDelete: _refreshBooks,
               course: widget.course,
+              onEdit: widget.onEditBook,
             )).toList();
           }
 
