@@ -158,4 +158,54 @@ class BookRepository {
       whereArgs: [id],
     );
   }
+
+  /// Deletes a sentence from a book and updates the total lines count
+  Future<void> deleteSentence(int bookId, int sentenceId) async {
+    String dbName = '$bookId.db';
+    String path = join(await getDatabasesPath(), dbName);
+    Database bookDb = await openDatabase(path);
+
+    await bookDb.delete(
+      'sentences',
+      where: 'id = ?',
+      whereArgs: [sentenceId],
+    );
+
+    // Update the book's total lines count
+    final db = await database;
+    final book = (await db.query(
+      'books',
+      where: 'id = ?',
+      whereArgs: [bookId],
+    )).first;
+
+    final updatedBook = Book.fromMap(book);
+    updatedBook.totalLines--;
+    await updateBook(updatedBook);
+  }
+
+  /// Restores a deleted sentence
+  Future<void> restoreSentence(int bookId, Sentence sentence) async {
+    String dbName = '$bookId.db';
+    String path = join(await getDatabasesPath(), dbName);
+    Database bookDb = await openDatabase(path);
+
+    await bookDb.insert(
+      'sentences',
+      sentence.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
+    // Update the book's total lines count
+    final db = await database;
+    final book = (await db.query(
+      'books',
+      where: 'id = ?',
+      whereArgs: [bookId],
+    )).first;
+
+    final updatedBook = Book.fromMap(book);
+    updatedBook.totalLines++;
+    await updateBook(updatedBook);
+  }
 }
