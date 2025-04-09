@@ -3,6 +3,7 @@ import 'package:lenski/models/book_model.dart';
 import 'package:lenski/models/course_model.dart';
 //import 'dart:math';
 import 'package:lenski/screens/course/books/add_book_button.dart';
+import 'package:lenski/screens/course/books/edit_book_screen.dart';
 import 'package:lenski/screens/course/books/empty_book_button.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
@@ -15,6 +16,7 @@ class BookButton extends StatefulWidget {
   final bool? add;
   final VoidCallback? onPressed;
   final VoidCallback? onDelete;
+  final Function(Book)? onEdit;
 
   /// Creates a BookButton widget.
   /// 
@@ -30,6 +32,7 @@ class BookButton extends StatefulWidget {
     this.add = false,
     this.onPressed,
     this.onDelete,
+    this.onEdit,
   });
 
   @override
@@ -69,10 +72,37 @@ class _BookButtonState extends State<BookButton> {
   /// Deletes the book from the repository.
   Future<void> _deleteBook(BuildContext context) async {
     if (book != null) {
-      final bookRepository = BookRepository();
-      await bookRepository.deleteBook(book!.id!);
-      if (widget.onDelete != null) {
-        widget.onDelete!();
+      // Show confirmation dialog
+      final bool? shouldDelete = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Delete Book'),
+            content: const Text('Are you sure you want to delete this book?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.red,
+                ),
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Delete'),
+              ),
+            ],
+          );
+        },
+      );
+
+      // Only delete if user confirmed
+      if (shouldDelete == true) {
+        final bookRepository = BookRepository();
+        await bookRepository.deleteBook(book!.id!);
+        if (widget.onDelete != null) {
+          widget.onDelete!();
+        }
       }
     }
   }
@@ -174,15 +204,18 @@ class _BookButtonState extends State<BookButton> {
         const SizedBox(height: 8),
         SizedBox(
           width: 100 + p.standardPadding() * 2,
-          child: Text(
-            book?.name ?? ' ',
-            style: const TextStyle(
-              fontSize: 16,
-              fontFamily: 'Varela Round',
+          child: InkWell(
+            onTap: book != null ? () => widget.onEdit?.call(book!) : null,
+            child: Text(
+              book?.name ?? ' ',
+              style: const TextStyle(
+                fontSize: 16,
+                fontFamily: 'Varela Round',
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
