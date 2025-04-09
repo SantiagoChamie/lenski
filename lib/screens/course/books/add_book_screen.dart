@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lenski/screens/course/books/loading_overlay.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_creator.dart';
 import 'package:file_picker/file_picker.dart';
@@ -21,7 +22,9 @@ class AddBookScreen extends StatefulWidget {
 class _AddBookScreenState extends State<AddBookScreen> {
   final TextEditingController textController = TextEditingController();
   bool isFileMode = true; // Changed to true to show file section first
+  bool isLoading = false;
   String? selectedFilePath;
+  final BookCreator _bookCreator = BookCreator();
 
   Future<void> pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -118,110 +121,128 @@ class _AddBookScreenState extends State<AddBookScreen> {
     final p = Proportions(context);
 
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.only(bottom: p.standardPadding() * 2),
-          child: Stack(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F0F6),
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 2,
-                      offset: Offset(0, 5),
-                    ),
-                  ],
-                ),
-                width: p.mainScreenWidth() - p.standardPadding() * 4,
-                child: Padding(
-                  padding: EdgeInsets.all(p.standardPadding() * 2),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Add your own!', 
-                        style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.all(p.standardPadding()),
-                          child: _buildAnimatedSection(),
+      body: Stack(
+        children: [
+          Center(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: p.standardPadding() * 2),
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F0F6),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 2,
+                          offset: Offset(0, 5),
                         ),
-                      ),
-                      Column(
+                      ],
+                    ),
+                    width: p.mainScreenWidth() - p.standardPadding() * 4,
+                    child: Padding(
+                      padding: EdgeInsets.all(p.standardPadding() * 2),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _buildPageIndicator(),
-                          SizedBox(height: p.standardPadding()),
-                          SizedBox(
-                            height: p.sidebarButtonWidth(),
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                if (!_hasText()) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Please add some text or file before creating a book'),
-                                      duration: Duration(seconds: 2),
-                                    ),
-                                  );
-                                  return;
-                                }
-                                
-                                if (isFileMode) {
-                                  await BookCreator().processFile(selectedFilePath!, widget.languageCode);
-                                  widget.onBackPressed();
-                                } else {
-                                  BookCreator().processBook(textController.text, widget.languageCode);
-                                  widget.onBackPressed();
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2C73DE),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              child: const Text(
-                                "Start learning!",
-                                style: TextStyle(
-                                  fontFamily: "Telex", 
-                                  fontSize: 30, 
-                                  color: Colors.white
-                                ),
-                              ),
+                          const Text('Add your own!', 
+                            style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.all(p.standardPadding()),
+                              child: _buildAnimatedSection(),
                             ),
+                          ),
+                          Column(
+                            children: [
+                              _buildPageIndicator(),
+                              SizedBox(height: p.standardPadding()),
+                              SizedBox(
+                                height: p.sidebarButtonWidth(),
+                                child: ElevatedButton(
+                                  onPressed: isLoading ? null : () async {
+                                    if (!_hasText()) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Please add some text or file before creating a book'),
+                                          duration: Duration(seconds: 2),
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    setState(() => isLoading = true);
+                                    try {
+                                      if (isFileMode) {
+                                        await _bookCreator.processFile(selectedFilePath!, widget.languageCode);
+                                      } else {
+                                        _bookCreator.processBook(textController.text, widget.languageCode);
+                                      }
+                                      widget.onBackPressed();
+                                    } finally {
+                                      setState(() => isLoading = false);
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF2C73DE),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    disabledBackgroundColor: Colors.grey[300], // Optional: style for disabled state
+                                    disabledForegroundColor: Colors.grey[600], // Optional: style for disabled state
+                                  ),
+                                  child: const Text(
+                                    "Start learning!",
+                                    style: TextStyle(
+                                      fontFamily: "Telex", 
+                                      fontSize: 30, 
+                                      color: Colors.white
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-              Positioned(
-                top: 10,
-                left: 10,
-                child: IconButton(
-                  onPressed: widget.onBackPressed, 
-                  icon: const Icon(Icons.close)
-                ),
-              ),
-              Positioned(
-                top: p.createCourseHeight() / 3,
-                left: isFileMode ? null : 0,
-                right: isFileMode ? 0 : null,
-                child: IconButton(
-                  onPressed: () => _switchMode(!isFileMode),
-                  icon: Icon(
-                    isFileMode 
-                      ? Icons.keyboard_arrow_right
-                      : Icons.keyboard_arrow_left
+                  Positioned(
+                    top: 10,
+                    left: 10,
+                    child: IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: isLoading ? null : () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
                   ),
-                  iconSize: 40,
-                ),
+                  Positioned(
+                    top: p.createCourseHeight() / 3,
+                    left: isFileMode ? null : 0,
+                    right: isFileMode ? 0 : null,
+                    child: IconButton(
+                      onPressed: () => _switchMode(!isFileMode),
+                      icon: Icon(
+                        isFileMode 
+                          ? Icons.keyboard_arrow_right
+                          : Icons.keyboard_arrow_left
+                      ),
+                      iconSize: 40,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+          if (isLoading)
+            LoadingOverlay(
+              onCancel: () {
+                _bookCreator.cancelProcessing();
+                setState(() => isLoading = false);
+              },
+            ),
+        ],
       ),
     );
   }
@@ -229,6 +250,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
   Widget _buildTextInput() {
     return TextField(
       controller: textController,
+      enabled: !isLoading,
       decoration: const InputDecoration(
         border: OutlineInputBorder(),
         hintText: 'Place the text here',
@@ -258,7 +280,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: pickFile,
+            onTap: isLoading ? null : pickFile,
             borderRadius: BorderRadius.circular(10),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

@@ -4,10 +4,11 @@ import 'package:path/path.dart' as path;
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/models/book_model.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'package:subtitle/subtitle.dart';
 
 class BookCreator {
   final BookRepository _bookRepository = BookRepository();
+  bool _isCancelled = false;
+  Book? _currentBook;
 
   /// Processes text directly pasted into the app
   void processBook(String text, String code) async {
@@ -130,8 +131,17 @@ class BookCreator {
     return sentences;
   }
 
+  void cancelProcessing() {
+    _isCancelled = true;
+    if (_currentBook != null) {
+      _bookRepository.deleteBook(_currentBook!.id!);
+      _currentBook = null;
+    }
+  }
+
   Future<void> _createBook(List<String> content, String code) async {
     if (content.isEmpty) return;
+    _isCancelled = false;
 
     final bookTitle = content.first;
     final book = Book(
@@ -144,8 +154,19 @@ class BookCreator {
     );
 
     await _bookRepository.insertBook(book);
+    if (_isCancelled) return;
+
     final insertedBook = await _bookRepository.booksByLanguage(code)
         .then((books) => books.last);
+    _currentBook = insertedBook;
+    
+    if (_isCancelled) {
+      await _bookRepository.deleteBook(insertedBook.id!);
+      _currentBook = null;
+      return;
+    }
+
     await _bookRepository.createBookDatabase(insertedBook.id!, content);
+    _currentBook = null;
   }
 }
