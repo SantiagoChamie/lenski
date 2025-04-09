@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:path/path.dart' as path;
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/models/book_model.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:subtitle/subtitle.dart';
 
 class BookCreator {
   final BookRepository _bookRepository = BookRepository();
@@ -53,20 +55,23 @@ class BookCreator {
 
   Future<List<String>> _processSrtFile(String filePath) async {
     final file = File(filePath);
-    final contents = await file.readAsLines();
-    final List<String> sentences = [];
-    
-    for (int i = 0; i < contents.length; i++) {
-      final line = contents[i].trim();
-      // Skip timestamp lines and subtitle numbers
-      if (line.contains('-->') || RegExp(r'^\d+$').hasMatch(line)) {
-        continue;
-      }
-      if (line.isNotEmpty) {
-        sentences.add(line);
-      }
-    }
-    return sentences;
+    final bytes = await file.readAsBytes();
+    final content = latin1.decode(bytes);
+    final lines = content.split('\n');
+
+    return lines.where((line) {
+      final trimmed = line.trim();
+      // Skip empty lines, lines that are just numbers, and timestamp lines
+      if (trimmed.isEmpty) return false;
+      if (RegExp(r'^\d+$').hasMatch(trimmed)) return false;
+      if (RegExp(r'^\d{2}:\d{2}:\d{2},\d{3}').hasMatch(trimmed)) return false;
+      return true;
+    }).map((line) => 
+      // Remove HTML-style tags if present and normalize spaces
+      line.replaceAll(RegExp(r'<[^>]*>'), '')
+          .replaceAll(RegExp(r'\s+'), ' ')
+          .trim()
+    ).toList();
   }
 
   Future<List<String>> _processPdfFile(String filePath) async {
