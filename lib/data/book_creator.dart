@@ -10,6 +10,9 @@ class BookCreator {
   bool _isCancelled = false;
   Book? _currentBook;
 
+  // Add this getter
+  bool get isCancelled => _isCancelled;
+
   /// Processes text directly pasted into the app
   void processBook(String text, String code) async {
     final sentences = text.split('\n').toList();

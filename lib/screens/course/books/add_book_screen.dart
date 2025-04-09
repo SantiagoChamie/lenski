@@ -175,10 +175,17 @@ class _AddBookScreenState extends State<AddBookScreen> {
                                     try {
                                       if (isFileMode) {
                                         await _bookCreator.processFile(selectedFilePath!, widget.languageCode);
+                                        // Use the public getter instead of the private field
+                                        if (!_bookCreator.isCancelled) {
+                                          widget.onBackPressed();
+                                        }
                                       } else {
                                         _bookCreator.processBook(textController.text, widget.languageCode);
+                                        // Use the public getter instead of the private field
+                                        if (!_bookCreator.isCancelled) {
+                                          widget.onBackPressed();
+                                        }
                                       }
-                                      widget.onBackPressed();
                                     } finally {
                                       setState(() => isLoading = false);
                                     }
@@ -213,7 +220,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
                     child: IconButton(
                       icon: const Icon(Icons.close),
                       onPressed: isLoading ? null : () {
-                        Navigator.of(context).pop();
+                        widget.onBackPressed();
                       },
                     ),
                   ),
@@ -240,6 +247,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
               onCancel: () {
                 _bookCreator.cancelProcessing();
                 setState(() => isLoading = false);
+                // No widget.onBackPressed() here
               },
             ),
         ],
