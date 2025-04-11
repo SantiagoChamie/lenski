@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/course/course_navigator.dart';
+import 'package:lenski/screens/course/metrics.dart';
 import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/languages.dart';
 import 'package:lenski/utils/proportions.dart';
@@ -48,18 +49,11 @@ class CourseHome extends StatelessWidget {
                 position: 'below',
               ),
               const Spacer(),
-              /*Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFD9D0DB),
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(10.0), bottomLeft: Radius.circular(10.0)),
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.star, color: Colors.black, size: 30.0),
-                  onPressed: () {
-                    // Add your onPressed code here!
-                  },
-                ),
-              ),*/
+              const SizedBox(
+                width: 200.0,
+                child: Metrics()
+              ),
+              SizedBox(width: p.standardPadding()),
             ],
           ),
         ),
