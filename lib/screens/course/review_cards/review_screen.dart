@@ -5,6 +5,7 @@ import 'package:lenski/services/tts_service.dart';
 import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
+import 'package:lenski/data/course_repository.dart'; // Add repository import
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A screen for reviewing flashcards within a course.
@@ -24,8 +25,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
   bool isFront = true;
   bool isAudioEnabled = true; // Default value
   bool isTtsAvailable = false; // New state variable
+  bool _hasIncrementedStreak = false; // New field to track streak updates
   List<lenski_card.Card> cards = [];
   final CardRepository repository = CardRepository();
+  final CourseRepository courseRepository = CourseRepository(); // Add repository
 
   @override
   void initState() {
@@ -95,8 +98,14 @@ class _ReviewScreenState extends State<ReviewScreen> {
     });
   }
 
-  /// Handles the difficulty selection.
+  /// Handles the difficulty selection and updates streak on first review.
   void handleDifficulty(int quality) async {
+    // Update streak only on first card review of the session
+    if (!_hasIncrementedStreak) {
+      await courseRepository.incrementStreak(widget.course);
+      _hasIncrementedStreak = true;
+    }
+
     final currentCard = cards.removeAt(0);
     final nextDue = await repository.updateCardEFactor(currentCard, quality);
     if (nextDue < 1) {

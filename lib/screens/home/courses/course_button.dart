@@ -27,6 +27,7 @@ class CourseButton extends StatefulWidget {
 
 class _CourseButtonState extends State<CourseButton> {
   bool _showColorMenu = false;
+  final _repository = CourseRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +80,36 @@ class _CourseButtonState extends State<CourseButton> {
               ),
             ),
           ),
+          // Add Streak Indicator
+          if (widget.course.streak >= 0)
+            Positioned(
+              bottom: 10,
+              left: 10,
+              child: FutureBuilder<bool>(
+                future: _repository.wasAccessedToday(widget.course),
+                builder: (context, snapshot) {
+                  final isToday = snapshot.data ?? false;
+                  return Row(
+                    children: [
+                      Icon(
+                        Icons.local_fire_department,
+                        color: isToday ? Colors.orange : const Color(0xFFF5F0F6),
+                        size: 28,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${widget.course.streak}',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: isToday ? Colors.orange : const Color(0xFFF5F0F6),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
           // Settings button
           Positioned(
             top: 10,
@@ -118,7 +149,7 @@ class _CourseButtonState extends State<CourseButton> {
                       child: InkWell(
                         onTap: () async {
                           final updatedCourse = widget.course.copyWith(color: color);
-                          await CourseRepository().updateCourse(updatedCourse);
+                          await _repository.updateCourse(updatedCourse);
                           widget.onDelete();
                           setState(() {
                             _showColorMenu = false;
@@ -149,7 +180,7 @@ class _CourseButtonState extends State<CourseButton> {
             child: IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
               onPressed: () async {
-                await CourseRepository().deleteCourse(widget.course.code);
+                await _repository.deleteCourse(widget.course.code);
                 widget.onDelete();
               },
             ),
