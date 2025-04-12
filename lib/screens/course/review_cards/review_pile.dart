@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/course_model.dart';
+import 'package:lenski/utils/course_texts.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
 import 'dart:math';
+
+import 'package:lenski/widgets/ltext.dart';
 
 /// A widget that displays a pile of review cards for a course.
 class ReviewPile extends StatefulWidget {
@@ -38,7 +41,7 @@ class _ReviewPileState extends State<ReviewPile> {
         cardFronts.shuffle(Random());
         displayText = cardFronts.first;
       } else {
-        displayText = 'No new cards remaining';
+        displayText = noNewCardsRemainingMessages[widget.course.code]!;
       }
     });
   }
@@ -99,10 +102,17 @@ class _ReviewPileState extends State<ReviewPile> {
                 ],
               ),
               child: Center(
-                child: Text(
-                  displayText ?? 'Loading...',
-                  style: const TextStyle(fontSize: 24, fontFamily: 'Telex'),
-                ),
+                child: !cardFronts.isNotEmpty
+                    ? LText(
+                        text: displayText ?? loadingMessages[widget.course.code]!,
+                        style: const TextStyle(fontSize: 24, fontFamily: 'Telex'),
+                        fromLanguage: widget.course.fromCode,
+                        toLanguage: widget.course.code,
+                      )
+                    : Text(
+                        displayText ?? loadingMessages[widget.course.code]!,
+                        style: const TextStyle(fontSize: 24, fontFamily: 'Telex'),
+                      ),
               ),
             ),
           ),

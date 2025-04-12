@@ -3,7 +3,7 @@ import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/course/course_navigator.dart';
 import 'package:lenski/screens/course/metrics.dart';
 import 'package:lenski/widgets/flag_icon.dart';
-import 'package:lenski/utils/languages.dart';
+import 'package:lenski/utils/course_texts.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/widgets/ltext.dart';
 
@@ -35,7 +35,7 @@ class CourseHome extends StatelessWidget {
               SizedBox(width: p.standardPadding()),
               //TODO: fix bug where the text keeps displaying even after navigation event
               LText(
-                text: welcomeMessages[course.name]!,
+                text: welcomeMessages[course.code]!,
                 style: const TextStyle(
                   fontSize: 24.0,
                   color: Color.fromARGB(255, 0, 0, 0),

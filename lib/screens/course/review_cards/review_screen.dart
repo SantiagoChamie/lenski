@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:lenski/models/card_model.dart' as lenski_card;
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/services/tts_service.dart';
+import 'package:lenski/utils/course_texts.dart';
 import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
 import 'package:lenski/data/course_repository.dart'; // Add repository import
+import 'package:lenski/widgets/ltext.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A screen for reviewing flashcards within a course.
@@ -123,9 +125,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Card deleted'),
+          content: Text(cardDeletedMessages[widget.course.code]!),
           action: SnackBarAction(
-            label: 'Undo',
+            label: undoMessages[widget.course.code]!,
             textColor: const Color(0xFFFFD38D),
             onPressed: () async {
               cards.insert(0, currentCard);
@@ -166,13 +168,15 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 child: Center(
                   child: Padding(
                     padding: EdgeInsets.all(p.standardPadding()),
-                    child: const Text(
-                      'No more cards to review!',
-                      style: TextStyle(
+                    child: LText(
+                      text: noMoreCardsToReviewMessages[widget.course.code]!,
+                      style: const TextStyle(
                         fontSize: 24.0,
                         color: Color.fromARGB(255, 0, 0, 0),
                         fontFamily: "Varela Round",
                       ),
+                      fromLanguage: widget.course.fromCode,
+                      toLanguage: widget.course.code,
                     ),
                   ),
                 ),
@@ -285,8 +289,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
                       ),
                       isFront ? ElevatedButton(
                         onPressed: toggleCard,
-                        child: const Text('Show answer',
-                          style: TextStyle(
+                        child: Text(
+                          showAnswerMessages[widget.course.code]!,
+                          style: const TextStyle(
                             fontSize: 18.0,
                             color: Color(0xFF000000),
                             fontFamily: "Sansation",
@@ -298,8 +303,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
                         children: [
                           ElevatedButton(
                             onPressed: () => handleDifficulty(1),
-                            child: const Text('Hard',
-                              style: TextStyle(
+                            child: Text(
+                              hardDifficulty[widget.course.code]!,
+                              style: const TextStyle(
                                 fontSize: 18.0,
                                 color: Color(0xFF000000),
                                 fontFamily: "Sansation",
@@ -309,8 +315,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
                           SizedBox(width: p.standardPadding()),
                           ElevatedButton(
                             onPressed: () => handleDifficulty(4),
-                            child: const Text('Easy',
-                              style: TextStyle(
+                            child: Text(
+                              easyDifficulty[widget.course.code]!,
+                              style: const TextStyle(
                                 fontSize: 18.0,
                                 color: Color(0xFF000000),
                                 fontFamily: "Sansation",

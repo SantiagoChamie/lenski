@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lenski/data/metrics_repository.dart';
 import 'package:lenski/models/course_metrics_model.dart';
 import 'package:lenski/models/course_model.dart';
+import 'package:lenski/utils/course_texts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Metrics extends StatefulWidget {
@@ -92,9 +93,9 @@ class _MetricsState extends State<Metrics> {
                             color: Colors.blue,
                           ),
                         ),
-                        const Text(
-                          ' Words Learned',
-                          style: TextStyle(
+                        Text(
+                          ' ${wordsLearnedMessages[widget.course.code]!}',
+                          style: const TextStyle(
                             fontSize: 24,
                             color: Colors.blue,
                           ),
@@ -121,9 +122,9 @@ class _MetricsState extends State<Metrics> {
                             color: Colors.green,
                           ),
                         ),
-                        const Text(
-                          ' Books Finished',
-                          style: TextStyle(
+                        Text(
+                          ' ${booksFinishedMessages[widget.course.code]!}',
+                          style: const TextStyle(
                             fontSize: 24,
                             color: Colors.green,
                           ),
@@ -150,9 +151,9 @@ class _MetricsState extends State<Metrics> {
                             color: Colors.orange,
                           ),
                         ),
-                        const Text(
-                          ' Day Streak',
-                          style: TextStyle(
+                        Text(
+                          ' ${dayStreakMessages[widget.course.code]!}',
+                          style: const TextStyle(
                             fontSize: 24,
                             color: Colors.orange,
                           ),
