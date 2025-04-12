@@ -50,7 +50,7 @@ class CourseHome extends StatelessWidget {
               ),
               const Spacer(),
               SizedBox(
-                width: 200.0,
+                width: 250.0,
                 child: Metrics(course: course)
               ),
               SizedBox(width: p.standardPadding()),
