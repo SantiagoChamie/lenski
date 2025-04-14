@@ -81,7 +81,7 @@ class _CourseButtonState extends State<CourseButton> {
             ),
           ),
           // Add Streak Indicator
-          if (widget.course.streak >= 0)
+          if (widget.course.streak > 0)
             Positioned(
               bottom: 10,
               left: 10,

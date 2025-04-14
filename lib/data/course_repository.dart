@@ -70,7 +70,6 @@ class CourseRepository {
     if (todayDays - course.lastAccess > 1) {
       // Streak broken - more than one day has passed
       course.streak = 0;
-      course.lastAccess = todayDays;
       await updateCourse(course);
     }
   }
