@@ -146,7 +146,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Add your own!', 
+                          const Text('Add your own texts!', 
                             style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
                           Expanded(
                             child: Padding(

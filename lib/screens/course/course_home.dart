@@ -48,6 +48,18 @@ class CourseHome extends StatelessWidget {
                 toLanguage: course.code,
                 position: 'below',
               ),
+              Container(
+                margin: const EdgeInsets.only(left: 8.0),
+                child: const Tooltip(
+                  message: 'Highlight text to see its translation',
+                  preferBelow: false,
+                  child: Icon(
+                    Icons.help_outline,
+                    size: 20.0,
+                    color: Color.fromARGB(255, 145, 139, 146),
+                  ),
+                ),
+              ),
               const Spacer(),
               SizedBox(
                 width: 250.0,
