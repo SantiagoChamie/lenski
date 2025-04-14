@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/screens/home/add_course/buttons/competence_selector_button.dart';
-//import 'package:lenski/screens/home/add_course/course_difficulty_text.dart';
+import 'package:lenski/screens/home/add_course/course_difficulty_text.dart';
 import 'package:lenski/screens/home/add_course/buttons/language_selector_button.dart';
 import 'package:lenski/utils/course_colors.dart';
 import 'package:lenski/utils/languages.dart';
@@ -15,8 +15,7 @@ class AddCourseScreen extends StatefulWidget {
   final Color lightColor;
   final String mediumText;
   final Color mediumColor;
-  final String durationText;
-  final String dailyTimeText;
+
 
   /// Creates an AddCourseScreen widget.
   /// 
@@ -34,8 +33,6 @@ class AddCourseScreen extends StatefulWidget {
     this.lightColor = const Color(0xFF0BAE44),
     this.mediumText = "medium",
     this.mediumColor = const Color(0xFFEE9A1D),
-    this.durationText = "<150 days",
-    this.dailyTimeText = "15 min/day",
   });
 
   @override
@@ -269,22 +266,17 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                   child: Padding(
                     padding: EdgeInsets.all(p.standardPadding()),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center, //TODO remove when returning difficulty text
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        //TODO: implement difficulty text
-                        /* const Expanded(
+                        Expanded(
                           child: Center(
-                            child: CourseDifficultyText(difficulty: "Light", intensity: "medium"),
+                            child: CourseDifficultyText(
+                              competences: _selectedCompetences.length,
+                              startingLanguage: languageCodes[_selectedOriginLanguage]!,
+                              targetLanguage: languageCodes[_selectedLanguage]!,
+                              ),
                           ),
                         ), 
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(widget.durationText, style: const TextStyle(fontFamily: "Sansation", fontSize: 20)),
-                            Text(widget.dailyTimeText, style: const TextStyle(fontFamily: "Sansation", fontSize: 20)),
-                          ],
-                        ), */
-                        const SizedBox(width: 16),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
