@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:lenski/screens/home/add_course/buttons/competence_selector_button.dart';
 //import 'package:lenski/screens/home/add_course/course_difficulty_text.dart';
@@ -224,12 +223,12 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                             ),
                             SizedBox(height: p.standardPadding()),
                             CompetenceSelectorButton(
-                              competence: "reading",
+                              competence: "writing",
                               onToggle: _toggleCompetence,
                             ),
                             SizedBox(height: p.standardPadding()),
                             CompetenceSelectorButton(
-                              competence: "writing",
+                              competence: "reading",
                               onToggle: _toggleCompetence,
                             ),
                           ],

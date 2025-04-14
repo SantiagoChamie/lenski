@@ -160,6 +160,16 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
           const SizedBox(width: 8), // Space between flag icon and text
           Text(_selectedLanguage, style: const TextStyle(fontSize: 20, fontFamily: "Varela Round", color: Colors.black)), // Text on the left
           const SizedBox(width: 8), // Space between text and icon
+          if (!widget.isSource) 
+            Tooltip(
+              message: "A language you already know.",
+              child: Icon(Icons.help_outline, color: Colors.grey[600]),
+            ),
+          if (widget.isSource)
+            Tooltip(
+              message: "A language you want to learn.",
+              child: Icon(Icons.help_outline, color: Colors.grey[600]),
+            ),
           const Spacer(),
           const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black), // Icon on the right
         ],

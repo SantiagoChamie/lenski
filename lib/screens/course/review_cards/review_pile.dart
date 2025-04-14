@@ -21,6 +21,7 @@ class ReviewPile extends StatefulWidget {
 class _ReviewPileState extends State<ReviewPile> {
   String? displayText;
   List<String> cardFronts = [];
+  bool _disposed = false;
 
   @override
   void initState() {
@@ -28,10 +29,20 @@ class _ReviewPileState extends State<ReviewPile> {
     _fetchFirstWord();
   }
 
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
   /// Fetches the first word to be displayed from the repository.
   Future<void> _fetchFirstWord() async {
+    if (_disposed) return;
+    
     final repository = CardRepository();
     final cards = await repository.cards(DateTime.now(), widget.course.code);
+    if (!mounted) return;
+
     setState(() {
       if (cards.isNotEmpty) {
         cardFronts = cards.map((card) => card.front).toList();
@@ -45,9 +56,12 @@ class _ReviewPileState extends State<ReviewPile> {
 
   /// Refreshes the word to be displayed.
   Future<void> _refreshWord() async {
+    if (_disposed) return;
     if (cardFronts.isNotEmpty) {
       final repository = CardRepository();
       final cards = await repository.cards(DateTime.now(), widget.course.code);
+      if (!mounted) return;
+
       setState(() {
         if (cards.isNotEmpty) {
           final newCardFronts = cards.map((card) => card.front).toList();
@@ -59,7 +73,7 @@ class _ReviewPileState extends State<ReviewPile> {
         }
       });
     } else {
-      _fetchFirstWord();
+      await _fetchFirstWord();
     }
   }
 
