@@ -87,23 +87,30 @@ class _CourseButtonState extends State<CourseButton> {
                 future: _repository.wasAccessedToday(widget.course),
                 builder: (context, snapshot) {
                   final isToday = snapshot.data ?? false;
-                  return Row(
-                    children: [
-                      Icon(
-                        Icons.local_fire_department,
-                        color: isToday ? Colors.orange : const Color(0xFFF5F0F6),
-                        size: 28,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${widget.course.streak}',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: isToday ? Colors.orange : const Color(0xFFF5F0F6),
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(33),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.local_fire_department,
+                          color: isToday ? Colors.orange : Colors.grey[400],
+                          size: 28,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 4),
+                        Text(
+                          '${widget.course.streak}',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: isToday ? Colors.orange : Colors.grey[400],
+                          ),
+                        ),
+                      ],
+                    ),
                   );
                 },
               ),

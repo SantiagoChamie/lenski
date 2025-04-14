@@ -40,11 +40,7 @@ class CourseDifficultyText extends StatelessWidget {
     if (langA['writingDirection'] != langB['writingDirection']) score += 0.3;
 
     if (langA['genderedWords'] != langB['genderedWords']) score += 0.5;
-    if (langA['pluralWords'] != langB['pluralWords']) score += 0.2;
-
-    print("Language A: ${lang1}, Language B: $lang2");
-    print("Score: $score");
-    
+    if (langA['pluralWords'] != langB['pluralWords']) score += 0.2;    
 
     return score.floor().clamp(1, 4);
   }
