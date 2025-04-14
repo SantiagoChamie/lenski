@@ -48,8 +48,14 @@ class _BookButtonState extends State<BookButton> {
     book = widget.book;
   }
 
+  @override
+  void dispose() {
+    // Add any cleanup here if needed
+    super.dispose();
+  }
+
   /// Handles the button press event.
-  void _printBookType(BuildContext context) {
+  void _handleBookPress(BuildContext context) {
     if (widget.add == true) {
       if (widget.onPressed != null) {
         widget.onPressed!();
@@ -60,7 +66,7 @@ class _BookButtonState extends State<BookButton> {
         'Book',
         arguments: {'book': book!, 'course': widget.course!},
       ).then((updatedBook) {
-        if (updatedBook != null && updatedBook is Book) {
+        if (mounted && updatedBook != null && updatedBook is Book) {
           setState(() {
             book = updatedBook;
           });
@@ -128,7 +134,7 @@ class _BookButtonState extends State<BookButton> {
     return Column(
       children: [
         InkWell(
-          onTap: book != null || widget.add == true ? () => _printBookType(context) : widget.onPressed,
+          onTap: book != null || widget.add == true ? () => _handleBookPress(context) : widget.onPressed,
           child: Stack(
             children: [
               book == null
