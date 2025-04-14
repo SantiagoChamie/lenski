@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lenski/screens/course/course_home.dart';
-//import 'package:lenski/screens/home/competences/competence_list.dart';
+import 'package:lenski/screens/home/competences/competence_list.dart'; // Uncomment this import
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/course_repository.dart';
 import 'package:lenski/utils/course_colors.dart';
@@ -58,8 +57,7 @@ class _CourseButtonState extends State<CourseButton> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   // Icons on the left indicating the competences
-                  //TODO: Uncomment this line to display the competences
-                  //CompetenceList(course: course),
+                  CompetenceList(course: widget.course), // Uncomment this line
                   const SizedBox(width: 50),
                   // Column with image and text in the center
                   Row(
