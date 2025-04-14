@@ -39,14 +39,34 @@ class _LTextState extends State<LText> {
     super.dispose();
   }
 
+  String truncateSelectedText(String text, {int maxLength = 100}) {
+    if (text.length <= maxLength) return text;
+
+    // First try: Split by sentence-ending punctuation
+    final sentences = text.split(RegExp(r'(?<=[.!?])\s+'));
+    if (sentences.isNotEmpty && sentences[0].length <= maxLength) {
+      return sentences[0].trim();
+    }
+
+    // Second try: Split by all punctuation
+    final fragments = text.split(RegExp(r'(?<=[.!?,;:()\[\]{}<>\-])\s*'));
+    if (fragments.isNotEmpty && fragments[0].length <= maxLength) {
+      return fragments[0].trim();
+    }
+
+    // Last resort: Just truncate at maxLength
+    return text.substring(0, maxLength).trim();
+  }
+
   void showOverlay(BuildContext context, String text, Rect rect) {
     overlayEntry?.remove();
 
-    // Remove newline characters from the selected text
+    // Remove newline characters and truncate the selected text
     final sanitizedText = text.replaceAll('\n', ' ');
+    final truncatedText = truncateSelectedText(sanitizedText);
     
-    // Find the context using our new algorithm
-    final contextText = findContext(sanitizedText, widget.text);
+    // Find the context using our existing algorithm
+    final contextText = findContext(truncatedText, widget.text);
 
     overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
@@ -55,7 +75,7 @@ class _LTextState extends State<LText> {
         child: Material(
           color: Colors.transparent,
           child: TranslationOverlay(
-            text: sanitizedText,
+            text: truncatedText, // Use truncated text instead of full selection
             contextText: contextText,
             sourceLang: widget.toLanguage,
             targetLang: widget.fromLanguage,
