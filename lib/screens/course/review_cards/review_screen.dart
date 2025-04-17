@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/card_model.dart' as lenski_card;
 import 'package:lenski/models/course_model.dart';
+import 'package:lenski/screens/course/review_cards/back_card.dart';
+import 'package:lenski/screens/course/review_cards/types/empty_pile.dart';
+import 'package:lenski/screens/course/review_cards/types/listening_card.dart';
+import 'package:lenski/screens/course/review_cards/types/reading_card.dart';
+import 'package:lenski/screens/course/review_cards/types/speaking_card.dart';
+import 'package:lenski/screens/course/review_cards/types/writing_card.dart';
+import 'package:lenski/screens/home/competences/competence_icon.dart';
 import 'package:lenski/services/tts_service.dart';
 import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
@@ -44,15 +51,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
     setState(() {
       isAudioEnabled = prefs.getBool('isAudioEnabled') ?? true;
     });
-  }
-
-  /// Toggles the audio preference and saves it to SharedPreferences.
-  Future<void> _toggleAudioPreference() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isAudioEnabled = !isAudioEnabled;
-    });
-    await prefs.setBool('isAudioEnabled', isAudioEnabled);
   }
 
   /// Loads the cards to be reviewed from the repository.
@@ -144,63 +142,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
     final boxPadding = p.standardPadding() * 4;
     const iconSize = 80.0;
 
-    //TODO: make this conditional into the text widget
     if (cards.isEmpty) {
-      return Stack(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(boxPadding),
-            child: Center(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F0F6),
-                  borderRadius: BorderRadius.circular(5.0),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 4.0,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(p.standardPadding()),
-                    child: const Text(
-                      'No more cards to review!',
-                      style: TextStyle(
-                        fontSize: 24.0,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                        fontFamily: "Varela Round",
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            top: boxPadding - iconSize / 3,
-            left: boxPadding - iconSize / 3,
-            child: FlagIcon(
-              size: iconSize,
-              borderWidth: 5.0,
-              borderColor: const Color(0xFFD9D0DB),
-              imageUrl: widget.course.imageUrl,
-            ),
-          ),
-          Positioned(
-            top: boxPadding + 10,
-            right: boxPadding + 10,
-            child: IconButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              icon: const Icon(Icons.close_rounded),
-            ),
-          ),
-        ],
-      );
+      return EmptyPile(imageUrl: widget.course.imageUrl,);
     }
 
     final currentCard = cards.first;
@@ -222,110 +165,53 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   ),
                 ],
               ),
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.all(p.standardPadding()),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(isFront ? '${widget.course.code.toLowerCase()}.' : '${widget.course.fromCode.toLowerCase()}.',
-                        style: const TextStyle(
-                          fontSize: 18.0,
-                          color: Color(0xFF99909B),
-                          fontFamily: "Varela Round",
-                        ),
-                      ),
-                      Column(
-                        children: [
-                          Text(cards.isEmpty ? '???' :isFront ? currentCard.front : currentCard.back,
-                            style: const TextStyle(
-                              fontSize: 24.0,
-                              color: Color.fromARGB(255, 0, 0, 0),
-                              fontFamily: "Varela Round",
-                            ),
-                          ),
-                          if (isFront && currentCard.context != currentCard.front) Text.rich(
-                            TextSpan(
-                              text: currentCard.context.substring(0, currentCard.context.indexOf(currentCard.front)),
-                              style: const TextStyle(
-                                fontSize: 18.0,
-                                color: Color(0xFF99909B),
-                                fontFamily: "Varela Round",
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: currentCard.front,
-                                  style: const TextStyle(
-                                    fontSize: 18.0,
-                                    color: Color(0xFF99909B),
-                                    fontFamily: "Varela Round",
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: currentCard.context.substring(currentCard.context.indexOf(currentCard.front) + currentCard.front.length),
-                                  style: const TextStyle(
-                                    fontSize: 18.0,
-                                    color: Color(0xFF99909B),
-                                    fontFamily: "Varela Round",
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (!isFront)
-                          Text(currentCard.front,
-                            style: const TextStyle(
-                              fontSize: 18.0,
-                              color: Color(0xFF99909B),
-                              fontFamily: "Varela Round",
-                            ),
-                          ),
-                        ],
-                      ),
-                      isFront ? ElevatedButton(
-                        onPressed: toggleCard,
-                        child: const Text('Show answer',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            color: Color(0xFF000000),
-                            fontFamily: "Sansation",
-                          ),
-                        ),
-                      ) :
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () => handleDifficulty(1),
-                            child: const Text('Hard',
-                              style: TextStyle(
-                                fontSize: 18.0,
-                                color: Color(0xFF000000),
-                                fontFamily: "Sansation",
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: p.standardPadding()),
-                          ElevatedButton(
-                            onPressed: () => handleDifficulty(4),
-                            child: const Text('Easy',
-                              style: TextStyle(
-                                fontSize: 18.0,
-                                color: Color(0xFF000000),
-                                fontFamily: "Sansation",
-                              ),
-                            ),
+              child: Padding(
+                padding: EdgeInsets.all(p.standardPadding()),
+                child: isFront
+                    ? currentCard.type == 'reading' 
+                        ? ReadingCard(
+                            card: currentCard,
+                            courseCode: widget.course.code,
+                            onShowAnswer: toggleCard,
                           )
-                        ],
+                        :
+                      currentCard.type == 'listening'
+                        ? ListeningCard(
+                            card: currentCard,
+                            courseCode: widget.course.code,
+                            onShowAnswer: toggleCard,
+                          )
+                        :
+                      currentCard.type == 'speaking'
+                        ? SpeakingCard(
+                            card: currentCard,
+                            courseCode: widget.course.code,
+                            onShowAnswer: toggleCard,
+                          )
+                        :
+                      currentCard.type == 'writing'
+                        ? WritingCard(
+                            card: currentCard,
+                            courseCode: widget.course.code,
+                            onShowAnswer: toggleCard,
+                          )
+                        :
+                      ReadingCard(
+                        card: currentCard,
+                        courseCode: widget.course.code,
+                        onShowAnswer: toggleCard,
+                      )
+                    : BackCard(
+                        card: currentCard,
+                        courseFromCode: widget.course.fromCode,
+                        onDifficultySelected: handleDifficulty,
                       ),
-                    ],
-                  ),
-                ),
               ),
             ),
           ),
         ),
+
+        /// Icons and decor
         Positioned(
           top: boxPadding - iconSize / 3,
           left: boxPadding - iconSize / 3,
@@ -346,16 +232,19 @@ class _ReviewScreenState extends State<ReviewScreen> {
             icon: const Icon(Icons.close_rounded),
           ),
         ),
-        if (isTtsAvailable) Positioned(
+        Positioned(
           bottom: boxPadding + 10,
           left: boxPadding + 10,
-          child: IconButton(
-            onPressed: _toggleAudioPreference,
-            icon: Icon(
-              isAudioEnabled ? Icons.volume_up : Icons.volume_off,
-              color: Colors.black,
+          child: Tooltip(
+            message: 
+              currentCard.type == 'writing' ? "How do you write this word?"
+              : currentCard.type == 'speaking' ? "How do you pronounce this word?" 
+              : "What does this word mean?",
+            child: CompetenceIcon(
+              type: currentCard.type,
+              size: iconSize/2,
             ),
-          ),
+          )
         ),
         Positioned(
           bottom: boxPadding + 20,

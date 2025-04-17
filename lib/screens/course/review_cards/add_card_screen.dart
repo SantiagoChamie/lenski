@@ -179,14 +179,24 @@ class _AddCardScreenState extends State<AddCardScreen> {
                         frontController.text = frontController.text.toLowerCase();
                       }
 
-                      // Create a card for each selected competence
-                      for (final type in selectedCompetences.entries.where((e) => e.value)) {
+                      // Define the order of card types
+                      const typeOrder = ['reading', 'listening', 'writing', 'speaking'];
+                      
+                      // Get selected types and sort them according to the defined order
+                      final selectedTypes = selectedCompetences.entries
+                          .where((e) => e.value)
+                          .map((e) => e.key)
+                          .toList()
+                        ..sort((a, b) => typeOrder.indexOf(a).compareTo(typeOrder.indexOf(b)));
+
+                      // Create cards in sequence with different due dates
+                      for (int i = 0; i < selectedTypes.length; i++) {
                         final card = card_model.Card(
                           front: frontController.text,
                           back: backController.text,
                           context: contextController.text == '' ? frontController.text : contextController.text,
-                          dueDate: DateTime.now(),
-                          type: type.key,
+                          dueDate: DateTime.now().add(Duration(days: i)),
+                          type: selectedTypes[i],
                           language: widget.course.code,
                         );
                         await CardRepository().insertCard(card);

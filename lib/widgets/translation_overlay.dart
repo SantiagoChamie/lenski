@@ -67,15 +67,21 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
     // If no cardTypes provided, default to reading only
     final types = widget.cardTypes ?? ['reading'];
     
-    // Create a card for each type
-    for (final type in types) {
+    // Define the order of card types
+    const typeOrder = ['reading', 'listening', 'writing', 'speaking'];
+    
+    // Sort the types based on the defined order
+    types.sort((a, b) => typeOrder.indexOf(a).compareTo(typeOrder.indexOf(b)));
+    
+    // Create cards in sequence with different due dates
+    for (int i = 0; i < types.length; i++) {
       final card = custom_card.Card(
         front: widget.text,
         back: backText,
         context: widget.contextText,
-        dueDate: DateTime.now(),
+        dueDate: DateTime.now().add(Duration(days: i)),
         language: widget.sourceLang,
-        type: type,
+        type: types[i],
       );
       await CardRepository().insertCard(card);
     }
