@@ -9,6 +9,7 @@ class LText extends StatefulWidget {
   final TextStyle style;
   final TextAlign textAlign;
   final String position;
+  final List<String>? cardTypes; // New parameter
 
   const LText({
     super.key,
@@ -18,6 +19,7 @@ class LText extends StatefulWidget {
     required this.style,
     this.textAlign = TextAlign.center,
     this.position = 'above',
+    this.cardTypes, // Add this parameter
   });
 
   @override
@@ -80,6 +82,7 @@ class _LTextState extends State<LText> {
             sourceLang: widget.toLanguage,
             targetLang: widget.fromLanguage,
             onClose: () => hideOverlay(instant: true),
+            cardTypes: widget.cardTypes, // Pass the card types to the overlay
           ),
         ),
       ),

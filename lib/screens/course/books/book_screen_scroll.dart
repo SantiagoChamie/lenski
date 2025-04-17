@@ -214,6 +214,12 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                                               fontFamily: "Varela Round",
                                             ),
                                             textAlign: TextAlign.justify,
+                                            cardTypes: [
+                                              if (widget.course.reading) 'reading',
+                                              if (widget.course.writing) 'writing',
+                                              if (widget.course.listening) 'listening',
+                                              if (widget.course.speaking) 'speaking',
+                                            ],
                                           ),
                                         ),
                                       ),
