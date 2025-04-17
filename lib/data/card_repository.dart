@@ -21,11 +21,6 @@ class CardRepository {
     return date.toUtc().difference(DateTime.utc(1970, 1, 1)).inDays;
   }
 
-  /// Converts an integer representing the number of days since Unix epoch to a DateTime object.
-  static DateTime _intToDateTime(int days) {
-    return DateTime.utc(1970, 1, 1).add(Duration(days: days));
-  }
-
   /// Getter for the database. Initializes the database if it is not already initialized.
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -48,12 +43,13 @@ class CardRepository {
           'dueDate INTEGER, '
           'language TEXT, '
           'prevInterval INTEGER, '
-          'eFactor REAL, ' // Add eFactor column
-          'repetition INTEGER' // Add repetition column
+          'eFactor REAL, '
+          'repetition INTEGER, '
+          'type TEXT' // Add type column
           ')',
         );
       },
-      version: 1,
+      version: 2, // Increment version number
     );
   }
 
@@ -131,6 +127,7 @@ class CardRepository {
       id: card.id,
       front: card.front,
       back: card.back,
+      type: card.type,
       context: card.context,
       dueDate: newDueDate,
       language: card.language,

@@ -9,6 +9,7 @@ class LText extends StatefulWidget {
   final TextStyle style;
   final TextAlign textAlign;
   final String position;
+  final List<String>? cardTypes; // New parameter
 
   const LText({
     super.key,
@@ -18,6 +19,7 @@ class LText extends StatefulWidget {
     required this.style,
     this.textAlign = TextAlign.center,
     this.position = 'above',
+    this.cardTypes, // Add this parameter
   });
 
   @override
@@ -39,14 +41,34 @@ class _LTextState extends State<LText> {
     super.dispose();
   }
 
+  String truncateSelectedText(String text, {int maxLength = 100}) {
+    if (text.length <= maxLength) return text;
+
+    // First try: Split by sentence-ending punctuation
+    final sentences = text.split(RegExp(r'(?<=[.!?])\s+'));
+    if (sentences.isNotEmpty && sentences[0].length <= maxLength) {
+      return sentences[0].trim();
+    }
+
+    // Second try: Split by all punctuation
+    final fragments = text.split(RegExp(r'(?<=[.!?,;:()\[\]{}<>\-])\s*'));
+    if (fragments.isNotEmpty && fragments[0].length <= maxLength) {
+      return fragments[0].trim();
+    }
+
+    // Last resort: Just truncate at maxLength
+    return text.substring(0, maxLength).trim();
+  }
+
   void showOverlay(BuildContext context, String text, Rect rect) {
     overlayEntry?.remove();
 
-    // Remove newline characters from the selected text
+    // Remove newline characters and truncate the selected text
     final sanitizedText = text.replaceAll('\n', ' ');
+    final truncatedText = truncateSelectedText(sanitizedText);
     
-    // Find the context using our new algorithm
-    final contextText = findContext(sanitizedText, widget.text);
+    // Find the context using our existing algorithm
+    final contextText = findContext(truncatedText, widget.text);
 
     overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
@@ -55,11 +77,12 @@ class _LTextState extends State<LText> {
         child: Material(
           color: Colors.transparent,
           child: TranslationOverlay(
-            text: sanitizedText,
+            text: truncatedText, // Use truncated text instead of full selection
             contextText: contextText,
             sourceLang: widget.toLanguage,
             targetLang: widget.fromLanguage,
             onClose: () => hideOverlay(instant: true),
+            cardTypes: widget.cardTypes, // Pass the card types to the overlay
           ),
         ),
       ),
@@ -85,13 +108,10 @@ class _LTextState extends State<LText> {
   String findContext(String selectedText, String fullText, {int maxLength = 100}) {
     // First, create a sanitized version of the full text
     String sanitizedText = fullText.replaceAll('\n', ' ');
-    print(selectedText);
-    print(sanitizedText);
     // Approach 1: Split by sentence-ending punctuation
     final sentences = sanitizedText.split(RegExp(r'(?<=[.!?])\s+'));
     for (final sentence in sentences) {
       if (sentence.contains(selectedText) && sentence.length <= maxLength) {
-        print('sentence: $sentence');
         return sentence.trim();
       }
     }
@@ -101,7 +121,6 @@ class _LTextState extends State<LText> {
     final fragments = sanitizedText.split(RegExp(r'(?<=[.!?,;:()\[\]{}<>\-])\s*'));
     for (final fragment in fragments) {
       if (fragment.contains(selectedText) && fragment.length <= maxLength) {
-        print('fragment: $fragment');
         return fragment.trim();
       }
     }
@@ -110,7 +129,6 @@ class _LTextState extends State<LText> {
     final lines = fullText.split('\n');
     for (final line in lines) {
       if (line.contains(selectedText) && line.length <= maxLength) {
-        print('line: $line');
         return line.trim();
       }
     }

@@ -48,8 +48,14 @@ class _BookButtonState extends State<BookButton> {
     book = widget.book;
   }
 
+  @override
+  void dispose() {
+    // Add any cleanup here if needed
+    super.dispose();
+  }
+
   /// Handles the button press event.
-  void _printBookType(BuildContext context) {
+  void _handleBookPress(BuildContext context) {
     if (widget.add == true) {
       if (widget.onPressed != null) {
         widget.onPressed!();
@@ -60,7 +66,7 @@ class _BookButtonState extends State<BookButton> {
         'Book',
         arguments: {'book': book!, 'course': widget.course!},
       ).then((updatedBook) {
-        if (updatedBook != null && updatedBook is Book) {
+        if (mounted && updatedBook != null && updatedBook is Book) {
           setState(() {
             book = updatedBook;
           });
@@ -128,7 +134,7 @@ class _BookButtonState extends State<BookButton> {
     return Column(
       children: [
         InkWell(
-          onTap: book != null || widget.add == true ? () => _printBookType(context) : widget.onPressed,
+          onTap: book != null || widget.add == true ? () => _handleBookPress(context) : widget.onPressed,
           child: Stack(
             children: [
               book == null
@@ -193,8 +199,8 @@ class _BookButtonState extends State<BookButton> {
                       top: 10,
                       left: 10,
                       child: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => _deleteBook(context),
+                        icon: const Icon(Icons.settings, color: Colors.white),
+                        onPressed: () => widget.onEdit?.call(book!),
                       ),
                     )
                   : const SizedBox(),
@@ -204,18 +210,15 @@ class _BookButtonState extends State<BookButton> {
         const SizedBox(height: 8),
         SizedBox(
           width: 100 + p.standardPadding() * 2,
-          child: InkWell(
-            onTap: book != null ? () => widget.onEdit?.call(book!) : null,
-            child: Text(
-              book?.name ?? ' ',
-              style: const TextStyle(
-                fontSize: 16,
-                fontFamily: 'Varela Round',
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+          child: Text(
+            book?.name ?? ' ',
+            style: const TextStyle(
+              fontSize: 16,
+              fontFamily: 'Varela Round',
             ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

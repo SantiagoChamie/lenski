@@ -20,8 +20,24 @@ class CompetenceSelectorButton extends StatefulWidget {
 class _CompetenceSelectorButtonState extends State<CompetenceSelectorButton> {
   bool _isSelected = false;
 
-  /// Toggles the selection state of the competence.
+  @override
+  void initState() {
+    super.initState();
+    // Set reading to be selected by default
+    _isSelected = widget.competence == "reading";
+    
+    // Use Future.microtask to schedule the callback after the build is complete
+    if (_isSelected) {
+      Future.microtask(() {
+        widget.onToggle(widget.competence);
+      });
+    }
+  }
+
   void _toggleSelection() {
+    // Don't allow toggling if it's reading
+    if (widget.competence == "reading") return;
+
     setState(() {
       _isSelected = !_isSelected;
     });
@@ -31,6 +47,7 @@ class _CompetenceSelectorButtonState extends State<CompetenceSelectorButton> {
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
+    final isReading = widget.competence == "reading";
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
@@ -60,7 +77,12 @@ class _CompetenceSelectorButtonState extends State<CompetenceSelectorButton> {
             widget.competence[0].toUpperCase() + widget.competence.substring(1).toLowerCase(),
             style: const TextStyle(fontSize: 20, fontFamily: "Varela Round", color: Colors.black),
           ), // Competence name
-          const SizedBox(width: 8), // Space between competence name and icon
+          const SizedBox(width: 8),
+          if (isReading) 
+            Tooltip(
+              message: "Reading is the base of LenSki's learning method.",
+              child: Icon(Icons.help_outline, color: Colors.grey[600]),
+            ),
           const Spacer(),
           CompetenceIcon(size: 50, type: widget.competence),
         ],

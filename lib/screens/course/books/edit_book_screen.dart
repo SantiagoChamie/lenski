@@ -48,6 +48,41 @@ class _EditBookScreenState extends State<EditBookScreen> {
     }
   }
 
+  Future<void> _deleteBook(BuildContext context) async {
+    final bool? shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Book'),
+          content: const Text('Are you sure you want to delete this book?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color.fromARGB(255, 171, 163, 172),
+              ),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete == true) {
+      await _bookRepository.deleteBook(widget.book.id!);
+      if (mounted) {
+        widget.onBackPressed();
+      }
+    }
+  }
+
   Widget _buildDetailsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,6 +116,24 @@ class _EditBookScreenState extends State<EditBookScreen> {
           '${widget.book.currentLine} / ${widget.book.totalLines} lines ' 
           '(${(widget.book.currentLine / widget.book.totalLines * 100).toInt()}%)'
         ),
+        const Spacer(),
+        SizedBox(
+          child: TextButton(
+            onPressed: () => _deleteBook(context),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: const Text(
+              'Delete book',
+              style: TextStyle(
+                fontSize: 16,
+                fontFamily: 'Varela Round',
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20)
       ],
     );
   }

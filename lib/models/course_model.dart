@@ -12,6 +12,8 @@ class Course {
   bool writing;
   Color color;
   String imageUrl;
+  int streak;
+  int lastAccess;
 
   /// Creates a Course object.
   /// 
@@ -25,6 +27,8 @@ class Course {
   /// [writing] indicates if the course includes writing competence.
   /// [color] is the color associated with the course.
   /// [imageUrl] is the URL of the course's image.
+  /// [streak] is the current streak count.
+  /// [lastAccess] is the last day the course was accessed (stored as days since epoch).
   Course({
     required this.name,
     required this.level,
@@ -36,7 +40,11 @@ class Course {
     required this.writing,
     required this.color,
     required this.imageUrl,
-  });
+    this.streak = 0,
+    DateTime? lastAccess,
+  }) : lastAccess = _dateTimeToInt(
+         lastAccess ?? DateTime.now().subtract(const Duration(days: 1))
+       );
 
   /// Converts a Course object into a Map.
   /// The keys must correspond to the names of the columns in the database.
@@ -50,8 +58,10 @@ class Course {
       'speaking': speaking ? 1 : 0,
       'reading': reading ? 1 : 0,
       'writing': writing ? 1 : 0,
-      'color': color.toARGB32(), // Using toARGB32() instead of .value
+      'color': color.value,
       'imageUrl': imageUrl,
+      'streak': streak,
+      'lastAccess': lastAccess,
     };
   }
 
@@ -68,6 +78,8 @@ class Course {
       writing: map['writing'] == 1,
       color: Color(map['color']),
       imageUrl: map['imageUrl'],
+      streak: map['streak'] ?? 0,
+      lastAccess: _intToDateTime(map['lastAccess'] ?? _dateTimeToInt(DateTime.now().subtract(const Duration(days: 1)))),
     );
   }
 
@@ -83,6 +95,8 @@ class Course {
     bool? writing,
     Color? color,
     String? imageUrl,
+    int? streak,
+    DateTime? lastAccess,
   }) {
     return Course(
       name: name ?? this.name,
@@ -95,6 +109,18 @@ class Course {
       writing: writing ?? this.writing,
       color: color ?? this.color,
       imageUrl: imageUrl ?? this.imageUrl,
+      streak: streak ?? this.streak,
+      lastAccess: lastAccess ?? _intToDateTime(this.lastAccess),
     );
+  }
+
+  /// Converts a DateTime object to an integer representing the number of days since Unix epoch.
+  static int _dateTimeToInt(DateTime date) {
+    return date.toUtc().difference(DateTime.utc(1970, 1, 1)).inDays;
+  }
+
+  /// Converts an integer representing the number of days since Unix epoch to a DateTime object.
+  static DateTime _intToDateTime(int days) {
+    return DateTime.utc(1970, 1, 1).add(Duration(days: days));
   }
 }

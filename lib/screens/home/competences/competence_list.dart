@@ -1,53 +1,79 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
 import '../../../models/course_model.dart';
-import 'competence_icon.dart';
 
-/// A list of competences for a course
 class CompetenceList extends StatelessWidget {
   final Course course;
 
-  /// Creates a CompetenceList widget.
-  /// 
-  /// [course] is the course containing the competences to be displayed.
   const CompetenceList({super.key, required this.course});
+
+  Color _getColor(String type) {
+    switch (type) {
+      case 'listening':
+        return const Color(0xFFD52CDE);
+      case 'speaking':
+        return const Color(0xFFDE2C50);
+      case 'reading':
+        return const Color(0xFFEDA42E);
+      case 'writing':
+        return const Color(0xFFEDE72D);
+      default:
+        return Colors.grey;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
-    final iconSize = p.standardPadding() * 1.5; // Example size, adjust as needed
+    final dotSize = p.standardPadding()/2; // Smaller size for dots
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         SizedBox(height: p.standardPadding()),
         if (course.listening) ...[
-          CompetenceIcon(
-            type: 'listening',
-            size: iconSize,
+          Container(
+            height: dotSize,
+            width: dotSize,
+            decoration: BoxDecoration(
+              color: _getColor('listening'),
+              shape: BoxShape.circle,
+            ),
           ),
-          SizedBox(height: p.standardPadding() / 2),
+          SizedBox(height: p.standardPadding() / 4),
         ],
         if (course.speaking) ...[
-          CompetenceIcon(
-            type: 'speaking',
-            size: iconSize,
+          Container(
+            height: dotSize,
+            width: dotSize,
+            decoration: BoxDecoration(
+              color: _getColor('speaking'),
+              shape: BoxShape.circle,
+            ),
           ),
-          SizedBox(height: p.standardPadding() / 2),
+          SizedBox(height: p.standardPadding() / 4),
         ],
         if (course.reading) ...[
-          CompetenceIcon(
-            type: 'reading',
-            size: iconSize,
+          Container(
+            height: dotSize,
+            width: dotSize,
+            decoration: BoxDecoration(
+              color: _getColor('reading'),
+              shape: BoxShape.circle,
+            ),
           ),
-          SizedBox(height: p.standardPadding() / 2),
+          SizedBox(height: p.standardPadding() / 4),
         ],
         if (course.writing) ...[
-          CompetenceIcon(
-            type: 'writing',
-            size: iconSize,
+          Container(
+            height: dotSize,
+            width: dotSize,
+            decoration: BoxDecoration(
+              color: _getColor('writing'),
+              shape: BoxShape.circle,
+            ),
           ),
-          SizedBox(height: p.standardPadding() / 2),
+          SizedBox(height: p.standardPadding() / 4),
         ],
       ],
     );

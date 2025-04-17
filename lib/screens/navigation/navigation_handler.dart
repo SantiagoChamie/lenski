@@ -86,7 +86,11 @@ class NavigationHandlerState extends State<NavigationHandler> {
                   default:
                     builder = (BuildContext _) => const Courses();
                 }
-                return MaterialPageRoute(builder: builder, settings: settings);
+                return MaterialPageRoute(
+                  builder: builder,
+                  settings: settings,
+                  maintainState: false,
+                 );
               },
             ),
           ),

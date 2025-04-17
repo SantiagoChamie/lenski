@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lenski/screens/course/course_home.dart';
-//import 'package:lenski/screens/home/competences/competence_list.dart';
+import 'package:lenski/screens/home/competences/competence_list.dart'; // Uncomment this import
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/course_repository.dart';
 import 'package:lenski/utils/course_colors.dart';
@@ -27,6 +26,7 @@ class CourseButton extends StatefulWidget {
 
 class _CourseButtonState extends State<CourseButton> {
   bool _showColorMenu = false;
+  final _repository = CourseRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -57,8 +57,7 @@ class _CourseButtonState extends State<CourseButton> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   // Icons on the left indicating the competences
-                  //TODO: Uncomment this line to display the competences
-                  //CompetenceList(course: course),
+                  CompetenceList(course: widget.course), // Uncomment this line
                   const SizedBox(width: 50),
                   // Column with image and text in the center
                   Row(
@@ -79,6 +78,43 @@ class _CourseButtonState extends State<CourseButton> {
               ),
             ),
           ),
+          // Add Streak Indicator
+          if (widget.course.streak > 0)
+            Positioned(
+              bottom: 10,
+              left: 10,
+              child: FutureBuilder<bool>(
+                future: _repository.wasAccessedToday(widget.course),
+                builder: (context, snapshot) {
+                  final isToday = snapshot.data ?? false;
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(33),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.local_fire_department,
+                          color: isToday ? Colors.orange : Colors.grey[400],
+                          size: 28,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${widget.course.streak}',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: isToday ? Colors.orange : Colors.grey[400],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
           // Settings button
           Positioned(
             top: 10,
@@ -118,7 +154,7 @@ class _CourseButtonState extends State<CourseButton> {
                       child: InkWell(
                         onTap: () async {
                           final updatedCourse = widget.course.copyWith(color: color);
-                          await CourseRepository().updateCourse(updatedCourse);
+                          await _repository.updateCourse(updatedCourse);
                           widget.onDelete();
                           setState(() {
                             _showColorMenu = false;
@@ -149,7 +185,7 @@ class _CourseButtonState extends State<CourseButton> {
             child: IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
               onPressed: () async {
-                await CourseRepository().deleteCourse(widget.course.code);
+                await _repository.deleteCourse(widget.course.code);
                 widget.onDelete();
               },
             ),

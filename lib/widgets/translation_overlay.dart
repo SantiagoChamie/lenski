@@ -13,6 +13,7 @@ class TranslationOverlay extends StatefulWidget {
   final String sourceLang;
   final String targetLang;
   final VoidCallback onClose; // Callback to close the overlay
+  final List<String>? cardTypes; // New parameter
 
   const TranslationOverlay({
     super.key,
@@ -21,6 +22,7 @@ class TranslationOverlay extends StatefulWidget {
     required this.sourceLang,
     required this.targetLang,
     required this.onClose, // Add this parameter
+    this.cardTypes, // Add this parameter
   });
 
   @override
@@ -60,16 +62,30 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
     return await TranslationService().cardExists(widget.text, widget.contextText);
   }
 
-  /// Adds a new card to the CardRepository.
+  /// Adds new cards to the CardRepository.
   Future<void> _addCard(String backText) async {
-    final card = custom_card.Card(
-      front: widget.text,
-      back: backText,
-      context: widget.contextText,
-      dueDate: DateTime.now(),
-      language: widget.sourceLang,
-    );
-    await CardRepository().insertCard(card);
+    // If no cardTypes provided, default to reading only
+    final types = widget.cardTypes ?? ['reading'];
+    
+    // Define the order of card types
+    const typeOrder = ['reading', 'listening', 'writing', 'speaking'];
+    
+    // Sort the types based on the defined order
+    types.sort((a, b) => typeOrder.indexOf(a).compareTo(typeOrder.indexOf(b)));
+    
+    // Create cards in sequence with different due dates
+    for (int i = 0; i < types.length; i++) {
+      final card = custom_card.Card(
+        front: widget.text,
+        back: backText,
+        context: widget.contextText,
+        dueDate: DateTime.now().add(Duration(days: i)),
+        language: widget.sourceLang,
+        type: types[i],
+      );
+      await CardRepository().insertCard(card);
+    }
+
     setState(() {
       _cardAdded = true;
     });
