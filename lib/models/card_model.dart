@@ -7,6 +7,9 @@ class Card {
   final int dueDate; // Store dueDate as an integer
   final String language;
   final int prevInterval; // New parameter
+  final double eFactor; // New parameter
+  final int repetition; // New parameter
+  final String type; // New attribute
 
   /// Creates a Card object.
   /// 
@@ -17,6 +20,9 @@ class Card {
   /// [dueDate] is the due date for reviewing the card, stored as an integer.
   /// [language] is the language code of the card.
   /// [prevInterval] is the previous interval for the card.
+  /// [eFactor] is the easiness factor for the card.
+  /// [repetition] is the repetition count for the card.
+  /// [type] is the type of the card.
   Card({
     this.id,
     required this.front,
@@ -24,7 +30,10 @@ class Card {
     required this.context,
     required DateTime dueDate, // Accept DateTime in constructor
     required this.language,
+    required this.type, // New required parameter
     this.prevInterval = 0, // Initialize prevInterval as 0
+    this.eFactor = 2.5, // Initialize eFactor as 2.5
+    this.repetition = 0, // Initialize repetition as 0
   }) : dueDate = _dateTimeToInt(dueDate); // Convert DateTime to integer
 
   /// Converts a Card object into a Map.
@@ -38,6 +47,9 @@ class Card {
       'dueDate': dueDate, // Store as integer
       'language': language,
       'prevInterval': prevInterval, // Include prevInterval
+      'eFactor': eFactor, // Include eFactor
+      'repetition': repetition, // Include repetition
+      'type': type, // Add type to map
     };
   }
 
@@ -50,7 +62,10 @@ class Card {
       context: map['context'],
       dueDate: _intToDateTime(map['dueDate']), // Convert integer to DateTime
       language: map['language'],
+      type: map['type'], // Add type from map
       prevInterval: map['prevInterval'], // Include prevInterval
+      eFactor: map['eFactor'], // Include eFactor
+      repetition: map['repetition'], // Include repetition
     );
   }
 

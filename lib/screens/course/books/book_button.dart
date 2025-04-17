@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/book_model.dart';
 import 'package:lenski/models/course_model.dart';
-import 'dart:math';
+//import 'dart:math';
 import 'package:lenski/screens/course/books/add_book_button.dart';
+import 'package:lenski/screens/course/books/edit_book_screen.dart';
 import 'package:lenski/screens/course/books/empty_book_button.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
@@ -15,6 +16,7 @@ class BookButton extends StatefulWidget {
   final bool? add;
   final VoidCallback? onPressed;
   final VoidCallback? onDelete;
+  final Function(Book)? onEdit;
 
   /// Creates a BookButton widget.
   /// 
@@ -30,6 +32,7 @@ class BookButton extends StatefulWidget {
     this.add = false,
     this.onPressed,
     this.onDelete,
+    this.onEdit,
   });
 
   @override
@@ -45,20 +48,25 @@ class _BookButtonState extends State<BookButton> {
     book = widget.book;
   }
 
+  @override
+  void dispose() {
+    // Add any cleanup here if needed
+    super.dispose();
+  }
+
   /// Handles the button press event.
-  void _printBookType(BuildContext context) {
+  void _handleBookPress(BuildContext context) {
     if (widget.add == true) {
       if (widget.onPressed != null) {
         widget.onPressed!();
       }
     } else if (book != null) {
-      Navigator.push(
+      Navigator.pushNamed(
         context,
-        MaterialPageRoute(
-          builder: (context) => BookScreen(book: book!, course: widget.course!),
-        ),
+        'Book',
+        arguments: {'book': book!, 'course': widget.course!},
       ).then((updatedBook) {
-        if (updatedBook != null && updatedBook is Book) {
+        if (mounted && updatedBook != null && updatedBook is Book) {
           setState(() {
             book = updatedBook;
           });
@@ -70,10 +78,37 @@ class _BookButtonState extends State<BookButton> {
   /// Deletes the book from the repository.
   Future<void> _deleteBook(BuildContext context) async {
     if (book != null) {
-      final bookRepository = BookRepository();
-      await bookRepository.deleteBook(book!.id!);
-      if (widget.onDelete != null) {
-        widget.onDelete!();
+      // Show confirmation dialog
+      final bool? shouldDelete = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Delete Book'),
+            content: const Text('Are you sure you want to delete this book?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.red,
+                ),
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Delete'),
+              ),
+            ],
+          );
+        },
+      );
+
+      // Only delete if user confirmed
+      if (shouldDelete == true) {
+        final bookRepository = BookRepository();
+        await bookRepository.deleteBook(book!.id!);
+        if (widget.onDelete != null) {
+          widget.onDelete!();
+        }
       }
     }
   }
@@ -82,7 +117,7 @@ class _BookButtonState extends State<BookButton> {
   Widget build(BuildContext context) {
     final p = Proportions(context);
     const double bookWidth = 150;
-    final randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
+    const randomColor = Color(0xFFFFD38D); //Color((Random().nextDouble() * 0xFFFFFF).toInt()).withValues(alpha: 1.0);
     final percentage = (book != null && book!.totalLines > 0)
         ? book!.currentLine == 1 ? 0 : ((book!.currentLine) / book!.totalLines * 100).toInt()
         : 100;
@@ -99,7 +134,7 @@ class _BookButtonState extends State<BookButton> {
     return Column(
       children: [
         InkWell(
-          onTap: book != null || widget.add == true ? () => _printBookType(context) : widget.onPressed,
+          onTap: book != null || widget.add == true ? () => _handleBookPress(context) : widget.onPressed,
           child: Stack(
             children: [
               book == null
@@ -164,8 +199,8 @@ class _BookButtonState extends State<BookButton> {
                       top: 10,
                       left: 10,
                       child: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => _deleteBook(context),
+                        icon: const Icon(Icons.settings, color: Colors.white),
+                        onPressed: () => widget.onEdit?.call(book!),
                       ),
                     )
                   : const SizedBox(),

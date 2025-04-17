@@ -144,6 +144,7 @@ class _BookScreenState extends State<BookScreen> {
                                             child: Center( // Center horizontally
                                               child: LText(
                                                 text: currentSentence,
+                                                position: 'below',
                                                 fromLanguage: widget.course.fromCode,
                                                 toLanguage: widget.course.code,
                                                 style: const TextStyle(

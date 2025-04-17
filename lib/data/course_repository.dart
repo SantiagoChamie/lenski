@@ -29,7 +29,21 @@ class CourseRepository {
       path,
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE courses(id INTEGER PRIMARY KEY, name TEXT, level TEXT, code TEXT, fromCode TEXT, listening INTEGER, speaking INTEGER, reading INTEGER, writing INTEGER, color INTEGER, imageUrl TEXT)',
+          'CREATE TABLE courses('
+          'id INTEGER PRIMARY KEY, '
+          'name TEXT, '
+          'level TEXT, '
+          'code TEXT, '
+          'fromCode TEXT, '
+          'listening INTEGER, '
+          'speaking INTEGER, '
+          'reading INTEGER, '
+          'writing INTEGER, '
+          'color INTEGER, '
+          'imageUrl TEXT, '
+          'streak INTEGER DEFAULT 0, '
+          'lastAccess INTEGER DEFAULT 0'
+          ')',
         );
       },
       version: 1,
@@ -48,15 +62,53 @@ class CourseRepository {
     );
   }
 
-  /// Retrieves all courses from the database.
-  /// 
-  /// Returns a list of courses.
+  /// Checks and resets streak if more than one day has passed since last access
+  Future<void> checkStreak(Course course) async {
+    final today = DateTime.now();
+    final todayDays = _dateTimeToInt(today);
+    
+    if (todayDays - course.lastAccess > 1) {
+      // Streak broken - more than one day has passed
+      course.streak = 0;
+      await updateCourse(course);
+    }
+  }
+
+  /// Increments streak if accessing on a different day than last access
+  Future<void> incrementStreak(Course course) async {
+    final today = DateTime.now();
+    final todayDays = _dateTimeToInt(today);
+    
+    if (todayDays > course.lastAccess) {
+      // New day, increment streak
+      course.streak++;
+      course.lastAccess = todayDays;
+      await updateCourse(course);
+    }
+  }
+  
+  /// Checks if the course was accessed today
+  Future<bool> wasAccessedToday(Course course) async {
+    final today = _dateTimeToInt(DateTime.now());
+    return course.lastAccess == today;
+  }
+
+  /// Retrieves all courses and checks their streaks
   Future<List<Course>> courses() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('courses');
-    return List.generate(maps.length, (i) {
-      return Course.fromMap(maps[i]);
+    final List<Course> courseList = List.generate(maps.length, (i) {
+      final course = Course.fromMap(maps[i]);
+      checkStreak(course); // Only check for streak breaks
+      return course;
     });
+    
+    return courseList;
+  }
+
+  /// Helper method to convert DateTime to days since epoch
+  static int _dateTimeToInt(DateTime date) {
+    return date.toUtc().difference(DateTime.utc(1970, 1, 1)).inDays;
   }
 
   /// Updates an existing course in the database.

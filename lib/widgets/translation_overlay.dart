@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/services/translation_service.dart';
+import 'package:lenski/services/tts_service.dart'; // Import the TTS service
 import 'package:lenski/data/card_repository.dart';
 import 'package:lenski/models/card_model.dart' as custom_card; // Alias the import
 import 'dart:io';
@@ -12,6 +13,7 @@ class TranslationOverlay extends StatefulWidget {
   final String sourceLang;
   final String targetLang;
   final VoidCallback onClose; // Callback to close the overlay
+  final List<String>? cardTypes; // New parameter
 
   const TranslationOverlay({
     super.key,
@@ -20,6 +22,7 @@ class TranslationOverlay extends StatefulWidget {
     required this.sourceLang,
     required this.targetLang,
     required this.onClose, // Add this parameter
+    this.cardTypes, // Add this parameter
   });
 
   @override
@@ -59,16 +62,30 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
     return await TranslationService().cardExists(widget.text, widget.contextText);
   }
 
-  /// Adds a new card to the CardRepository.
+  /// Adds new cards to the CardRepository.
   Future<void> _addCard(String backText) async {
-    final card = custom_card.Card(
-      front: widget.text,
-      back: backText,
-      context: widget.contextText,
-      dueDate: DateTime.now(),
-      language: widget.sourceLang,
-    );
-    await CardRepository().insertCard(card);
+    // If no cardTypes provided, default to reading only
+    final types = widget.cardTypes ?? ['reading'];
+    
+    // Define the order of card types
+    const typeOrder = ['reading', 'listening', 'writing', 'speaking'];
+    
+    // Sort the types based on the defined order
+    types.sort((a, b) => typeOrder.indexOf(a).compareTo(typeOrder.indexOf(b)));
+    
+    // Create cards in sequence with different due dates
+    for (int i = 0; i < types.length; i++) {
+      final card = custom_card.Card(
+        front: widget.text,
+        back: backText,
+        context: widget.contextText,
+        dueDate: DateTime.now().add(Duration(days: i)),
+        language: widget.sourceLang,
+        type: types[i],
+      );
+      await CardRepository().insertCard(card);
+    }
+
     setState(() {
       _cardAdded = true;
     });
@@ -223,31 +240,51 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
                               ),
                             ],
                           ),
-                          if (!cardExistsSnapshot.data! && !_cardAdded)
                           SizedBox(height: p.standardPadding()),
-                          if (!cardExistsSnapshot.data! && !_cardAdded)
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFFD9D0DB),
-                                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                  ),
-                                  child: IconButton(
-                                    icon: const Icon(Icons.add, color: Colors.black, size: 30.0),
-                                    onPressed: () async {
-                                      if (snapshot.hasData) {
-                                        await _addCard(snapshot.data!);
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('Card added successfully')),
-                                        );
-                                      }
-                                    },
-                                  ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (!cardExistsSnapshot.data! && !_cardAdded)
+                              Container(
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFD9D0DB),
+                                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
                                 ),
-                              ],
-                            ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.add, color: Colors.black, size: 30.0),
+                                  onPressed: () async {
+                                    if (snapshot.hasData) {
+                                      await _addCard(snapshot.data!);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Card added successfully')),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                              SizedBox(width: p.standardPadding()/2),
+                              Container(
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFD9D0DB),
+                                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.volume_up, color: Colors.black, size: 30.0),
+                                  onPressed: () async {
+                                    try{
+                                    if (snapshot.hasData) {
+                                      await TtsService().speak(widget.text, widget.sourceLang);
+                                    }
+                                  }catch(e){ 
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Install the text-to-speech for this language in your device to access this functinality')),
+                                    );
+                                  }
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     );

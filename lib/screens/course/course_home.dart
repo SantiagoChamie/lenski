@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/course/course_navigator.dart';
+import 'package:lenski/screens/course/metrics.dart';
 import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/languages.dart';
 import 'package:lenski/utils/proportions.dart';
@@ -47,19 +48,24 @@ class CourseHome extends StatelessWidget {
                 toLanguage: course.code,
                 position: 'below',
               ),
+              Container(
+                margin: const EdgeInsets.only(left: 8.0),
+                child: const Tooltip(
+                  message: 'Highlight text to see its translation',
+                  preferBelow: false,
+                  child: Icon(
+                    Icons.help_outline,
+                    size: 20.0,
+                    color: Color.fromARGB(255, 145, 139, 146),
+                  ),
+                ),
+              ),
               const Spacer(),
-              /*Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFD9D0DB),
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(10.0), bottomLeft: Radius.circular(10.0)),
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.star, color: Colors.black, size: 30.0),
-                  onPressed: () {
-                    // Add your onPressed code here!
-                  },
-                ),
-              ),*/
+              SizedBox(
+                width: 250.0,
+                child: Metrics(course: course)
+              ),
+              SizedBox(width: p.standardPadding()),
             ],
           ),
         ),

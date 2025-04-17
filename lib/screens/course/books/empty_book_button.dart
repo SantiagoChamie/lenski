@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 /// A widget that displays an empty book button with a dotted border.
 class EmptyBookButton extends StatelessWidget {
   final double bookWidth;
+  final double stokeWidth = 2;
 
   /// Creates an EmptyBookButton widget.
   /// 
@@ -14,13 +15,13 @@ class EmptyBookButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return DottedBorder(
       color: Colors.grey,
-      strokeWidth: 2,
+      strokeWidth: stokeWidth,
       borderType: BorderType.RRect,
       radius: const Radius.circular(8),
       dashPattern: const [6, 3],
       child: Container(
-        width: bookWidth,
-        height: bookWidth * 1.5,
+        width: bookWidth-4,
+        height: bookWidth * 1.5 - stokeWidth*2,
         color: Colors.transparent,
       ),
     );
