@@ -59,9 +59,7 @@ class BookCreator {
 
   Future<List<String>> _processSrtFile(String filePath) async {
     final file = File(filePath);
-    final bytes = await file.readAsBytes();
-    final content = latin1.decode(bytes);
-    final lines = content.split('\n');
+    final lines = await file.readAsLines();
 
     return lines.where((line) {
       final trimmed = line.trim();
