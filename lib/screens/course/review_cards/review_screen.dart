@@ -117,7 +117,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
     if (cards.isNotEmpty) {
       final currentCard = cards.removeAt(0);
       await repository.deleteCard(currentCard.id);
-      setState(() {});
+      setState(() {
+        isFront = true;
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
