@@ -191,11 +191,12 @@ class _AddCardScreenState extends State<AddCardScreen> {
 
                       // Create cards in sequence with different due dates
                       for (int i = 0; i < selectedTypes.length; i++) {
+                        final dueDate = DateTime.now().add(Duration(days: i));
                         final card = card_model.Card(
                           front: frontController.text,
                           back: backController.text,
                           context: contextController.text == '' ? frontController.text : contextController.text,
-                          dueDate: DateTime.now().add(Duration(days: i)),
+                          dueDate: DateTime(dueDate.year, dueDate.month, dueDate.day),
                           type: selectedTypes[i],
                           language: widget.course.code,
                         );
