@@ -4,6 +4,7 @@ import 'package:lenski/screens/course/books/book_button.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/models/book_model.dart';
+import 'dart:math' as Math;
 
 /// A widget that displays a library of books for a specific course.
 class Library extends StatefulWidget {
@@ -73,8 +74,23 @@ class _LibraryState extends State<Library> {
           // Add the "Add Book" button
           bookButtons.add(BookButton(add: true, onPressed: widget.onAddBookPressed));
 
-          // Ensure there are at least 6 buttons in total
-          while (bookButtons.length < 6) {
+          // Calculate number of columns based on screen width and standard padding
+          const  buttonWidth = 140.0; // Approximate width of a BookButton
+          final availableWidth = p.mainScreenWidth() / 2;
+          final columnsPerRow = (availableWidth / (buttonWidth + p.standardPadding() * 2)).floor();
+          
+          // Calculate how many buttons we need to add to complete the last row
+          // and ensure we have at least 2 rows
+          final currentButtons = bookButtons.length;
+          final minButtons = columnsPerRow * 2; // Minimum 2 rows
+          final buttonsInLastRow = currentButtons % columnsPerRow;
+          final emptyButtonsNeeded = buttonsInLastRow > 0 
+              ? columnsPerRow - buttonsInLastRow 
+              : 0;
+          
+          // Add empty buttons to reach minimum of 2 rows or complete the last row
+          final totalButtonsNeeded = Math.max(minButtons - currentButtons, emptyButtonsNeeded);
+          for (var i = 0; i < totalButtonsNeeded; i++) {
             bookButtons.add(const BookButton());
           }
 

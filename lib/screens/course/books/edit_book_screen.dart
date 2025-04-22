@@ -84,57 +84,57 @@ class _EditBookScreenState extends State<EditBookScreen> {
   }
 
   Widget _buildDetailsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextField(
-          controller: _titleController,
-          decoration: const InputDecoration(
-            labelText: 'Book Title',
-            border: OutlineInputBorder(),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _imageUrlController,
-          decoration: const InputDecoration(
-            labelText: 'Image URL',
-            hintText: 'Enter image URL',
-            border: OutlineInputBorder(),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
-            ),
-          ),
-        ),
-        const SizedBox(height: 32),
-        _buildDetailItem('Language', widget.book.language),
-        _buildDetailItem('Total Lines', widget.book.totalLines.toString()),
-        _buildDetailItem('Current Progress', 
-          '${widget.book.currentLine} / ${widget.book.totalLines} lines ' 
-          '(${(widget.book.currentLine / widget.book.totalLines * 100).toInt()}%)'
-        ),
-        const Spacer(),
-        SizedBox(
-          child: TextButton(
-            onPressed: () => _deleteBook(context),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
-            child: const Text(
-              'Delete book',
-              style: TextStyle(
-                fontSize: 16,
-                fontFamily: 'Varela Round',
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _titleController,
+            decoration: const InputDecoration(
+              labelText: 'Book Title',
+              border: OutlineInputBorder(),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 20)
-      ],
+          const SizedBox(height: 16),
+          TextField(
+            controller: _imageUrlController,
+            decoration: const InputDecoration(
+              labelText: 'Image URL',
+              hintText: 'Enter image URL',
+              border: OutlineInputBorder(),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          _buildDetailItem('Language', widget.book.language),
+          _buildDetailItem('Current Progress', 
+            '${widget.book.currentLine} / ${widget.book.totalLines} lines ' 
+            '(${(widget.book.currentLine / widget.book.totalLines * 100).toInt()}%)'
+          ),
+          SizedBox(
+            child: TextButton(
+              onPressed: () => _deleteBook(context),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: const Text(
+                'Delete book',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontFamily: 'Varela Round',
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20)
+        ],
+      ),
     );
   }
 

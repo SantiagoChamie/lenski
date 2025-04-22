@@ -21,6 +21,11 @@ class CardRepository {
     return date.toUtc().difference(DateTime.utc(1970, 1, 1)).inDays;
   }
 
+  /// Returns the start of the day for a given DateTime object.
+  static DateTime _startOfDay(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
   /// Getter for the database. Initializes the database if it is not already initialized.
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -122,7 +127,7 @@ class CardRepository {
       newEFactor = card.eFactor;
     }
 
-    final newDueDate = DateTime.now().add(Duration(days: newInterval));
+    final newDueDate = _startOfDay(DateTime.now().add(Duration(days: newInterval)));
     final updatedCard = Card(
       id: card.id,
       front: card.front,

@@ -64,8 +64,7 @@ class CourseRepository {
 
   /// Checks and resets streak if more than one day has passed since last access
   Future<void> checkStreak(Course course) async {
-    final today = DateTime.now();
-    final todayDays = _dateTimeToInt(today);
+    final todayDays = _dateTimeToInt(DateTime.now());
     
     if (todayDays - course.lastAccess > 1) {
       // Streak broken - more than one day has passed
@@ -76,8 +75,7 @@ class CourseRepository {
 
   /// Increments streak if accessing on a different day than last access
   Future<void> incrementStreak(Course course) async {
-    final today = DateTime.now();
-    final todayDays = _dateTimeToInt(today);
+    final todayDays = _dateTimeToInt(DateTime.now());
     
     if (todayDays > course.lastAccess) {
       // New day, increment streak
@@ -89,8 +87,8 @@ class CourseRepository {
   
   /// Checks if the course was accessed today
   Future<bool> wasAccessedToday(Course course) async {
-    final today = _dateTimeToInt(DateTime.now());
-    return course.lastAccess == today;
+    final todayDays = _dateTimeToInt(DateTime.now());
+    return course.lastAccess == todayDays;
   }
 
   /// Retrieves all courses and checks their streaks
@@ -108,7 +106,12 @@ class CourseRepository {
 
   /// Helper method to convert DateTime to days since epoch
   static int _dateTimeToInt(DateTime date) {
-    return date.toUtc().difference(DateTime.utc(1970, 1, 1)).inDays;
+    return _startOfDay(date).toUtc().difference(DateTime.utc(1970, 1, 1)).inDays;
+  }
+
+  /// Helper method to get the start of the day for a given DateTime
+  static DateTime _startOfDay(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
   }
 
   /// Updates an existing course in the database.
