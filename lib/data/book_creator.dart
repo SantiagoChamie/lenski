@@ -3,6 +3,7 @@ import 'package:path/path.dart' as path;
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/models/book_model.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'dart:math' as math;
 
 class BookCreator {
   final BookRepository _bookRepository = BookRepository();
@@ -82,46 +83,70 @@ class BookCreator {
 
     try {
       for (int pageIndex = 0; pageIndex < document.pages.count; pageIndex++) {
-        // Add an empty line between pages (except for the first page)
         if (pageIndex > 0) {
           sentences.add('');
         }
 
         final PdfTextExtractor extractor = PdfTextExtractor(document);
-        final List<TextLine> textLines = extractor.extractTextLines(startPageIndex: pageIndex);
-
-        // Group text elements by their vertical position (y-coordinate)
-        final Map<double, List<TextWord>> lineGroups = {};
-        const double yThreshold = 2.0; // Tolerance for considering words on the same line
-
-        for (var line in textLines) {
-          for (var word in line.wordCollection) {
-            // Find the closest existing y-coordinate within the threshold
-            final double matchingY = lineGroups.keys.firstWhere(
-              (y) => (y - word.bounds.top).abs() <= yThreshold,
-              orElse: () => word.bounds.top,
-            );
-
-            if (!lineGroups.containsKey(matchingY)) {
-              lineGroups[matchingY] = [];
-            }
-            lineGroups[matchingY]!.add(word);
-          }
-        }
-
-        // Sort words horizontally within each line and combine them
-        for (var words in lineGroups.values) {
-          words.sort((a, b) => a.bounds.left.compareTo(b.bounds.left));
-          // Join words and normalize spaces
-          final String lineText = words
-              .map((word) => word.text)
-              .join(' ')
-              .trim()
-              .replaceAll(RegExp(r'\s+'), ' '); // Replace multiple spaces with single space
+        List<TextLine> textLines;
+        
+        try {
+          // First get the raw text
+          final String pageText = extractor.extractText(startPageIndex: pageIndex);
           
-          if (lineText.isNotEmpty) {
-            sentences.add(lineText);
+          try {
+            textLines = extractor.extractTextLines(
+              startPageIndex: pageIndex,
+              endPageIndex: pageIndex,
+            );
+            
+            // Group text elements by their vertical position
+            final Map<double, List<TextWord>> lineGroups = {};
+            const double yThreshold = 2.0;
+
+            for (var line in textLines) {
+              for (var word in line.wordCollection) {
+                final double matchingY = lineGroups.keys.firstWhere(
+                  (y) => (y - word.bounds.top).abs() <= yThreshold,
+                  orElse: () => word.bounds.top,
+                );
+
+                lineGroups.putIfAbsent(matchingY, () => []).add(word);
+              }
+            }
+
+            // Process each line group
+            final sortedYPositions = lineGroups.keys.toList()..sort();
+            for (var y in sortedYPositions) {
+              var words = lineGroups[y]!;
+              words.sort((a, b) => a.bounds.left.compareTo(b.bounds.left));
+              
+              final String lineText = words
+                  .map((word) => word.text)
+                  .join(' ')
+                  .trim()
+                  .replaceAll(RegExp(r'\s+'), ' ');
+              
+              if (lineText.isNotEmpty) {
+                sentences.add(lineText);
+              }
+            }
+          } catch (e) {
+            // Fallback: Process the raw text instead
+            final List<String> rawLines = pageText
+                .split('\n')
+                .where((line) => line.trim().isNotEmpty)
+                .toList();
+            
+            for (var line in rawLines) {
+              sentences.add(line.trim());
+            }
+            continue;
           }
+          
+        } catch (e) {
+          print('Error extracting text from page $pageIndex: $e');
+          continue; // Skip problematic pages
         }
       }
     } finally {
