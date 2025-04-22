@@ -33,6 +33,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
   late Future<String> _translatedText;
   late Future<bool> _cardExists;
   bool _cardAdded = false; // State variable to track if the card is added
+  bool _useContext = true; // New state variable for context toggle
 
   @override
   void initState() {
@@ -48,13 +49,21 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
         text: widget.text,
         sourceLang: widget.sourceLang,
         targetLang: widget.targetLang,
-        context: widget.contextText,
+        context: _useContext ? widget.contextText : widget.text, // Use text as context if not using context
       );
     } on SocketException {
       return Future.error('Could not connect to the internet');
     } catch (e) {
       return Future.error('Error: $e');
     }
+  }
+
+  /// Toggles the use of context for translation.
+  void _toggleContext() {
+    setState(() {
+      _useContext = !_useContext;
+      _translatedText = _fetchTranslation(); // Refresh translation with new context setting
+    });
   }
 
   /// Checks if a card with the given text and context already exists in the CardRepository.
@@ -281,6 +290,34 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
                                     );
                                   }
                                   },
+                                ),
+                              ),
+                              SizedBox(width: p.standardPadding()/2),
+                              Container(
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFD9D0DB),
+                                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                ),
+                                child: Tooltip(
+                                  message: _useContext ? 'Using contextual translation' : 'Using non-contextual translation',
+                                  child: IconButton(
+                                    icon: Text(
+                                      _useContext ? 'C' : 'NC',
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Varela Round',
+                                      ),
+                                    ),
+                                    iconSize: 30.0, // Match other buttons' size
+                                    padding: const EdgeInsets.all(8.0),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 48.0,
+                                      minHeight: 48.0,
+                                    ),
+                                    onPressed: _toggleContext,
+                                  ),
                                 ),
                               ),
                             ],
