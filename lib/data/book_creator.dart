@@ -3,12 +3,23 @@ import 'package:path/path.dart' as path;
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/models/book_model.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'dart:math' as math;
+
+class _TrackedLine {
+  String text;
+  int unusedCount;
+
+  _TrackedLine(this.text) : unusedCount = 0;
+}
 
 class BookCreator {
   final BookRepository _bookRepository = BookRepository();
   bool _isCancelled = false;
   Book? _currentBook;
+
+  final List<_TrackedLine> _trackedHeaders = [];
+  final List<_TrackedLine> _trackedFooters = [];
+  static const int _headerFooterLines = 3; // Number of lines to check at top/bottom
+  static const int _maxUnusedPages = 2;
 
   // Add this getter
   bool get isCancelled => _isCancelled;
@@ -83,70 +94,155 @@ class BookCreator {
 
     try {
       for (int pageIndex = 0; pageIndex < document.pages.count; pageIndex++) {
+        // Increment unused count for all tracked lines
+        for (var header in _trackedHeaders) {
+          header.unusedCount++;
+        }
+        for (var footer in _trackedFooters) {
+          footer.unusedCount++;
+        }
+
+        // Remove headers/footers that haven't been used for more than 2 pages
+        _trackedHeaders.removeWhere((header) => header.unusedCount > _maxUnusedPages);
+        _trackedFooters.removeWhere((footer) => footer.unusedCount > _maxUnusedPages);
+
         if (pageIndex > 0) {
           sentences.add('');
         }
 
         final PdfTextExtractor extractor = PdfTextExtractor(document);
-        List<TextLine> textLines;
         
         try {
-          // First get the raw text
-          final String pageText = extractor.extractText(startPageIndex: pageIndex);
+          // Primary method: Structured text extraction
+          final textLines = extractor.extractTextLines(
+            startPageIndex: pageIndex,
+            endPageIndex: pageIndex,
+          );
           
-          try {
-            textLines = extractor.extractTextLines(
-              startPageIndex: pageIndex,
-              endPageIndex: pageIndex,
-            );
+          final Map<double, List<TextWord>> lineGroups = {};
+          const double yThreshold = 2.0;
+
+          for (var line in textLines) {
+            for (var word in line.wordCollection) {
+              final double matchingY = lineGroups.keys.firstWhere(
+                (y) => (y - word.bounds.top).abs() <= yThreshold,
+                orElse: () => word.bounds.top,
+              );
+              lineGroups.putIfAbsent(matchingY, () => []).add(word);
+            }
+          }
+
+          final sortedYPositions = lineGroups.keys.toList()..sort();
+          final List<String> pageLines = [];
+
+          for (var y in sortedYPositions) {
+            var words = lineGroups[y]!;
+            words.sort((a, b) => a.bounds.left.compareTo(b.bounds.left));
             
-            // Group text elements by their vertical position
-            final Map<double, List<TextWord>> lineGroups = {};
-            const double yThreshold = 2.0;
+            final String lineText = words
+                .map((word) => word.text)
+                .join(' ')
+                .trim()
+                .replaceAll(RegExp(r'\s+'), ' ');
+            
+            if (lineText.isNotEmpty) {
+              pageLines.add(lineText);
+            }
+          }
 
-            for (var line in textLines) {
-              for (var word in line.wordCollection) {
-                final double matchingY = lineGroups.keys.firstWhere(
-                  (y) => (y - word.bounds.top).abs() <= yThreshold,
-                  orElse: () => word.bounds.top,
-                );
+          if (pageLines.isNotEmpty) {
+            final currentHeaders = pageLines.take(_headerFooterLines).toList();
+            final currentFooters = pageLines.reversed.take(_headerFooterLines).toList();
 
-                lineGroups.putIfAbsent(matchingY, () => []).add(word);
+            final filteredLines = pageLines.where((line) {
+              final normalizedLine = _normalizeText(line);
+              
+              bool isRepeatingHeader = _trackedHeaders.any((header) {
+                if (_normalizeText(header.text) == normalizedLine) {
+                  header.unusedCount = 0;
+                  return true;
+                }
+                return false;
+              });
+
+              bool isRepeatingFooter = _trackedFooters.any((footer) {
+                if (_normalizeText(footer.text) == normalizedLine) {
+                  footer.unusedCount = 0;
+                  return true;
+                }
+                return false;
+              });
+
+              return !isRepeatingHeader && !isRepeatingFooter;
+            }).toList();
+
+            // Add new potential headers/footers
+            for (var header in currentHeaders) {
+              if (!_trackedHeaders.any((h) => _normalizeText(h.text) == _normalizeText(header))) {
+                _trackedHeaders.add(_TrackedLine(header));
+              }
+            }
+            
+            for (var footer in currentFooters) {
+              if (!_trackedFooters.any((f) => _normalizeText(f.text) == _normalizeText(footer))) {
+                _trackedFooters.add(_TrackedLine(footer));
               }
             }
 
-            // Process each line group
-            final sortedYPositions = lineGroups.keys.toList()..sort();
-            for (var y in sortedYPositions) {
-              var words = lineGroups[y]!;
-              words.sort((a, b) => a.bounds.left.compareTo(b.bounds.left));
-              
-              final String lineText = words
-                  .map((word) => word.text)
-                  .join(' ')
-                  .trim()
-                  .replaceAll(RegExp(r'\s+'), ' ');
-              
-              if (lineText.isNotEmpty) {
-                sentences.add(lineText);
-              }
-            }
-          } catch (e) {
-            // Fallback: Process the raw text instead
-            final List<String> rawLines = pageText
-                .split('\n')
-                .where((line) => line.trim().isNotEmpty)
-                .toList();
-            
-            for (var line in rawLines) {
-              sentences.add(line.trim());
-            }
+            sentences.addAll(filteredLines);
             continue;
           }
+
+          // Fallback: Raw text extraction
+          final String pageText = extractor.extractText(startPageIndex: pageIndex);
+          final List<String> rawLines = pageText
+              .split('\n')
+              .where((line) => line.trim().isNotEmpty)
+              .toList();
           
+          if (rawLines.isNotEmpty) {
+            final currentHeaders = rawLines.take(_headerFooterLines).toList();
+            final currentFooters = rawLines.reversed.take(_headerFooterLines).toList();
+
+            final filteredLines = rawLines.where((line) {
+              final normalizedLine = _normalizeText(line);
+              
+              bool isRepeatingHeader = _trackedHeaders.any((header) {
+                if (_normalizeText(header.text) == normalizedLine) {
+                  header.unusedCount = 0;
+                  return true;
+                }
+                return false;
+              });
+
+              bool isRepeatingFooter = _trackedFooters.any((footer) {
+                if (_normalizeText(footer.text) == normalizedLine) {
+                  footer.unusedCount = 0;
+                  return true;
+                }
+                return false;
+              });
+
+              return !isRepeatingHeader && !isRepeatingFooter;
+            }).toList();
+
+            // Add new potential headers/footers
+            for (var header in currentHeaders) {
+              if (!_trackedHeaders.any((h) => _normalizeText(h.text) == _normalizeText(header))) {
+                _trackedHeaders.add(_TrackedLine(header));
+              }
+            }
+            
+            for (var footer in currentFooters) {
+              if (!_trackedFooters.any((f) => _normalizeText(f.text) == _normalizeText(footer))) {
+                _trackedFooters.add(_TrackedLine(footer));
+              }
+            }
+
+            sentences.addAll(filteredLines.map((line) => line.trim()));
+          }
         } catch (e) {
-          print('Error extracting text from page $pageIndex: $e');
-          continue; // Skip problematic pages
+          continue;
         }
       }
     } finally {
@@ -154,6 +250,16 @@ class BookCreator {
     }
 
     return sentences;
+  }
+
+  // Add this helper method to normalize text for comparison
+  String _normalizeText(String text) {
+    // Remove page numbers and normalize whitespace
+    return text
+        .replaceAll(RegExp(r'\b\d+\b'), '') // Remove standalone numbers (page numbers)
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim()
+        .toLowerCase();
   }
 
   void cancelProcessing() {
