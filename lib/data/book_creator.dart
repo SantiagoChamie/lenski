@@ -113,7 +113,72 @@ class BookCreator {
         final PdfTextExtractor extractor = PdfTextExtractor(document);
         
         try {
-          // Primary method: Structured text extraction
+          // Primary method: Raw text extraction
+          final String pageText = extractor.extractText(startPageIndex: pageIndex);
+          List<String> rawLines = [];
+          
+          // Split text into lines and handle line length
+          for (String line in pageText.split('\n')) {
+            line = line.trim();
+            if (line.isEmpty) continue;
+            
+            // Split long lines
+            while (line.length > 100) {
+              int splitIndex = line.lastIndexOf(' ', 100);
+              if (splitIndex == -1) splitIndex = 100;
+              
+              rawLines.add(line.substring(0, splitIndex).trim());
+              line = line.substring(splitIndex).trim();
+            }
+            if (line.isNotEmpty) {
+              rawLines.add(line);
+            }
+          }
+          
+          if (rawLines.isNotEmpty) {
+            final currentHeaders = rawLines.take(_headerFooterLines).toList();
+            final currentFooters = rawLines.reversed.take(_headerFooterLines).toList();
+
+            final filteredLines = rawLines.where((line) {
+              final normalizedLine = _normalizeText(line);
+              
+              bool isRepeatingHeader = _trackedHeaders.any((header) {
+                if (_normalizeText(header.text) == normalizedLine) {
+                  header.unusedCount = 0;
+                  return true;
+                }
+                return false;
+              });
+
+              bool isRepeatingFooter = _trackedFooters.any((footer) {
+                if (_normalizeText(footer.text) == normalizedLine) {
+                  footer.unusedCount = 0;
+                  return true;
+                }
+                return false;
+              });
+
+              return !isRepeatingHeader && !isRepeatingFooter;
+            }).toList();
+
+            // Add new potential headers/footers
+            for (var header in currentHeaders) {
+              if (!_trackedHeaders.any((h) => _normalizeText(h.text) == _normalizeText(header))) {
+                _trackedHeaders.add(_TrackedLine(header));
+              }
+            }
+            
+            for (var footer in currentFooters) {
+              if (!_trackedFooters.any((f) => _normalizeText(f.text) == _normalizeText(footer))) {
+                _trackedFooters.add(_TrackedLine(footer));
+              }
+            }
+
+            sentences.addAll(filteredLines);
+            continue;
+          }
+
+          // Fallback: Structured text extraction
           final textLines = extractor.extractTextLines(
             startPageIndex: pageIndex,
             endPageIndex: pageIndex,
@@ -191,55 +256,6 @@ class BookCreator {
 
             sentences.addAll(filteredLines);
             continue;
-          }
-
-          // Fallback: Raw text extraction
-          final String pageText = extractor.extractText(startPageIndex: pageIndex);
-          final List<String> rawLines = pageText
-              .split('\n')
-              .where((line) => line.trim().isNotEmpty)
-              .toList();
-          
-          if (rawLines.isNotEmpty) {
-            final currentHeaders = rawLines.take(_headerFooterLines).toList();
-            final currentFooters = rawLines.reversed.take(_headerFooterLines).toList();
-
-            final filteredLines = rawLines.where((line) {
-              final normalizedLine = _normalizeText(line);
-              
-              bool isRepeatingHeader = _trackedHeaders.any((header) {
-                if (_normalizeText(header.text) == normalizedLine) {
-                  header.unusedCount = 0;
-                  return true;
-                }
-                return false;
-              });
-
-              bool isRepeatingFooter = _trackedFooters.any((footer) {
-                if (_normalizeText(footer.text) == normalizedLine) {
-                  footer.unusedCount = 0;
-                  return true;
-                }
-                return false;
-              });
-
-              return !isRepeatingHeader && !isRepeatingFooter;
-            }).toList();
-
-            // Add new potential headers/footers
-            for (var header in currentHeaders) {
-              if (!_trackedHeaders.any((h) => _normalizeText(h.text) == _normalizeText(header))) {
-                _trackedHeaders.add(_TrackedLine(header));
-              }
-            }
-            
-            for (var footer in currentFooters) {
-              if (!_trackedFooters.any((f) => _normalizeText(f.text) == _normalizeText(footer))) {
-                _trackedFooters.add(_TrackedLine(footer));
-              }
-            }
-
-            sentences.addAll(filteredLines.map((line) => line.trim()));
           }
         } catch (e) {
           continue;
