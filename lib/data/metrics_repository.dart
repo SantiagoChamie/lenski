@@ -1,5 +1,3 @@
-import 'package:lenski/models/card_model.dart';
-import 'package:lenski/models/book_model.dart';
 import 'package:lenski/models/course_metrics_model.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/data/card_repository.dart';
@@ -24,24 +22,33 @@ class MetricsRepository {
   /// 1. In the books database and marked as finished
   /// 2. In the archive database for the given language
   Future<int> getCompletedBooksCount(Course course) async {
-    final db = await _bookRepository.database;
-    final archiveDb = await _bookRepository.archiveDatabase;
+    int activeCount = 0;
+    int archivedCount = 0;
 
-    // Get finished books from active database
-    final activeResult = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM books WHERE language = ? AND finished = 1',
-      [course.code]
-    );
-    final activeCount = activeResult.first['count'] as int;
+    try {
+      final db = await _bookRepository.database;
+      final activeResult = await db.rawQuery(
+        'SELECT COUNT(*) as count FROM books WHERE language = ? AND finished = 1',
+        [course.code]
+      );
+      activeCount = activeResult.first['count'] as int;
+    } catch (e) {
+      // Database or table doesn't exist yet, keep count as 0
+      activeCount = 0;
+    }
 
-    // Get books from archive database
-    final archivedResult = await archiveDb.rawQuery(
-      'SELECT COUNT(*) as count FROM archived_books WHERE language = ?',
-      [course.code]
-    );
-    final archivedCount = archivedResult.first['count'] as int;
+    try {
+      final archiveDb = await _bookRepository.archiveDatabase;
+      final archivedResult = await archiveDb.rawQuery(
+        'SELECT COUNT(*) as count FROM archived_books WHERE language = ?',
+        [course.code]
+      );
+      archivedCount = archivedResult.first['count'] as int;
+    } catch (e) {
+      // Archive database or table doesn't exist yet, keep count as 0
+      archivedCount = 0;
+    }
 
-    // Return total of finished active books plus archived books
     return activeCount + archivedCount;
   }
 

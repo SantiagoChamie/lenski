@@ -52,10 +52,10 @@ class BookRepository {
       path,
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE archived_books(id INTEGER PRIMARY KEY, name TEXT, language TEXT, category TEXT, imageUrl TEXT)',
+          'CREATE TABLE archived_books(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, language TEXT, category TEXT, imageUrl TEXT, finishedDate INTEGER)',
         );
       },
-      version: 1,
+      version: 2,
     );
   }
 
@@ -180,92 +180,30 @@ class BookRepository {
     );
   }
 
-  /// Deletes a sentence from a book and updates the total lines count
-  Future<void> deleteSentence(int bookId, int sentenceId) async {
-    String dbName = '$bookId.db';
-    String path = join(await getDatabasesPath(), dbName);
-    Database bookDb = await openDatabase(path);
+  Future<void> archiveBook(Book book) async {
+    final archiveDb = await archiveDatabase;
 
-    await bookDb.delete(
-      'sentences',
-      where: 'id = ?',
-      whereArgs: [sentenceId],
-    );
+    // Create archived book from the book
+    final archivedBook = ArchivedBook.fromBook(book);
 
-    // Update the book's total lines count
-    final db = await database;
-    final book = (await db.query(
-      'books',
-      where: 'id = ?',
-      whereArgs: [bookId],
-    )).first;
-
-    final updatedBook = Book.fromMap(book);
-    updatedBook.totalLines--;
-    await updateBook(updatedBook);
-  }
-
-  /// Restores a deleted sentence
-  Future<void> restoreSentence(int bookId, Sentence sentence) async {
-    String dbName = '$bookId.db';
-    String path = join(await getDatabasesPath(), dbName);
-    Database bookDb = await openDatabase(path);
-
-    await bookDb.insert(
-      'sentences',
-      sentence.toMap(),
+    // Insert into archive database without specifying ID
+    await archiveDb.insert(
+      'archived_books',
+      archivedBook.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
 
-    // Update the book's total lines count
-    final db = await database;
-    final book = (await db.query(
-      'books',
-      where: 'id = ?',
-      whereArgs: [bookId],
-    )).first;
-
-    final updatedBook = Book.fromMap(book);
-    updatedBook.totalLines++;
-    await updateBook(updatedBook);
+    // Use existing deleteBook method to remove the book and its database
+    await deleteBook(book.id!);
   }
 
-  Future<void> archiveBook(Book book) async {
-    final db = await database;
-    final archiveDb = await archiveDatabase;
-
-    // Begin transaction
-    await db.transaction((txn) async {
-      // Create archived book from the book
-      final archivedBook = ArchivedBook.fromBook(book);
-
-      // Insert into archive database
-      await archiveDb.insert(
-        'archived_books',
-        archivedBook.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-
-      // Delete from books database
-      await txn.delete(
-        'books',
-        where: 'id = ?',
-        whereArgs: [book.id],
-      );
-
-      // Delete the book's sentence database
-      String dbName = '${book.id}.db';
-      String path = join(await getDatabasesPath(), dbName);
-      final file = File(path);
-      if (await file.exists()) {
-        await file.delete();
-      }
-    });
-  }
-
-  Future<List<ArchivedBook>> getArchivedBooks() async {
+  Future<List<ArchivedBook>> getArchivedBooks(String language) async {
     final db = await archiveDatabase;
-    final List<Map<String, dynamic>> maps = await db.query('archived_books');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'archived_books',
+      where: 'language = ?',
+      whereArgs: [language],
+    );
     return List.generate(maps.length, (i) {
       return ArchivedBook.fromMap(maps[i]);
     });

@@ -119,9 +119,8 @@ class _EditBookScreenState extends State<EditBookScreen> {
           if (widget.book.finished) // Only show archive button if book is finished
             SizedBox(
               child: TextButton(
-                onPressed: () {
-                  // Archive book logic here
-                  _bookRepository.archiveBook(widget.book);
+                onPressed: () async {
+                  await _bookRepository.archiveBook(widget.book);
                   if (mounted) {
                     widget.onBackPressed();
                   }
