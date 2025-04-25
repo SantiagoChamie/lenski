@@ -85,6 +85,24 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
     await bookRepository.updateBook(widget.book);
   }
 
+  /// Checks if the book should be marked as finished based on current position
+  Future<void> _checkAndMarkAsFinished(List<Sentence> sentences) async {
+    if (widget.book.finished) return;  // Skip if already finished
+
+    // Calculate if last line is visible
+    final lastVisibleLine = _currentLine + (_visibleLines ~/ 2);
+    if (lastVisibleLine+1 >= sentences.length) {
+      // Mark book as finished
+      final updatedBook = widget.book.copyWith(finished: true);
+      final bookRepository = BookRepository();
+      await bookRepository.updateBook(updatedBook);
+      
+      if (mounted) {
+        widget.book.finished = true;
+      }
+    }
+  }
+
   /// Moves to the next sentence in the book.
   void _nextSentence() {
     setState(() {
@@ -177,6 +195,9 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                               return const Text('No sentences found');
                             } else {
                               final sentences = snapshot.data!;
+                              
+                              // Move the check outside setState
+                              _checkAndMarkAsFinished(sentences);  // Remove the result display
 
                               // Concatenate all sentences into a single string
                               final textContent = List.generate(_visibleLines, (index) {

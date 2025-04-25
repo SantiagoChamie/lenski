@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/book_model.dart';
 import 'package:lenski/models/course_model.dart';
-//import 'dart:math';
 import 'package:lenski/screens/course/books/add_book_button.dart';
-import 'package:lenski/screens/course/books/edit_book_screen.dart';
 import 'package:lenski/screens/course/books/empty_book_button.dart';
 import 'package:lenski/utils/proportions.dart';
-import 'package:lenski/data/book_repository.dart';
-import 'package:lenski/screens/course/books/book_screen.dart';
+
 
 /// A button widget for displaying a book.
 class BookButton extends StatefulWidget {
@@ -72,44 +69,6 @@ class _BookButtonState extends State<BookButton> {
           });
         }
       });
-    }
-  }
-
-  /// Deletes the book from the repository.
-  Future<void> _deleteBook(BuildContext context) async {
-    if (book != null) {
-      // Show confirmation dialog
-      final bool? shouldDelete = await showDialog<bool>(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Delete Book'),
-            content: const Text('Are you sure you want to delete this book?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.red,
-                ),
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Delete'),
-              ),
-            ],
-          );
-        },
-      );
-
-      // Only delete if user confirmed
-      if (shouldDelete == true) {
-        final bookRepository = BookRepository();
-        await bookRepository.deleteBook(book!.id!);
-        if (widget.onDelete != null) {
-          widget.onDelete!();
-        }
-      }
     }
   }
 

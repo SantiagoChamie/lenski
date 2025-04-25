@@ -6,6 +6,7 @@ class Book {
   int totalLines;
   int currentLine;
   String language;
+  bool finished;  // New attribute
 
   /// Creates a Book object.
   /// 
@@ -15,6 +16,7 @@ class Book {
   /// [totalLines] is the total number of lines in the book.
   /// [currentLine] is the current line being read in the book.
   /// [language] is the language code of the book.
+  /// [finished] indicates whether the book is finished.
   Book({
     required this.id,
     required this.name,
@@ -22,6 +24,7 @@ class Book {
     required this.totalLines,
     required this.currentLine,
     required this.language,
+    this.finished = false,  // Default value
   });
 
   /// Creates a copy of this Book but with the given fields replaced with the new values.
@@ -32,6 +35,7 @@ class Book {
     int? totalLines,
     int? currentLine,
     String? language,
+    bool? finished,
   }) {
     return Book(
       id: id ?? this.id,
@@ -40,6 +44,7 @@ class Book {
       totalLines: totalLines ?? this.totalLines,
       currentLine: currentLine ?? this.currentLine,
       language: language ?? this.language,
+      finished: finished ?? this.finished,
     );
   }
 
@@ -53,6 +58,7 @@ class Book {
       'totalLines': totalLines,
       'currentLine': currentLine,
       'language': language,
+      'finished': finished ? 1 : 0,  // Convert bool to int for SQLite
     };
   }
 
@@ -65,6 +71,7 @@ class Book {
       totalLines: map['totalLines'],
       currentLine: map['currentLine'],
       language: map['language'],
+      finished: map['finished'] == 1,  // Convert int to bool from SQLite
     );
   }
 }

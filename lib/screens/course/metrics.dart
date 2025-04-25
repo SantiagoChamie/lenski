@@ -76,7 +76,7 @@ class _MetricsState extends State<Metrics> {
                   SizedBox(
                     height: widget.height,
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         const Icon(
                           Icons.psychology,
@@ -99,13 +99,14 @@ class _MetricsState extends State<Metrics> {
                             color: Colors.blue,
                           ),
                         ),
+                        const SizedBox(width: 20),
                       ],
                     ),
                   ),
                   SizedBox(
                     height: widget.height,
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         const Icon(
                           Icons.menu_book,
@@ -128,13 +129,14 @@ class _MetricsState extends State<Metrics> {
                             color: Colors.green,
                           ),
                         ),
+                        const SizedBox(width: 20),
                       ],
                     ),
                   ),
                   SizedBox(
                     height: widget.height,
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         const Icon(
                           Icons.local_fire_department,
@@ -157,6 +159,7 @@ class _MetricsState extends State<Metrics> {
                             color: Colors.orange,
                           ),
                         ),
+                        const SizedBox(width: 20),
                       ],
                     ),
                   ),

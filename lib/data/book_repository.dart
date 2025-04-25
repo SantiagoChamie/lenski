@@ -31,10 +31,10 @@ class BookRepository {
       path,
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE books(id INTEGER PRIMARY KEY, name TEXT, imageUrl TEXT, totalLines INTEGER, currentLine INTEGER, language TEXT)',
+          'CREATE TABLE books(id INTEGER PRIMARY KEY, name TEXT, imageUrl TEXT, totalLines INTEGER, currentLine INTEGER, language TEXT, finished INTEGER DEFAULT 0)',
         );
       },
-      version: 1,
+      version: 2,  // Increment version number
     );
   }
 

@@ -4,7 +4,7 @@ import 'package:lenski/screens/course/books/book_button.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/models/book_model.dart';
-import 'dart:math' as Math;
+import 'dart:math' as math;
 
 /// A widget that displays a library of books for a specific course.
 class Library extends StatefulWidget {
@@ -89,7 +89,7 @@ class _LibraryState extends State<Library> {
               : 0;
           
           // Add empty buttons to reach minimum of 2 rows or complete the last row
-          final totalButtonsNeeded = Math.max(minButtons - currentButtons, emptyButtonsNeeded);
+          final totalButtonsNeeded = math.max(minButtons - currentButtons, emptyButtonsNeeded);
           for (var i = 0; i < totalButtonsNeeded; i++) {
             bookButtons.add(const BookButton());
           }

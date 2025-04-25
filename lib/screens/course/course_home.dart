@@ -33,7 +33,6 @@ class CourseHome extends StatelessWidget {
                 imageUrl: course.imageUrl,
               ),
               SizedBox(width: p.standardPadding()),
-              //TODO: fix bug where the text keeps displaying even after navigation event
               LText(
                 text: welcomeMessages[course.name]!,
                 style: const TextStyle(
