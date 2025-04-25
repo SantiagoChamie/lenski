@@ -1,3 +1,4 @@
+import 'package:lenski/models/archived_book_model.dart';
 import 'package:lenski/models/sentence_model.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
@@ -8,6 +9,7 @@ import '../../models/book_model.dart';
 class BookRepository {
   static final BookRepository _instance = BookRepository._internal();
   Database? _database;
+  Database? _archiveDatabase;
 
   /// Factory constructor to return the singleton instance of BookRepository.
   factory BookRepository() {
@@ -35,6 +37,25 @@ class BookRepository {
         );
       },
       version: 2,  // Increment version number
+    );
+  }
+
+  Future<Database> get archiveDatabase async {
+    if (_archiveDatabase != null) return _archiveDatabase!;
+    _archiveDatabase = await _initArchiveDatabase();
+    return _archiveDatabase!;
+  }
+
+  Future<Database> _initArchiveDatabase() async {
+    String path = join(await getDatabasesPath(), 'archive.db');
+    return openDatabase(
+      path,
+      onCreate: (db, version) {
+        return db.execute(
+          'CREATE TABLE archived_books(id INTEGER PRIMARY KEY, name TEXT, language TEXT, category TEXT, imageUrl TEXT)',
+        );
+      },
+      version: 1,
     );
   }
 
@@ -207,5 +228,46 @@ class BookRepository {
     final updatedBook = Book.fromMap(book);
     updatedBook.totalLines++;
     await updateBook(updatedBook);
+  }
+
+  Future<void> archiveBook(Book book) async {
+    final db = await database;
+    final archiveDb = await archiveDatabase;
+
+    // Begin transaction
+    await db.transaction((txn) async {
+      // Create archived book from the book
+      final archivedBook = ArchivedBook.fromBook(book);
+
+      // Insert into archive database
+      await archiveDb.insert(
+        'archived_books',
+        archivedBook.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      // Delete from books database
+      await txn.delete(
+        'books',
+        where: 'id = ?',
+        whereArgs: [book.id],
+      );
+
+      // Delete the book's sentence database
+      String dbName = '${book.id}.db';
+      String path = join(await getDatabasesPath(), dbName);
+      final file = File(path);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    });
+  }
+
+  Future<List<ArchivedBook>> getArchivedBooks() async {
+    final db = await archiveDatabase;
+    final List<Map<String, dynamic>> maps = await db.query('archived_books');
+    return List.generate(maps.length, (i) {
+      return ArchivedBook.fromMap(maps[i]);
+    });
   }
 }

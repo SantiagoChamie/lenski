@@ -120,7 +120,11 @@ class _EditBookScreenState extends State<EditBookScreen> {
             SizedBox(
               child: TextButton(
                 onPressed: () {
-                  // TODO: Implement archive functionality
+                  // Archive book logic here
+                  _bookRepository.archiveBook(widget.book);
+                  if (mounted) {
+                    widget.onBackPressed();
+                  }
                 },
                 style: TextButton.styleFrom(
                   foregroundColor: const Color(0xFF2C73DE),
