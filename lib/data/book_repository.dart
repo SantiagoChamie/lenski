@@ -52,10 +52,10 @@ class BookRepository {
       path,
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE archived_books(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, language TEXT, category TEXT, imageUrl TEXT, finishedDate INTEGER)',
+          'CREATE TABLE archived_books(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, language TEXT, category TEXT, subcategory TEXT, imageUrl TEXT, finishedDate INTEGER)',
         );
       },
-      version: 2,
+      version: 3,  // Increment version number
     );
   }
 

@@ -5,8 +5,9 @@ class ArchivedBook {
   String name;
   String language;
   String category;
+  String? subcategory;  // New field
   String? imageUrl;
-  int finishedDate;  // Store as days since epoch
+  int finishedDate;
 
   ArchivedBook({
     this.id,
@@ -14,7 +15,8 @@ class ArchivedBook {
     required this.language,
     required this.imageUrl,
     this.category = '',
-    DateTime? finishedDate,  // Accept DateTime in constructor
+    this.subcategory,  // New optional parameter
+    DateTime? finishedDate,
   }) : finishedDate = _dateTimeToInt(finishedDate ?? DateTime.now());
 
   Map<String, dynamic> toMap() {
@@ -23,6 +25,7 @@ class ArchivedBook {
       'name': name,
       'language': language,
       'category': category,
+      'subcategory': subcategory,  // Add to map
       'imageUrl': imageUrl,
       'finishedDate': finishedDate,
     };
@@ -34,6 +37,7 @@ class ArchivedBook {
       name: map['name'],
       language: map['language'],
       category: map['category'],
+      subcategory: map['subcategory'],  // Read from map
       imageUrl: map['imageUrl'],
       finishedDate: _intToDateTime(map['finishedDate']),
     );

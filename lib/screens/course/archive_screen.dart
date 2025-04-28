@@ -72,7 +72,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
         }
       },
       child: Tooltip(
-        message: book.name,
+        message: '${book.name}, ${book.finishedDate}',
         child: Container(
           width: bookWidth,
           margin: const EdgeInsets.all(8.0),
@@ -133,14 +133,13 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     }
 
     final p = Proportions(context);
-    // Calculate how many books can fit in a row
-    // Book width is 120 + 16 (margins)
     const bookWidth = 136.0;
-    final availableWidth = p.createCourseWidth() - 160; // Account for padding
+    final availableWidth = p.createCourseWidth() - 160;
     final booksPerRow = (availableWidth / bookWidth).floor();
 
-    // Sort and organize books as before
+    // Group books by category first
     final booksByCategory = <String, List<ArchivedBook>>{};
+    
     for (var book in books) {
       final category = book.category.trim().isEmpty ? 'Not Categorized' : book.category;
       if (!booksByCategory.containsKey(category)) {
@@ -149,10 +148,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
       booksByCategory[category]!.add(book);
     }
 
-    booksByCategory.forEach((category, books) {
-      books.sort((a, b) => a.finishedDate.compareTo(b.finishedDate));
-    });
-
+    // Sort categories
     final orderedCategories = booksByCategory.keys.toList()
       ..sort((a, b) {
         if (a == 'Not Categorized') return -1;
@@ -163,8 +159,43 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     return SingleChildScrollView(
       child: Column(
         children: orderedCategories.map((category) {
-          final categoryBooks = booksByCategory[category]!;
-          final rowCount = (categoryBooks.length / booksPerRow).ceil();
+          var categoryBooks = booksByCategory[category]!;
+
+          // First sort all books by date
+          categoryBooks.sort((a, b) => a.finishedDate.compareTo(b.finishedDate));
+
+          // Create a map to store the position of the earliest book for each subcategory
+          final subcategoryPositions = <String, int>{};
+          final orderedBooks = <ArchivedBook>[];
+          final pendingSubcategoryBooks = <String, List<ArchivedBook>>{};
+
+          // Process books in chronological order
+          for (var book in categoryBooks) {
+            if (book.subcategory == null) {
+              // Add books without subcategory directly to the result
+              orderedBooks.add(book);
+            } else {
+              // For books with subcategory, track their position and group them
+              if (!subcategoryPositions.containsKey(book.subcategory)) {
+                // This is the first book of this subcategory - mark its position
+                subcategoryPositions[book.subcategory!] = orderedBooks.length;
+                pendingSubcategoryBooks[book.subcategory!] = [];
+              }
+              pendingSubcategoryBooks[book.subcategory!]!.add(book);
+            }
+          }
+
+          // Insert subcategory groups at their correct positions
+          subcategoryPositions.forEach((subcategory, position) {
+            final subcategoryBooks = pendingSubcategoryBooks[subcategory]!;
+            // Sort books within the subcategory by date
+            subcategoryBooks.sort((a, b) => a.finishedDate.compareTo(b.finishedDate));
+            // Insert the entire subcategory group at the position of its earliest book
+            orderedBooks.insertAll(position, subcategoryBooks);
+          });
+
+          // Calculate rows
+          final rowCount = (orderedBooks.length / booksPerRow).ceil();
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,10 +225,8 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
               ),
               ...List.generate(rowCount, (rowIndex) {
                 final startIndex = rowIndex * booksPerRow;
-                final endIndex = (startIndex + booksPerRow).clamp(0, categoryBooks.length);
-                final rowBooks = categoryBooks.sublist(startIndex, endIndex);
-
-                // Calculate how many empty spaces we need
+                final endIndex = (startIndex + booksPerRow).clamp(0, orderedBooks.length);
+                final rowBooks = orderedBooks.sublist(startIndex, endIndex);
                 final emptySpaces = booksPerRow - rowBooks.length;
 
                 return Padding(
@@ -206,12 +235,9 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ...rowBooks.map((book) => _buildBookTile(book)),
-                      // Add empty containers to fill the row
                       ...List.generate(
                         emptySpaces,
-                        (_) => Container(
-                          width: bookWidth,
-                        ),
+                        (_) => Container(width: bookWidth),
                       ),
                     ],
                   ),
@@ -310,6 +336,7 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
   late TextEditingController _nameController;
   late TextEditingController _imageUrlController;
   late TextEditingController _categoryController;
+  late TextEditingController _subcategoryController; // New controller
 
   @override
   void initState() {
@@ -317,6 +344,7 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
     _nameController = TextEditingController(text: widget.book.name);
     _imageUrlController = TextEditingController(text: widget.book.imageUrl ?? '');
     _categoryController = TextEditingController(text: widget.book.category);
+    _subcategoryController = TextEditingController(text: widget.book.subcategory ?? ''); // Initialize subcategory
   }
 
   @override
@@ -324,6 +352,7 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
     _nameController.dispose();
     _imageUrlController.dispose();
     _categoryController.dispose();
+    _subcategoryController.dispose(); // Dispose subcategory
     super.dispose();
   }
 
@@ -409,6 +438,14 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
                 border: OutlineInputBorder(),
               ),
             ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _subcategoryController,
+              decoration: const InputDecoration(
+                labelText: 'Subcategory (optional)',
+                border: OutlineInputBorder(),
+              ),
+            ),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -427,6 +464,9 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
                       language: widget.book.language,
                       imageUrl: imageUrl.isEmpty ? null : imageUrl,
                       category: _categoryController.text.trim().toLowerCase(),
+                      subcategory: _subcategoryController.text.trim().isEmpty
+                          ? null
+                          : _subcategoryController.text.trim().toLowerCase(),
                       finishedDate: DateTime.fromMillisecondsSinceEpoch(
                         widget.book.finishedDate * 86400000,
                       ),
