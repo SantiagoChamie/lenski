@@ -13,7 +13,7 @@ class ArchivedBook {
     required this.name,
     required this.language,
     required this.imageUrl,
-    this.category = 'no category',
+    this.category = '',
     DateTime? finishedDate,  // Accept DateTime in constructor
   }) : finishedDate = _dateTimeToInt(finishedDate ?? DateTime.now());
 

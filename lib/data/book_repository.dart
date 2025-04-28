@@ -208,4 +208,24 @@ class BookRepository {
       return ArchivedBook.fromMap(maps[i]);
     });
   }
+
+  Future<void> updateArchivedBook(ArchivedBook book) async {
+    final db = await archiveDatabase;
+    await db.update(
+      'archived_books',
+      book.toMap(),
+      where: 'id = ?',
+      whereArgs: [book.id],
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> deleteArchivedBook(int id) async {
+    final db = await archiveDatabase;
+    await db.delete(
+      'archived_books',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
 }
