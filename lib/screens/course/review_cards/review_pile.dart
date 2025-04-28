@@ -133,6 +133,7 @@ class _ReviewPileState extends State<ReviewPile> {
                 ),
               ),
             ),
+            if(cardFronts.length > 1)
             Positioned(
               top: 0,
               left: 40,
