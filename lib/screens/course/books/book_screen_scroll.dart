@@ -146,6 +146,38 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
     }
   }
 
+  /// Shows a confirmation dialog for archiving the book.
+  Future<void> _showArchiveConfirmation() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Archive Book'),
+        content: const Text('Are you sure you want to archive this book? Archiving will remove all of this book\'s contents.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.blue,
+            ),
+            child: const Text('Archive'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      final bookRepository = BookRepository();
+      await bookRepository.archiveBook(widget.book);
+      if (mounted) {
+        Navigator.pop(context); // Close book screen after archiving
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
@@ -458,6 +490,19 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                     ],
                   ),
                 ),
+                if (widget.book.finished) ...[
+                  Positioned(
+                    right: boxPadding + 50,
+                    bottom: boxPadding + 20,
+                    child: FloatingActionButton(
+                      onPressed: _showArchiveConfirmation,
+                      elevation: 0,
+                      hoverElevation: 0,
+                      backgroundColor: const Color(0xFF71BDE0),
+                      child: const Icon(Icons.archive_outlined, color: Colors.black),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

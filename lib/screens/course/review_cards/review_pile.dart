@@ -133,6 +133,8 @@ class _ReviewPileState extends State<ReviewPile> {
             right: 60,
             child: FloatingActionButton(
               onPressed: _navigateToAddCardScreen,
+              hoverElevation: 0,
+              elevation: 0,
               backgroundColor: const Color(0xFFD9D0DB),
               child: const Icon(Icons.add, color: Colors.black),
             ),
