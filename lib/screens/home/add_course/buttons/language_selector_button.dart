@@ -86,8 +86,8 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
                               });
                               widget.onLanguageSelected(
                                 language,
-                                languageFlags[language]!,
-                                languageCodes[language]!
+                                languageFlags[language]![0],
+                                languageCodes[language]![0]
                               );
                               Navigator.of(context).pop();
                             },
