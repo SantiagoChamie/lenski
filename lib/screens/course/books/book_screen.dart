@@ -191,7 +191,7 @@ class _BookScreenState extends State<BookScreen> {
                 size: iconSize,
                 borderWidth: 5.0,
                 borderColor: const Color(0xFFD9D0DB),
-                imageUrl: widget.course.imageUrl,
+                language: widget.course.name,
               ),
             ),
             Positioned(

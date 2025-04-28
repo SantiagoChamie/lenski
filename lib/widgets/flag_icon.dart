@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:lenski/utils/languages.dart';
 
 /// A circular flag icon with a border
 class FlagIcon extends StatelessWidget {
   final double size;
   final double borderWidth;
-  final String imageUrl;
+  final String language;
   final Color? borderColor;
 
   /// Creates a FlagIcon widget.
@@ -18,7 +19,7 @@ class FlagIcon extends StatelessWidget {
     super.key,
     required this.size,
     required this.borderWidth,
-    required this.imageUrl,
+    required this.language,
     this.borderColor,
   });
 
@@ -33,7 +34,7 @@ class FlagIcon extends StatelessWidget {
       ),
       child: ClipOval(
         child: CachedNetworkImage(
-          imageUrl: imageUrl,
+          imageUrl: languageFlags[language]!,
           fit: BoxFit.cover,
           width: size,
           height: size,

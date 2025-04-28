@@ -3,8 +3,8 @@ import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/widgets/flag_icon.dart';
 
 class EmptyPile extends StatelessWidget {
-  final String imageUrl;
-  const EmptyPile({super.key, required this.imageUrl});
+  final String language;
+  const EmptyPile({super.key, required this.language});
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +52,7 @@ class EmptyPile extends StatelessWidget {
               size: iconSize,
               borderWidth: 5.0,
               borderColor: const Color(0xFFD9D0DB),
-              imageUrl: imageUrl,
+              language: language,
             ),
           ),
           Positioned(

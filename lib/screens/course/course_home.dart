@@ -30,7 +30,7 @@ class CourseHome extends StatelessWidget {
                 size: 100.0,
                 borderWidth: 5.0,
                 borderColor: const Color(0xFFD9D0DB),
-                imageUrl: course.imageUrl,
+                language: course.name,
               ),
               SizedBox(width: p.standardPadding()),
               LText(
