@@ -87,7 +87,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
       final card = custom_card.Card(
         front: widget.text,
         back: backText,
-        context: widget.contextText,
+        context: _useContext ? widget.contextText : widget.text,
         dueDate: DateTime.now().add(Duration(days: i)),
         language: widget.sourceLang,
         type: types[i],
