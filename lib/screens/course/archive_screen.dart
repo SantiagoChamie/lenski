@@ -71,48 +71,61 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
           });
         }
       },
-      child: Tooltip(
-        message: '${book.name}, ${book.finishedDate}',
-        child: Container(
-          width: bookWidth,
-          margin: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Container(
-                height: bookWidth * 4 / 3,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: book.imageUrl == null ? const Color(0xFF71BDE0) : null,
-                  // Only add border if there's an image
-                  border: book.imageUrl != null ? null : null,
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: (book.imageUrl != null && book.imageUrl!.isNotEmpty)
-                      ? Image.network(
-                          book.imageUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return const Center(
-                              child: Icon(
-                                Icons.broken_image,
-                                size: 48,
-                                color: Colors.white,
-                              ),
-                            );
-                          },
-                        )
-                      : const Center(
-                          child: Icon(
-                            Icons.book,
-                            size: 48,
-                            color: Colors.white,
-                          ),
-                        ),
-                ),
+      child: Container(
+        width: bookWidth,
+        margin: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Container(
+              height: bookWidth * 4 / 3,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: book.imageUrl == null ? const Color(0xFF71BDE0) : null,
+                // Only add border if there's an image
+                border: book.imageUrl != null ? null : null,
               ),
-            ],
-          ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: (book.imageUrl != null && book.imageUrl!.isNotEmpty)
+                    ? Image.network(
+                        book.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Center(
+                            child: Icon(
+                              Icons.broken_image,
+                              size: 48,
+                              color: Colors.white,
+                            ),
+                          );
+                        },
+                      )
+                    : const Center(
+                        child: Icon(
+                          Icons.book,
+                          size: 48,
+                          color: Colors.white,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 40, // Fixed height for two lines of text
+              width: bookWidth,
+              child: Text(
+                book.name,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontFamily: "Sansation",
+                  color: Colors.black,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
         ),
       ),
     );

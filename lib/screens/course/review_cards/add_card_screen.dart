@@ -59,7 +59,6 @@ class _AddCardScreenState extends State<AddCardScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Add a new card!', style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
                 Expanded(
                   child: Padding(
                     padding: EdgeInsets.all(p.standardPadding()),
@@ -96,17 +95,20 @@ class _AddCardScreenState extends State<AddCardScreen> {
                                 maxLines: 1,
                               ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.translate),
-                              onPressed: () async {
-                                final translatedText = await TranslationService().translate(
-                                  text: frontController.text,
-                                  sourceLang: widget.course.code,
-                                  targetLang: widget.course.fromCode,
-                                  context: contextController.text,
-                                );
-                                backController.text = translatedText;
-                              },
+                            Tooltip(
+                              message: 'Translate front text',
+                              child: IconButton(
+                                icon: const Icon(Icons.translate),
+                                onPressed: () async {
+                                  final translatedText = await TranslationService().translate(
+                                    text: frontController.text,
+                                    sourceLang: widget.course.code,
+                                    targetLang: widget.course.fromCode,
+                                    context: contextController.text,
+                                  );
+                                  backController.text = translatedText;
+                                },
+                              ),
                             ),
                           ],
                         ),
@@ -130,7 +132,7 @@ class _AddCardScreenState extends State<AddCardScreen> {
                         Padding(
                           padding: EdgeInsets.only(top: p.standardPadding()),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               for (final type in ['reading', 'writing', 'listening', 'speaking'])
                                 GestureDetector(
@@ -143,11 +145,14 @@ class _AddCardScreenState extends State<AddCardScreen> {
                                       }
                                     });
                                   },
-                                  child: Opacity(
-                                    opacity: selectedCompetences[type]! ? 1.0 : 0.3,
-                                    child: CompetenceIcon(
-                                      size: 40,
-                                      type: type,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                    child: Opacity(
+                                      opacity: selectedCompetences[type]! ? 1.0 : 0.3,
+                                      child: CompetenceIcon(
+                                        size: 40,
+                                        type: type,
+                                      ),
                                     ),
                                   ),
                                 ),
