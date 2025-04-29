@@ -4,9 +4,9 @@ import 'package:lenski/screens/course/books/book_screen_scroll.dart';
 import 'package:lenski/screens/home/courses.dart';
 import 'package:lenski/screens/course/course_home.dart';
 import 'package:lenski/screens/course/review_cards/review_screen.dart';
-import 'package:lenski/screens/course/books/book_screen.dart';
 import 'package:lenski/models/book_model.dart';
 import 'package:lenski/screens/settings/settings_screen.dart';
+import 'package:lenski/screens/course/archive_screen.dart';
 import 'sidebar.dart';
 
 /// A widget that handles navigation within the app.
@@ -82,6 +82,10 @@ class NavigationHandlerState extends State<NavigationHandler> {
                     break;
                   case 'Settings':
                     builder = (BuildContext _) => const SettingsScreen();
+                    break;
+                  case 'Archive':
+                    final course = settings.arguments as Course;
+                    builder = (BuildContext _) => ArchiveScreen(course: course);
                     break;
                   default:
                     builder = (BuildContext _) => const Courses();

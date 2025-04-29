@@ -47,7 +47,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   //TODO: make this elegant
   String _selectedLanguage = 'English';
   String _selectedLanguageCode = languageCodes['English']!;
-  String _selectedFlagUrl = languageFlags['English']!;
+  String _selectedFlagUrl = languageFlags['English']![0];
   
   String _selectedOriginLanguage = 'Español';
   String _selectedOriginLanguageCode = languageCodes['Español']!;

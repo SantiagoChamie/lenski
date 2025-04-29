@@ -6,6 +6,7 @@ import 'package:lenski/screens/course/books/library.dart';
 import 'package:lenski/screens/course/books/add_book_screen.dart';
 import 'package:lenski/screens/course/review_cards/review_pile.dart';
 import 'package:lenski/screens/course/review_cards/add_card_screen.dart';
+import 'package:lenski/utils/proportions.dart';
 
 /// A widget that navigates between different screens within a course.
 class CourseNavigator extends StatefulWidget {
@@ -60,6 +61,7 @@ class _CourseNavigatorState extends State<CourseNavigator> {
 
   @override
   Widget build(BuildContext context) {
+    final p = Proportions(context);
     if (_showAddBookScreen) {
       return AddBookScreen(
         onBackPressed: _toggleAddBookScreen,
@@ -71,19 +73,48 @@ class _CourseNavigatorState extends State<CourseNavigator> {
         onBackPressed: _closeEditBookScreen,
       );
     } else {
-      return Row(
+      return Stack(
         children: [
-          _showAddCardScreen 
-              ? AddCardScreen(onBackPressed: _toggleAddCardScreen, course: widget.course)
-              : ReviewPile(course: widget.course, onNewPressed: _toggleAddCardScreen),
-          const Spacer(),
-          Center(
-            child: Library(
-              course: widget.course,
-              onAddBookPressed: _toggleAddBookScreen,
-              onEditBook: _showEditBookScreen,
+          Row(
+            children: [
+              _showAddCardScreen 
+                  ? AddCardScreen(onBackPressed: _toggleAddCardScreen, course: widget.course)
+                  : ReviewPile(course: widget.course, onNewPressed: _toggleAddCardScreen),
+              const Spacer(),
+              Center(
+                child: Library(
+                  course: widget.course,
+                  onAddBookPressed: _toggleAddBookScreen,
+                  onEditBook: _showEditBookScreen,
+                ),
+              ),
+            ],
+          ),
+          Positioned(
+          bottom: p.standardPadding(),
+          right: p.standardPadding(),
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              border: Border.all(
+                color: const Color(0xFF2C73DE),
+                width: 2,
+              ),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.archive_outlined),
+              color: const Color(0xFF2C73DE),
+              onPressed: () {
+                Navigator.of(context).pushNamed(
+                  'Archive',
+                  arguments: widget.course,
+                );
+              },
+              tooltip: 'Open Archive',
             ),
           ),
+        ),
         ],
       );
     }

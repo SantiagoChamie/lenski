@@ -85,6 +85,24 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
     await bookRepository.updateBook(widget.book);
   }
 
+  /// Checks if the book should be marked as finished based on current position
+  Future<void> _checkAndMarkAsFinished(List<Sentence> sentences) async {
+    if (widget.book.finished) return;  // Skip if already finished
+
+    // Calculate if last line is visible
+    final lastVisibleLine = _currentLine + (_visibleLines ~/ 2);
+    if (lastVisibleLine+1 >= sentences.length) {
+      // Mark book as finished
+      final updatedBook = widget.book.copyWith(finished: true);
+      final bookRepository = BookRepository();
+      await bookRepository.updateBook(updatedBook);
+      
+      if (mounted) {
+        widget.book.finished = true;
+      }
+    }
+  }
+
   /// Moves to the next sentence in the book.
   void _nextSentence() {
     setState(() {
@@ -124,6 +142,38 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
         _nextSentence();
       } else if (event.scrollDelta.dy < -10) {
         _previousSentence();
+      }
+    }
+  }
+
+  /// Shows a confirmation dialog for archiving the book.
+  Future<void> _showArchiveConfirmation() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Archive Book'),
+        content: const Text('Are you sure you want to archive this book? Archiving will remove all of this book\'s contents.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.blue,
+            ),
+            child: const Text('Archive'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      final bookRepository = BookRepository();
+      await bookRepository.archiveBook(widget.book);
+      if (mounted) {
+        Navigator.pop(context); // Close book screen after archiving
       }
     }
   }
@@ -177,6 +227,9 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                               return const Text('No sentences found');
                             } else {
                               final sentences = snapshot.data!;
+                              
+                              // Move the check outside setState
+                              _checkAndMarkAsFinished(sentences);  // Remove the result display
 
                               // Concatenate all sentences into a single string
                               final textContent = List.generate(_visibleLines, (index) {
@@ -278,7 +331,7 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                     size: 80.0,
                     borderWidth: 5.0,
                     borderColor: const Color(0xFFD9D0DB),
-                    imageUrl: widget.course.imageUrl,
+                    language: widget.course.name,
                   ),
                 ),
                 Positioned(
@@ -437,6 +490,19 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                     ],
                   ),
                 ),
+                if (widget.book.finished) ...[
+                  Positioned(
+                    right: boxPadding + 50,
+                    bottom: boxPadding + 20,
+                    child: FloatingActionButton(
+                      onPressed: _showArchiveConfirmation,
+                      elevation: 0,
+                      hoverElevation: 0,
+                      backgroundColor: const Color(0xFF71BDE0),
+                      child: const Icon(Icons.archive_outlined, color: Colors.black),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

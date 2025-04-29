@@ -86,8 +86,8 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
                               });
                               widget.onLanguageSelected(
                                 language,
-                                languageFlags[language]!,
-                                languageCodes[language]!
+                                languageFlags[language]![0],
+                                languageCodes[language]![0]
                               );
                               Navigator.of(context).pop();
                             },
@@ -101,7 +101,7 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
                                   FlagIcon(
                                     size: 30,
                                     borderWidth: 0,
-                                    imageUrl: languageFlags[language]!,
+                                    language: language,
                                   ),
                                   const SizedBox(width: 16),
                                   Text(
@@ -155,7 +155,7 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
           FlagIcon(
             size: 30,
             borderWidth: 0,
-            imageUrl: languageFlags[_selectedLanguage]!,
+            language: _selectedLanguage,
           ),
           const SizedBox(width: 8), // Space between flag icon and text
           Text(_selectedLanguage, style: const TextStyle(fontSize: 20, fontFamily: "Varela Round", color: Colors.black)), // Text on the left

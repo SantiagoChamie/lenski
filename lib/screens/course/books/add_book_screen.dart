@@ -3,7 +3,8 @@ import 'package:lenski/screens/course/books/loading_overlay.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_creator.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:dotted_border/dotted_border.dart';  // Add this import at the top
+import 'package:dotted_border/dotted_border.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddBookScreen extends StatefulWidget {
   final VoidCallback onBackPressed;
@@ -21,10 +22,25 @@ class AddBookScreen extends StatefulWidget {
 
 class _AddBookScreenState extends State<AddBookScreen> {
   final TextEditingController textController = TextEditingController();
-  bool isFileMode = true; // Changed to true to show file section first
   bool isLoading = false;
   String? selectedFilePath;
   final BookCreator _bookCreator = BookCreator();
+  bool? isFileMode; // Change to nullable bool
+
+  static const String _prefKey = 'last_used_file_mode';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLastUsedMode();
+  }
+
+  Future<void> _loadLastUsedMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isFileMode = prefs.getBool(_prefKey) ?? true;
+    });
+  }
 
   Future<void> pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -51,7 +67,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
             margin: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isFileMode ? const Color(0xFF2C73DE) : Colors.grey,
+              color: isFileMode == true ? const Color(0xFF2C73DE) : Colors.grey,
             ),
           ),
         ),
@@ -63,7 +79,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
             margin: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: !isFileMode ? const Color(0xFF2C73DE) : Colors.grey,
+              color: isFileMode == false ? const Color(0xFF2C73DE) : Colors.grey,
             ),
           ),
         ),
@@ -90,7 +106,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
             child: child,
           );
         },
-        child: isFileMode
+        child: isFileMode == true
             ? _buildFileSelector().copyWith(key: const ValueKey('file'))
             : _buildTextInput().copyWith(key: const ValueKey('text')),
       ),
@@ -98,12 +114,12 @@ class _AddBookScreenState extends State<AddBookScreen> {
   }
 
   bool _hasText() {
-    return isFileMode 
+    return isFileMode == true 
         ? selectedFilePath != null 
         : textController.text.trim().isNotEmpty;
   }
 
-  void _switchMode(bool toFileMode) {
+  void _switchMode(bool toFileMode) async {
     if (isFileMode != toFileMode) {
       setState(() {
         if (toFileMode) {
@@ -113,12 +129,24 @@ class _AddBookScreenState extends State<AddBookScreen> {
         }
         isFileMode = toFileMode;
       });
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_prefKey, toFileMode);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
+
+    // Add null check for isFileMode
+    if (isFileMode == null) {
+      return const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2C73DE)),
+        ),
+      );
+    }
 
     return Scaffold(
       body: Stack(
@@ -173,15 +201,13 @@ class _AddBookScreenState extends State<AddBookScreen> {
                                     }
                                     setState(() => isLoading = true);
                                     try {
-                                      if (isFileMode) {
+                                      if (isFileMode == true) {
                                         await _bookCreator.processFile(selectedFilePath!, widget.languageCode);
-                                        // Use the public getter instead of the private field
                                         if (!_bookCreator.isCancelled) {
                                           widget.onBackPressed();
                                         }
                                       } else {
                                         _bookCreator.processBook(textController.text, widget.languageCode);
-                                        // Use the public getter instead of the private field
                                         if (!_bookCreator.isCancelled) {
                                           widget.onBackPressed();
                                         }
@@ -195,8 +221,8 @@ class _AddBookScreenState extends State<AddBookScreen> {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    disabledBackgroundColor: Colors.grey[300], // Optional: style for disabled state
-                                    disabledForegroundColor: Colors.grey[600], // Optional: style for disabled state
+                                    disabledBackgroundColor: Colors.grey[300],
+                                    disabledForegroundColor: Colors.grey[600],
                                   ),
                                   child: const Text(
                                     "Start learning!",
@@ -226,12 +252,12 @@ class _AddBookScreenState extends State<AddBookScreen> {
                   ),
                   Positioned(
                     top: p.createCourseHeight() / 3,
-                    left: isFileMode ? null : 0,
-                    right: isFileMode ? 0 : null,
+                    left: isFileMode == true ? null : 0,
+                    right: isFileMode == true ? 0 : null,
                     child: IconButton(
-                      onPressed: () => _switchMode(!isFileMode),
+                      onPressed: () => _switchMode(!(isFileMode == true)),
                       icon: Icon(
-                        isFileMode 
+                        isFileMode == true 
                           ? Icons.keyboard_arrow_right
                           : Icons.keyboard_arrow_left
                       ),
@@ -247,7 +273,6 @@ class _AddBookScreenState extends State<AddBookScreen> {
               onCancel: () {
                 _bookCreator.cancelProcessing();
                 setState(() => isLoading = false);
-                // No widget.onBackPressed() here
               },
             ),
         ],

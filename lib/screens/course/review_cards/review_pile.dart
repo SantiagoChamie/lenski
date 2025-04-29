@@ -22,6 +22,7 @@ class _ReviewPileState extends State<ReviewPile> {
   String? displayText;
   List<String> cardFronts = [];
   bool _disposed = false;
+  bool _isHovered = false;
 
   @override
   void initState() {
@@ -85,59 +86,75 @@ class _ReviewPileState extends State<ReviewPile> {
   Widget build(BuildContext context) {
     final p = Proportions(context);
 
-    return GestureDetector(
-      onTap: () {
-        final navigatorKey = Navigator.of(context).widget.key as GlobalKey<NavigatorState>;
-        navigatorKey.currentState?.pushNamed(
-          'Review',
-          arguments: widget.course,
-        );
-      },
-      child: Stack(
-        children: [
-          SizedBox(
-            width: p.mainScreenWidth() / 2,
-            height: double.infinity,
-            child: Container(
-              margin: EdgeInsets.only(bottom: p.standardPadding() * 2, left: p.standardPadding() * 2, right: p.standardPadding() * 2),
-              width: p.mainScreenWidth() / 2 - 40,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5F0F6),
-                borderRadius: BorderRadius.circular(5.0),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black38,
-                    blurRadius: 4.0,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Text(
-                  displayText ?? 'Loading...',
-                  style: const TextStyle(fontSize: 24, fontFamily: 'Telex'),
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: () {
+          final navigatorKey = Navigator.of(context).widget.key as GlobalKey<NavigatorState>;
+          navigatorKey.currentState?.pushNamed(
+            'Review',
+            arguments: widget.course,
+          );
+        },
+        child: Stack(
+          children: [
+            SizedBox(
+              width: p.mainScreenWidth() / 2,
+              height: double.infinity,
+              child: Container(
+                margin: EdgeInsets.only(
+                  bottom: p.standardPadding() * 2,
+                  left: p.standardPadding() * 2,
+                  right: p.standardPadding() * 2
+                ),
+                width: p.mainScreenWidth() / 2 - 40,
+                decoration: BoxDecoration(
+                  color: _isHovered ? const Color(0xFFF8F4F9) : const Color(0xFFF5F0F6),
+                  borderRadius: BorderRadius.circular(5.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _isHovered ? Colors.black45 : Colors.black38,
+                      blurRadius: _isHovered ? 6.0 : 4.0,
+                      offset: Offset(0, _isHovered ? 3 : 2),
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  children: [
+                    Center(
+                      child: Text(
+                        displayText ?? 'Loading...',
+                        style: const TextStyle(fontSize: 24, fontFamily: 'Telex'),
+                      ),
+                    ),
+                    
+                  ],
                 ),
               ),
             ),
-          ),
-          Positioned(
-            top: 0,
-            left: 40,
-            child: IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _refreshWord,
+            if(cardFronts.length > 1)
+            Positioned(
+              top: 0,
+              left: 40,
+              child: IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: _refreshWord,
+              ),
             ),
-          ),
-          Positioned(
-            bottom: 60,
-            right: 60,
-            child: FloatingActionButton(
-              onPressed: _navigateToAddCardScreen,
-              backgroundColor: const Color(0xFFD9D0DB),
-              child: const Icon(Icons.add, color: Colors.black),
+            Positioned(
+              bottom: 60,
+              right: 60,
+              child: FloatingActionButton(
+                onPressed: _navigateToAddCardScreen,
+                hoverElevation: 0,
+                elevation: 0,
+                backgroundColor: const Color(0xFFD9D0DB),
+                child: const Icon(Icons.add, color: Colors.black),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

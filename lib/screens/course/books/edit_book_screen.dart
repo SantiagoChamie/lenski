@@ -116,6 +116,28 @@ class _EditBookScreenState extends State<EditBookScreen> {
             '${widget.book.currentLine} / ${widget.book.totalLines} lines ' 
             '(${(widget.book.currentLine / widget.book.totalLines * 100).toInt()}%)'
           ),
+          if (widget.book.finished) // Only show archive button if book is finished
+            SizedBox(
+              child: TextButton(
+                onPressed: () async {
+                  await _bookRepository.archiveBook(widget.book);
+                  if (mounted) {
+                    widget.onBackPressed();
+                  }
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF2C73DE),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: const Text(
+                  'Archive book',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'Varela Round',
+                  ),
+                ),
+              ),
+            ),
           SizedBox(
             child: TextButton(
               onPressed: () => _deleteBook(context),

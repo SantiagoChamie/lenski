@@ -67,7 +67,7 @@ class _CourseButtonState extends State<CourseButton> {
                       FlagIcon(
                         size: 150,
                         borderWidth: 7,
-                        imageUrl: widget.course.imageUrl,
+                        language: widget.course.name,
                       ),
                       const SizedBox(height: 20, width: 20),
                       Text(widget.course.name, style: const TextStyle(fontSize: 40, fontFamily: "Unbounded", color: Colors.white)),

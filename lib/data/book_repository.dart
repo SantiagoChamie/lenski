@@ -1,3 +1,4 @@
+import 'package:lenski/models/archived_book_model.dart';
 import 'package:lenski/models/sentence_model.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
@@ -8,6 +9,7 @@ import '../../models/book_model.dart';
 class BookRepository {
   static final BookRepository _instance = BookRepository._internal();
   Database? _database;
+  Database? _archiveDatabase;
 
   /// Factory constructor to return the singleton instance of BookRepository.
   factory BookRepository() {
@@ -31,10 +33,29 @@ class BookRepository {
       path,
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE books(id INTEGER PRIMARY KEY, name TEXT, imageUrl TEXT, totalLines INTEGER, currentLine INTEGER, language TEXT)',
+          'CREATE TABLE books(id INTEGER PRIMARY KEY, name TEXT, imageUrl TEXT, totalLines INTEGER, currentLine INTEGER, language TEXT, finished INTEGER DEFAULT 0)',
         );
       },
-      version: 1,
+      version: 2,  // Increment version number
+    );
+  }
+
+  Future<Database> get archiveDatabase async {
+    if (_archiveDatabase != null) return _archiveDatabase!;
+    _archiveDatabase = await _initArchiveDatabase();
+    return _archiveDatabase!;
+  }
+
+  Future<Database> _initArchiveDatabase() async {
+    String path = join(await getDatabasesPath(), 'archive.db');
+    return openDatabase(
+      path,
+      onCreate: (db, version) {
+        return db.execute(
+          'CREATE TABLE archived_books(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, language TEXT, category TEXT, subcategory TEXT, imageUrl TEXT, finishedDate INTEGER)',
+        );
+      },
+      version: 3,  // Increment version number
     );
   }
 
@@ -159,53 +180,52 @@ class BookRepository {
     );
   }
 
-  /// Deletes a sentence from a book and updates the total lines count
-  Future<void> deleteSentence(int bookId, int sentenceId) async {
-    String dbName = '$bookId.db';
-    String path = join(await getDatabasesPath(), dbName);
-    Database bookDb = await openDatabase(path);
+  Future<void> archiveBook(Book book) async {
+    final archiveDb = await archiveDatabase;
 
-    await bookDb.delete(
-      'sentences',
-      where: 'id = ?',
-      whereArgs: [sentenceId],
-    );
+    // Create archived book from the book
+    final archivedBook = ArchivedBook.fromBook(book);
 
-    // Update the book's total lines count
-    final db = await database;
-    final book = (await db.query(
-      'books',
-      where: 'id = ?',
-      whereArgs: [bookId],
-    )).first;
-
-    final updatedBook = Book.fromMap(book);
-    updatedBook.totalLines--;
-    await updateBook(updatedBook);
-  }
-
-  /// Restores a deleted sentence
-  Future<void> restoreSentence(int bookId, Sentence sentence) async {
-    String dbName = '$bookId.db';
-    String path = join(await getDatabasesPath(), dbName);
-    Database bookDb = await openDatabase(path);
-
-    await bookDb.insert(
-      'sentences',
-      sentence.toMap(),
+    // Insert into archive database without specifying ID
+    await archiveDb.insert(
+      'archived_books',
+      archivedBook.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
 
-    // Update the book's total lines count
-    final db = await database;
-    final book = (await db.query(
-      'books',
-      where: 'id = ?',
-      whereArgs: [bookId],
-    )).first;
+    // Use existing deleteBook method to remove the book and its database
+    await deleteBook(book.id!);
+  }
 
-    final updatedBook = Book.fromMap(book);
-    updatedBook.totalLines++;
-    await updateBook(updatedBook);
+  Future<List<ArchivedBook>> getArchivedBooks(String language) async {
+    final db = await archiveDatabase;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'archived_books',
+      where: 'language = ?',
+      whereArgs: [language],
+    );
+    return List.generate(maps.length, (i) {
+      return ArchivedBook.fromMap(maps[i]);
+    });
+  }
+
+  Future<void> updateArchivedBook(ArchivedBook book) async {
+    final db = await archiveDatabase;
+    await db.update(
+      'archived_books',
+      book.toMap(),
+      where: 'id = ?',
+      whereArgs: [book.id],
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> deleteArchivedBook(int id) async {
+    final db = await archiveDatabase;
+    await db.delete(
+      'archived_books',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }

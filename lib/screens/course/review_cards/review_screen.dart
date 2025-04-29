@@ -145,7 +145,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
     const iconSize = 80.0;
 
     if (cards.isEmpty) {
-      return EmptyPile(imageUrl: widget.course.imageUrl,);
+      return EmptyPile(language: widget.course.name);
     }
 
     final currentCard = cards.first;
@@ -221,7 +221,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
             size: iconSize,
             borderWidth: 5.0,
             borderColor: const Color(0xFFD9D0DB),
-            imageUrl: widget.course.imageUrl,
+            language: widget.course.name,
           ),
         ),
         Positioned(
