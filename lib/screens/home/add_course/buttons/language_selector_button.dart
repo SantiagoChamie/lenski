@@ -32,21 +32,22 @@ class LanguageSelectorButton extends StatefulWidget {
 /// Contains the information to create the course
 class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
   late String _selectedLanguage;
-  late int _selectedFlagIndex;  // Add this variable
+  int _selectedFlagIndex = 0;  // Initialize with default value instead of using late
 
   @override
   void initState() {
     super.initState();
     _selectedLanguage = widget.startingLanguage;
-    _loadSavedFlagIndex();  // Add this call
+    _loadSavedFlagIndex();
   }
 
-  // Add this method to load the saved flag index
   Future<void> _loadSavedFlagIndex() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _selectedFlagIndex = prefs.getInt('flag_$_selectedLanguage') ?? 0;
-    });
+    if (mounted) {  // Check if widget is still mounted
+      setState(() {
+        _selectedFlagIndex = prefs.getInt('flag_$_selectedLanguage') ?? 0;
+      });
+    }
   }
 
   /// Displays a dialog for selecting a language.

@@ -266,7 +266,7 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                                               color: const Color.fromARGB(255, 0, 0, 0),
                                               fontFamily: "Varela Round",
                                             ),
-                                            textAlign: TextAlign.justify,
+                                            textAlign: widget.course.code != 'AR' ? TextAlign.justify : TextAlign.end,
                                             cardTypes: [
                                               if (widget.course.reading) 'reading',
                                               if (widget.course.writing) 'writing',
