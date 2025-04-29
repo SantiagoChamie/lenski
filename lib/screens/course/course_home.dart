@@ -34,7 +34,7 @@ class CourseHome extends StatelessWidget {
               ),
               SizedBox(width: p.standardPadding()),
               LText(
-                text: welcomeMessages[course.name]!,
+                text: getWelcomeMessage(course.name),
                 style: const TextStyle(
                   fontSize: 24.0,
                   color: Color.fromARGB(255, 0, 0, 0),
