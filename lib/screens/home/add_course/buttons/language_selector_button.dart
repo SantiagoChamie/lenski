@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/languages.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// A button widget for selecting a language.
 class LanguageSelectorButton extends StatefulWidget {
@@ -31,11 +32,21 @@ class LanguageSelectorButton extends StatefulWidget {
 /// Contains the information to create the course
 class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
   late String _selectedLanguage;
+  late int _selectedFlagIndex;  // Add this variable
 
   @override
   void initState() {
     super.initState();
     _selectedLanguage = widget.startingLanguage;
+    _loadSavedFlagIndex();  // Add this call
+  }
+
+  // Add this method to load the saved flag index
+  Future<void> _loadSavedFlagIndex() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _selectedFlagIndex = prefs.getInt('flag_$_selectedLanguage') ?? 0;
+    });
   }
 
   /// Displays a dialog for selecting a language.
@@ -80,14 +91,17 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
                           borderRadius: BorderRadius.circular(10),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(10),
-                            onTap: () {
-                              setState(() {
+                            onTap: () async {
+                              SharedPreferences prefs = await SharedPreferences.getInstance();
+                              var currentIndex = prefs.getInt('flag_$language') ?? 0;
+                              setState(() { 
                                 _selectedLanguage = language;
+                                _selectedFlagIndex = currentIndex;  // Update the flag index
                               });
                               widget.onLanguageSelected(
                                 language,
-                                languageFlags[language]![0],
-                                languageCodes[language]![0]
+                                languageFlags[language]![currentIndex],
+                                languageCodes[language]!
                               );
                               Navigator.of(context).pop();
                             },
@@ -156,6 +170,7 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
             size: 30,
             borderWidth: 0,
             language: _selectedLanguage,
+            key: ValueKey('$_selectedLanguage-$_selectedFlagIndex'),  // Add a key to force rebuild
           ),
           const SizedBox(width: 8), // Space between flag icon and text
           Text(_selectedLanguage, style: const TextStyle(fontSize: 20, fontFamily: "Varela Round", color: Colors.black)), // Text on the left

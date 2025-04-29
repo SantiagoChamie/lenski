@@ -32,6 +32,7 @@ class TranslationService {
       return _cache[cacheKey]!;
     }
 
+    print('Translating "$text" from $sourceLang to $targetLang with context "$context"');
     // Check the CardRepository for an existing card
     final existingCardBack = await _checkCardRepository(text, context);
     if (existingCardBack != null) {
