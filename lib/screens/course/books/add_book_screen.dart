@@ -199,17 +199,18 @@ class _AddBookScreenState extends State<AddBookScreen> {
                               children: [
                                 const Text('Add your own texts!', 
                                   style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
-                                if (['JA', 'ZH', 'KO'].contains(widget.languageCode))
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: Tooltip(
-                                      message: 'PDFs with vertical text (top to bottom) are not supported',
-                                      child: Icon(Icons.help_outline, 
-                                        size: 20, 
-                                        color: Colors.grey[600]
-                                      ),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: Tooltip(
+                                    message: 'Poor quality PDFs will not work properly.${(['JA', 'ZH', 'KO'].contains(widget.languageCode)) 
+                                        ? '\n\nPDFs with vertical text (top to bottom) are not supported'
+                                        : ''}',
+                                    child: Icon(Icons.help_outline, 
+                                      size: 20, 
+                                      color: Colors.grey[600]
                                     ),
                                   ),
+                                ),
                               ],
                             ),
                             Expanded(
@@ -318,17 +319,19 @@ class _AddBookScreenState extends State<AddBookScreen> {
                             children: [
                               const Text('Add your own texts!', 
                                 style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
-                              if (['JA', 'ZH', 'KO'].contains(widget.languageCode))
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  child: Tooltip(
-                                    message: 'PDFs with vertical text (top to bottom) are not supported',
-                                    child: Icon(Icons.help_outline, 
-                                      size: 20, 
-                                      color: Colors.grey[600]
-                                    ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: Tooltip(
+                                  message: 'Poor quality PDFs will not work properly.'
+                                    + ((['JA', 'ZH', 'KO'].contains(widget.languageCode)) 
+                                      ? '\n\nPDFs with vertical text (top to bottom) are not supported'
+                                      : ''),
+                                  child: Icon(Icons.help_outline, 
+                                    size: 20, 
+                                    color: Colors.grey[600]
                                   ),
                                 ),
+                              ),
                             ],
                           ),
                           Expanded(
