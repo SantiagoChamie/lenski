@@ -35,13 +35,13 @@ class CourseHome extends StatelessWidget {
               SizedBox(width: p.standardPadding()),
               LText(
                 text: getWelcomeMessage(course.name),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24.0,
-                  color: Color.fromARGB(255, 0, 0, 0),
-                  fontFamily: "Unbounded",
+                  color: const Color.fromARGB(255, 0, 0, 0),
+                  fontFamily: course.code != 'EL' ? "Unbounded": "Lexend",
                   decoration: TextDecoration.underline,
                   decorationStyle: TextDecorationStyle.dotted,
-                  decorationColor: Color.fromARGB(255, 0, 0, 0),
+                  decorationColor: const Color.fromARGB(255, 0, 0, 0),
                 ),
                 fromLanguage: course.fromCode,
                 toLanguage: course.code,

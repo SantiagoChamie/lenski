@@ -77,7 +77,7 @@ class BookCreator {
           content = await _processSrtFile(filePath);
           break;
         case '.pdf':
-          content = await _processPdfFile(filePath);
+          content = await _processPdfFile(filePath, code);
           break;
         default:
           throw Exception('Unsupported file format');
@@ -117,12 +117,13 @@ class BookCreator {
     ).toList();
   }
 
-  Future<List<String>> _processPdfFile(String filePath) async {
+  Future<List<String>> _processPdfFile(String filePath, String languageCode) async {
     final List<String> sentences = [];
     final File file = File(filePath);
     final PdfDocument document = PdfDocument(inputBytes: await file.readAsBytes());
 
     try {
+      
       for (int pageIndex = 0; pageIndex < document.pages.count; pageIndex++) {
         // Increment unused count for all tracked lines
         for (var header in _trackedHeaders) {
@@ -143,6 +144,7 @@ class BookCreator {
         final PdfTextExtractor extractor = PdfTextExtractor(document);
         
         try {
+          if(languageCode != 'EL'){
           // Primary method: Structured text extraction
           final textLines = extractor.extractTextLines(
             startPageIndex: pageIndex,
@@ -221,7 +223,7 @@ class BookCreator {
 
             sentences.addAll(filteredLines);
             continue;
-          }
+          }}
 
           // Fallback: Raw text extraction
           final String pageText = extractor.extractText(startPageIndex: pageIndex);
