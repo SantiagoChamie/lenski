@@ -194,8 +194,24 @@ class _AddBookScreenState extends State<AddBookScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Add your own texts!', 
-                              style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text('Add your own texts!', 
+                                  style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
+                                if (['JA', 'ZH', 'KO'].contains(widget.languageCode))
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Tooltip(
+                                      message: 'PDFs with vertical text (top to bottom) are not supported',
+                                      child: Icon(Icons.help_outline, 
+                                        size: 20, 
+                                        color: Colors.grey[600]
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
                             Expanded(
                               child: Padding(
                                 padding: EdgeInsets.all(p.standardPadding()),
@@ -297,8 +313,24 @@ class _AddBookScreenState extends State<AddBookScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Add your own texts!', 
-                            style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('Add your own texts!', 
+                                style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
+                              if (['JA', 'ZH', 'KO'].contains(widget.languageCode))
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: Tooltip(
+                                    message: 'PDFs with vertical text (top to bottom) are not supported',
+                                    child: Icon(Icons.help_outline, 
+                                      size: 20, 
+                                      color: Colors.grey[600]
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                           Expanded(
                             child: Padding(
                               padding: EdgeInsets.all(p.standardPadding()),
