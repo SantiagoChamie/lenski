@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart'; // Import this for PointerSignalEvent
 import 'package:lenski/models/book_model.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/models/sentence_model.dart';
+import 'package:lenski/screens/course/books/add_book_screen.dart';
 import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
@@ -494,12 +495,45 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                   Positioned(
                     right: boxPadding + 50,
                     bottom: boxPadding + 20,
-                    child: FloatingActionButton(
-                      onPressed: _showArchiveConfirmation,
-                      elevation: 0,
-                      hoverElevation: 0,
-                      backgroundColor: const Color(0xFF71BDE0),
-                      child: const Icon(Icons.archive_outlined, color: Colors.black),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Tooltip(
+                          message: 'Add more lines',
+                          waitDuration: const Duration(milliseconds: 500),
+                          verticalOffset: 30,
+                          child: FloatingActionButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => AddBookScreen(
+                                    onBackPressed: () => Navigator.of(context).pop(),
+                                    languageCode: widget.course.code,
+                                    bookId: widget.book.id,
+                                  ),
+                                ),
+                              );
+                            },
+                            elevation: 0,
+                            hoverElevation: 0,
+                            backgroundColor: const Color(0xFF71BDE0),
+                            child: const Icon(Icons.add_circle_outline, color: Colors.black),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Tooltip(
+                          message: 'Archive book',
+                          waitDuration: const Duration(milliseconds: 500),
+                          verticalOffset: 30,
+                          child: FloatingActionButton(
+                            onPressed: _showArchiveConfirmation,
+                            elevation: 0,
+                            hoverElevation: 0,
+                            backgroundColor: const Color(0xFF71BDE0),
+                            child: const Icon(Icons.archive_outlined, color: Colors.black),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

@@ -9,11 +9,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AddBookScreen extends StatefulWidget {
   final VoidCallback onBackPressed;
   final String languageCode;
+  final int? bookId; // Add this line
 
   const AddBookScreen({
     super.key, 
     required this.onBackPressed, 
-    required this.languageCode
+    required this.languageCode,
+    this.bookId, // Add this line
   });
 
   @override
@@ -197,8 +199,10 @@ class _AddBookScreenState extends State<AddBookScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text('Add your own texts!', 
-                                  style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
+                                Text(
+                                  widget.bookId != null ? 'Edit text' : 'Add your own texts!',
+                                  style: const TextStyle(fontSize: 24, fontFamily: "Unbounded")
+                                ),
                                 Padding(
                                   padding: const EdgeInsets.only(left: 8.0),
                                   child: Tooltip(
@@ -234,7 +238,12 @@ class _AddBookScreenState extends State<AddBookScreen> {
                                   }
                                   setState(() => isLoading = true);
                                   try {
-                                    _bookCreator.processBook(textController.text, widget.languageCode);
+                                    print('Processing book... of ${widget.bookId}');
+                                    _bookCreator.processBook(
+                                      textController.text, 
+                                      widget.languageCode,
+                                      bookId: widget.bookId, // Pass the bookId if available            
+                                    );
                                     if (!_bookCreator.isCancelled) {
                                       widget.onBackPressed();
                                     }
@@ -293,7 +302,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
         children: [
           Center(
             child: Padding(
-              padding: EdgeInsets.only(bottom: p.standardPadding() * 2),
+              padding: widget.bookId != null ? EdgeInsets.symmetric(vertical: p.standardPadding() * 2) : EdgeInsets.only(bottom: p.standardPadding() * 2),
               child: Stack(
                 children: [
                   Container(
@@ -317,15 +326,16 @@ class _AddBookScreenState extends State<AddBookScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text('Add your own texts!', 
-                                style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
+                              Text(
+                                widget.bookId != null ? 'Edit text' : 'Add your own texts!',
+                                style: const TextStyle(fontSize: 24, fontFamily: "Unbounded")
+                              ),
                               Padding(
                                 padding: const EdgeInsets.only(left: 8.0),
                                 child: Tooltip(
-                                  message: 'Poor quality PDFs will not work properly.'
-                                    + ((['JA', 'ZH', 'KO'].contains(widget.languageCode)) 
+                                  message: 'Poor quality PDFs will not work properly.${(['JA', 'ZH', 'KO'].contains(widget.languageCode)) 
                                       ? '\n\nPDFs with vertical text (top to bottom) are not supported'
-                                      : ''),
+                                      : ''}',
                                   child: Icon(Icons.help_outline, 
                                     size: 20, 
                                     color: Colors.grey[600]
@@ -365,7 +375,11 @@ class _AddBookScreenState extends State<AddBookScreen> {
                                           widget.onBackPressed();
                                         }
                                       } else {
-                                        _bookCreator.processBook(textController.text, widget.languageCode);
+                                        _bookCreator.processBook(
+                                          textController.text, 
+                                          widget.languageCode,
+                                          bookId: widget.bookId, // Pass the bookId if available    
+                                        );
                                         if (!_bookCreator.isCancelled) {
                                           widget.onBackPressed();
                                         }
@@ -409,7 +423,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
                     ),
                   ),
                   Positioned(
-                    top: p.createCourseHeight() / 3,
+                    top: widget.bookId != null ? p.createCourseHeight() / 2.5 : p.createCourseHeight() / 3,
                     left: isFileMode == true ? null : 0,
                     right: isFileMode == true ? 0 : null,
                     child: IconButton(

@@ -25,7 +25,7 @@ class BookCreator {
   bool get isCancelled => _isCancelled;
 
   /// Processes text directly pasted into the app
-  void processBook(String text, String code) async {
+  Future<void> processBook(String text, String code, {int? bookId}) async {
     // Split initial text by newlines and process each line
     final List<String> processedLines = [];
     final List<String> initialSentences = text.split('\n');
@@ -58,7 +58,21 @@ class BookCreator {
     }
 
     if (processedLines.isEmpty) return;
-    await _createBook(processedLines, code);
+
+    if (bookId != null) {
+      // Update existing book
+      await _bookRepository.appendSentencesToBook(bookId, processedLines);
+      
+      // Update total lines count
+      final book = await _bookRepository.booksByLanguage(code)
+        .then((books) => books.firstWhere((b) => b.id == bookId));
+      final sentences = await _bookRepository.getSentences(bookId);
+      book.totalLines = sentences.length;
+      await _bookRepository.updateBook(book);
+    } else {
+      // Create new book
+      await _createBook(processedLines, code);
+    }
   }
 
   /// Processes a file and creates a book based on its contents
