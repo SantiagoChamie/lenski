@@ -5,6 +5,7 @@ import 'package:lenski/services/tts_service.dart'; // Import the TTS service
 import 'package:lenski/data/card_repository.dart';
 import 'package:lenski/models/card_model.dart' as custom_card; // Alias the import
 import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
 
 /// A widget that displays a translation overlay for the selected text.
 class TranslationOverlay extends StatefulWidget {
@@ -33,12 +34,27 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
   late Future<String> _translatedText;
   late Future<bool> _cardExists;
   bool _cardAdded = false; // State variable to track if the card is added
+  bool _useContext = true; // New state variable for context toggle
+  bool _contextualTranslationEnabled = false; // New variable
 
   @override
   void initState() {
     super.initState();
+    _loadContextualTranslationSetting(); // Add this line
     _translatedText = _fetchTranslation();
     _cardExists = _checkCardExists();
+  }
+
+  /// Loads the contextual translation setting from shared preferences
+  Future<void> _loadContextualTranslationSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _contextualTranslationEnabled = prefs.getBool('contextual_translation_enabled') ?? false;
+      // If the feature is disabled, always use context
+      if (!_contextualTranslationEnabled) {
+        _useContext = true;
+      }
+    });
   }
 
   /// Fetches the translation for the selected text using the TranslationService.
@@ -48,13 +64,32 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
         text: widget.text,
         sourceLang: widget.sourceLang,
         targetLang: widget.targetLang,
-        context: widget.contextText, // Use text as context if not using context
+        context: _useContext ? widget.contextText : widget.text, // Use text as context if not using context
       );
     } on SocketException {
       return Future.error('Could not connect to the internet');
     } catch (e) {
       return Future.error('Error: $e');
     }
+  }
+
+  /// Modified toggle context method to check if feature is enabled
+  void _toggleContext() {
+    if (!_contextualTranslationEnabled) {
+      // Show a message indicating the feature is disabled
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Enable contextual translation toggle in settings to use this feature'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _useContext = !_useContext;
+      _translatedText = _fetchTranslation(); // Refresh translation with new context setting
+    });
   }
 
   /// Checks if a card with the given text and context already exists in the CardRepository.
@@ -78,7 +113,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
       final card = custom_card.Card(
         front: widget.text,
         back: backText,
-        context: widget.contextText,
+        context: _useContext ? widget.contextText : widget.text,
         dueDate: DateTime.now().add(Duration(days: i)),
         language: widget.sourceLang,
         type: types[i],
@@ -281,6 +316,36 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
                                     );
                                   }
                                   },
+                                ),
+                              ),
+                              if(_contextualTranslationEnabled)
+                              SizedBox(width: p.standardPadding()/2),
+                              if(_contextualTranslationEnabled)
+                              Container(
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFD9D0DB),
+                                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                ),
+                                child: Tooltip(
+                                  message: _useContext ? 'Using contextual translation' : 'Using non-contextual translation',
+                                  child: IconButton(
+                                    icon: Text(
+                                      _useContext ? 'C' : 'NC',
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Varela Round',
+                                      ),
+                                    ),
+                                    iconSize: 30.0, // Match other buttons' size
+                                    padding: const EdgeInsets.all(8.0),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 48.0,
+                                      minHeight: 48.0,
+                                    ),
+                                    onPressed: _toggleContext,
+                                  ),
                                 ),
                               ),
                             ],
