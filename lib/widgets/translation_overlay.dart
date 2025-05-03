@@ -5,6 +5,7 @@ import 'package:lenski/services/tts_service.dart'; // Import the TTS service
 import 'package:lenski/data/card_repository.dart';
 import 'package:lenski/models/card_model.dart' as custom_card; // Alias the import
 import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
 
 /// A widget that displays a translation overlay for the selected text.
 class TranslationOverlay extends StatefulWidget {
@@ -34,12 +35,26 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
   late Future<bool> _cardExists;
   bool _cardAdded = false; // State variable to track if the card is added
   bool _useContext = true; // New state variable for context toggle
+  bool _contextualTranslationEnabled = false; // New variable
 
   @override
   void initState() {
     super.initState();
+    _loadContextualTranslationSetting(); // Add this line
     _translatedText = _fetchTranslation();
     _cardExists = _checkCardExists();
+  }
+
+  /// Loads the contextual translation setting from shared preferences
+  Future<void> _loadContextualTranslationSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _contextualTranslationEnabled = prefs.getBool('contextual_translation_enabled') ?? false;
+      // If the feature is disabled, always use context
+      if (!_contextualTranslationEnabled) {
+        _useContext = true;
+      }
+    });
   }
 
   /// Fetches the translation for the selected text using the TranslationService.
@@ -58,8 +73,19 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
     }
   }
 
-  /// Toggles the use of context for translation.
+  /// Modified toggle context method to check if feature is enabled
   void _toggleContext() {
+    if (!_contextualTranslationEnabled) {
+      // Show a message indicating the feature is disabled
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Enable contextual translation toggle in settings to use this feature'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _useContext = !_useContext;
       _translatedText = _fetchTranslation(); // Refresh translation with new context setting
@@ -292,7 +318,9 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
                                   },
                                 ),
                               ),
+                              if(_contextualTranslationEnabled)
                               SizedBox(width: p.standardPadding()/2),
+                              if(_contextualTranslationEnabled)
                               Container(
                                 decoration: const BoxDecoration(
                                   color: Color(0xFFD9D0DB),

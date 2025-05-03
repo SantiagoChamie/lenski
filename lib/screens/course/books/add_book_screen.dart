@@ -25,14 +25,19 @@ class _AddBookScreenState extends State<AddBookScreen> {
   bool isLoading = false;
   String? selectedFilePath;
   final BookCreator _bookCreator = BookCreator();
-  bool? isFileMode; // Change to nullable bool
+  bool? isFileMode; // We'll still keep this for type safety
 
   static const String _prefKey = 'last_used_file_mode';
 
   @override
   void initState() {
     super.initState();
-    _loadLastUsedMode();
+    // For Arabic, always set to text mode
+    if (widget.languageCode == 'AR') {
+      isFileMode = false;
+    } else {
+      _loadLastUsedMode();
+    }
   }
 
   Future<void> _loadLastUsedMode() async {
@@ -56,6 +61,11 @@ class _AddBookScreenState extends State<AddBookScreen> {
   }
 
   Widget _buildPageIndicator() {
+    // For Arabic, don't show the indicators
+    if (widget.languageCode == 'AR') {
+      return const SizedBox.shrink();
+    }
+    
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -88,6 +98,11 @@ class _AddBookScreenState extends State<AddBookScreen> {
   }
 
   Widget _buildAnimatedSection() {
+    // For Arabic, directly return text input
+    if (widget.languageCode == 'AR') {
+      return _buildTextInput();
+    }
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: AnimatedSwitcher(
@@ -120,6 +135,9 @@ class _AddBookScreenState extends State<AddBookScreen> {
   }
 
   void _switchMode(bool toFileMode) async {
+    // For Arabic, don't allow mode switching
+    if (widget.languageCode == 'AR') return;
+
     if (isFileMode != toFileMode) {
       setState(() {
         if (toFileMode) {
@@ -140,10 +158,132 @@ class _AddBookScreenState extends State<AddBookScreen> {
     final p = Proportions(context);
 
     // Add null check for isFileMode
-    if (isFileMode == null) {
+    if (isFileMode == null && widget.languageCode != 'AR') {
       return const Center(
         child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2C73DE)),
+        ),
+      );
+    }
+
+    // Remove the arrow buttons for Arabic
+    if (widget.languageCode == 'AR') {
+      return Scaffold(
+        body: Stack(
+          children: [
+            Center(
+              child: Padding(
+                padding: EdgeInsets.only(bottom: p.standardPadding() * 2),
+                child: Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5F0F6),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 2,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      width: p.mainScreenWidth() - p.standardPadding() * 4,
+                      child: Padding(
+                        padding: EdgeInsets.all(p.standardPadding() * 2),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text('Add your own texts!', 
+                                  style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: Tooltip(
+                                    message: 'Poor quality PDFs will not work properly.${(['JA', 'ZH', 'KO'].contains(widget.languageCode)) 
+                                        ? '\n\nPDFs with vertical text (top to bottom) are not supported'
+                                        : ''}',
+                                    child: Icon(Icons.help_outline, 
+                                      size: 20, 
+                                      color: Colors.grey[600]
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.all(p.standardPadding()),
+                                child: _buildTextInput(),
+                              ),
+                            ),
+                            SizedBox(
+                              height: p.sidebarButtonWidth(),
+                              child: ElevatedButton(
+                                onPressed: isLoading ? null : () async {
+                                  if (!_hasText()) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Please add some text before creating a book'),
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  setState(() => isLoading = true);
+                                  try {
+                                    _bookCreator.processBook(textController.text, widget.languageCode);
+                                    if (!_bookCreator.isCancelled) {
+                                      widget.onBackPressed();
+                                    }
+                                  } finally {
+                                    setState(() => isLoading = false);
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF2C73DE),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  disabledBackgroundColor: Colors.grey[300],
+                                  disabledForegroundColor: Colors.grey[600],
+                                ),
+                                child: const Text(
+                                  "Start learning!",
+                                  style: TextStyle(
+                                    fontFamily: "Telex", 
+                                    fontSize: 30, 
+                                    color: Colors.white
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 10,
+                      left: 10,
+                      child: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: isLoading ? null : widget.onBackPressed,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (isLoading)
+              LoadingOverlay(
+                onCancel: () {
+                  _bookCreator.cancelProcessing();
+                  setState(() => isLoading = false);
+                },
+              ),
+          ],
         ),
       );
     }
@@ -174,8 +314,26 @@ class _AddBookScreenState extends State<AddBookScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Add your own texts!', 
-                            style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('Add your own texts!', 
+                                style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: Tooltip(
+                                  message: 'Poor quality PDFs will not work properly.'
+                                    + ((['JA', 'ZH', 'KO'].contains(widget.languageCode)) 
+                                      ? '\n\nPDFs with vertical text (top to bottom) are not supported'
+                                      : ''),
+                                  child: Icon(Icons.help_outline, 
+                                    size: 20, 
+                                    color: Colors.grey[600]
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                           Expanded(
                             child: Padding(
                               padding: EdgeInsets.all(p.standardPadding()),
@@ -325,7 +483,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'Add files (.txt .pdf .srt)',
+                 'Add files (.txt .pdf .srt)',
                   style: TextStyle(
                     fontSize: 18,
                     color: Colors.grey,

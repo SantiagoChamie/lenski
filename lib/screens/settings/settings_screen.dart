@@ -11,11 +11,15 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final TextEditingController _apiKeyController = TextEditingController();
+  bool _contextualTranslationEnabled = false;
+  bool _premiumApiEnabled = false;  // New state variable
 
   @override
   void initState() {
     super.initState();
     _loadApiKey();
+    _loadContextualTranslationSetting();
+    _loadPremiumApiSetting();  // New method call
   }
 
   /// Loads the saved API key from shared preferences and sets it in the text controller.
@@ -30,6 +34,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _saveApiKey() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('deepl_api_key', _apiKeyController.text);
+  }
+
+  /// Loads the contextual translation setting from shared preferences
+  Future<void> _loadContextualTranslationSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _contextualTranslationEnabled = prefs.getBool('contextual_translation_enabled') ?? false;
+    });
+  }
+
+  /// Saves the contextual translation setting to shared preferences
+  Future<void> _saveContextualTranslationSetting(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('contextual_translation_enabled', value);
+    setState(() {
+      _contextualTranslationEnabled = value;
+    });
+  }
+
+  /// Loads the premium API setting from shared preferences
+  Future<void> _loadPremiumApiSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _premiumApiEnabled = prefs.getBool('premium_api_enabled') ?? false;
+    });
+  }
+
+  /// Saves the premium API setting to shared preferences
+  Future<void> _savePremiumApiSetting(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('premium_api_enabled', value);
+    setState(() {
+      _premiumApiEnabled = value;
+    });
   }
 
   @override
@@ -71,6 +109,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     'Save API Key',
                     style: TextStyle(color: Color(0xFF2C73DE)),
                   ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                
+                const Text(
+                  'Use Premium DeepL API',
+                  style: TextStyle(fontFamily: 'Sansation'),
+                ),
+                const SizedBox(width: 10),
+                Switch(
+                  value: _premiumApiEnabled,
+                  onChanged: _savePremiumApiSetting,
+                  activeColor: const Color(0xFF2C73DE),
+                ),
+                
+              ],
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Translation Settings',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Telex'),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Toggle between contextual and non-contextual translation in the overlay',
+                  style: TextStyle(fontFamily: 'Sansation'),
+                ),
+                Switch(
+                  value: _contextualTranslationEnabled,
+                  onChanged: _saveContextualTranslationSetting,
+                  activeColor: const Color(0xFF2C73DE),
                 ),
               ],
             ),

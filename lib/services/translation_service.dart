@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:lenski/data/card_repository.dart'; // Import the CardRepository
+import 'package:lenski/data/card_repository.dart';
 
 /// A service to translate text using the DeepL API.
 /// The service caches the translated text to avoid unnecessary API calls.
@@ -43,6 +43,14 @@ class TranslationService {
     if (apiKey.isEmpty) {
       throw Exception('API Key is not set');
     }
+    
+    // Check if premium API is enabled
+    final bool isPremiumApi = await _isPremiumApiEnabled();
+    
+    // Set the correct API endpoint based on premium status
+    final String apiEndpoint = isPremiumApi
+        ? 'https://api.deepl.com/v2/translate'
+        : 'https://api-free.deepl.com/v2/translate';
 
     final Map<String, dynamic> requestBody = {
       'text': [text],
@@ -55,10 +63,11 @@ class TranslationService {
     }
 
     final response = await http.post(
-      Uri.parse('https://api-free.deepl.com/v2/translate'),
+      Uri.parse(apiEndpoint),
       headers: {
         'Authorization': 'DeepL-Auth-Key $apiKey',
         'Content-Type': 'application/json; charset=utf-8',
+        'User-Agent': 'LenskiApp/1.0.0',
       },
       body: utf8.encode(json.encode(requestBody)),
     );
@@ -71,6 +80,12 @@ class TranslationService {
     } else {
       throw Exception('Failed to translate text');
     }
+  }
+
+  /// Checks if premium API is enabled
+  Future<bool> _isPremiumApiEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('premium_api_enabled') ?? false;
   }
 
   /// Checks the CardRepository for an existing card with the given front and context.

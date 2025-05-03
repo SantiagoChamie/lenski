@@ -26,9 +26,39 @@ class BookCreator {
 
   /// Processes text directly pasted into the app
   void processBook(String text, String code) async {
-    final sentences = text.split('\n').toList();
-    if (sentences.isEmpty) return;
-    await _createBook(sentences, code);
+    // Split initial text by newlines and process each line
+    final List<String> processedLines = [];
+    final List<String> initialSentences = text.split('\n');
+
+    for (String sentence in initialSentences) {
+      if (sentence.trim().isEmpty) {
+        processedLines.add('');
+        continue;
+      }
+
+      // Split long sentences by word count
+      List<String> words = sentence.split(' ');
+      StringBuffer currentLine = StringBuffer();
+      int wordCount = 0;
+
+      for (String word in words) {
+        if (wordCount >= 15) {
+          processedLines.add(currentLine.toString().trim());
+          currentLine.clear();
+          wordCount = 0;
+        }
+        currentLine.write('$word ');
+        wordCount++;
+      }
+
+      // Add remaining words if any
+      if (currentLine.isNotEmpty) {
+        processedLines.add(currentLine.toString().trim());
+      }
+    }
+
+    if (processedLines.isEmpty) return;
+    await _createBook(processedLines, code);
   }
 
   /// Processes a file and creates a book based on its contents
@@ -47,7 +77,7 @@ class BookCreator {
           content = await _processSrtFile(filePath);
           break;
         case '.pdf':
-          content = await _processPdfFile(filePath);
+          content = await _processPdfFile(filePath, code);
           break;
         default:
           throw Exception('Unsupported file format');
@@ -87,12 +117,13 @@ class BookCreator {
     ).toList();
   }
 
-  Future<List<String>> _processPdfFile(String filePath) async {
+  Future<List<String>> _processPdfFile(String filePath, String languageCode) async {
     final List<String> sentences = [];
     final File file = File(filePath);
     final PdfDocument document = PdfDocument(inputBytes: await file.readAsBytes());
 
     try {
+      
       for (int pageIndex = 0; pageIndex < document.pages.count; pageIndex++) {
         // Increment unused count for all tracked lines
         for (var header in _trackedHeaders) {
@@ -113,6 +144,7 @@ class BookCreator {
         final PdfTextExtractor extractor = PdfTextExtractor(document);
         
         try {
+          if(languageCode != 'EL'){
           // Primary method: Structured text extraction
           final textLines = extractor.extractTextLines(
             startPageIndex: pageIndex,
@@ -191,7 +223,7 @@ class BookCreator {
 
             sentences.addAll(filteredLines);
             continue;
-          }
+          }}
 
           // Fallback: Raw text extraction
           final String pageText = extractor.extractText(startPageIndex: pageIndex);
@@ -216,8 +248,6 @@ class BookCreator {
           }
           
           if (rawLines.isNotEmpty) {
-            final currentHeaders = rawLines.take(_headerFooterLines).toList();
-            final currentFooters = rawLines.reversed.take(_headerFooterLines).toList();
 
             final filteredLines = rawLines.where((line) {
               final normalizedLine = _normalizeText(line);
