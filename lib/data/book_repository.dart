@@ -1,6 +1,5 @@
 import 'package:lenski/models/archived_book_model.dart';
 import 'package:lenski/models/sentence_model.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import 'dart:io';
@@ -96,49 +95,6 @@ class BookRepository {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
-  }
-
-  /// Appends new sentences to an existing book's database.
-  /// 
-  /// [bookId] is the ID of the book.
-  /// [sentences] is the list of new sentences to be appended.
-  Future<void> appendSentencesToBook(int bookId, List<String> sentences) async {
-    String dbName = '$bookId.db';
-    String path = join(await getDatabasesPath(), dbName);
-    Database bookDb = await openDatabase(path);
-
-    // Get the current highest ID
-    final result = await bookDb.rawQuery('SELECT MAX(id) as maxId FROM sentences');
-    final int currentMaxId = result.first['maxId'] as int? ?? 0;
-
-    // Insert new sentences with incremented IDs
-    for (int i = 0; i < sentences.length; i++) {
-      await bookDb.insert(
-        'sentences',
-        {
-          'id': currentMaxId + i + 1, 
-          'sentence': sentences[i]
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    }
-    // Get total number of sentences
-    final countResult = await bookDb.rawQuery('SELECT COUNT(*) as count FROM sentences');
-    final int totalLines = Sqflite.firstIntValue(countResult) ?? 0;
-
-    await bookDb.close();
-
-    // Update the book's finished status and total lines
-    final db = await database;
-    await db.update(
-      'books',
-      {
-        'finished': 0,
-        'totalLines': totalLines,
-      },
-      where: 'id = ?',
-      whereArgs: [bookId],
-    );
   }
 
   /// Retrieves the sentences for a book from its database.
