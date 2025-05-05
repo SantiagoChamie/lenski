@@ -3,6 +3,7 @@ import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/services/translation_service.dart';
 import 'package:lenski/services/tts_service.dart'; // Import the TTS service
 import 'package:lenski/data/card_repository.dart';
+import 'package:lenski/data/session_repository.dart'; // Add this import
 import 'package:lenski/models/card_model.dart' as custom_card; // Alias the import
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
@@ -97,7 +98,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
     return await TranslationService().cardExists(widget.text, widget.contextText);
   }
 
-  /// Adds new cards to the CardRepository.
+  /// Adds new cards to the CardRepository and updates session statistics.
   Future<void> _addCard(String backText) async {
     // If no cardTypes provided, default to reading only
     final types = widget.cardTypes ?? ['reading'];
@@ -120,6 +121,13 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
       );
       await CardRepository().insertCard(card);
     }
+
+    // Update session statistics - increment words added by 1
+    final sessionRepo = SessionRepository();
+    await sessionRepo.updateSessionStats(
+      courseCode: widget.sourceLang,
+      wordsAdded: 1,
+    );
 
     setState(() {
       _cardAdded = true;

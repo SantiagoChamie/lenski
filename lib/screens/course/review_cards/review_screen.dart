@@ -12,7 +12,8 @@ import 'package:lenski/services/tts_service.dart';
 import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
-import 'package:lenski/data/course_repository.dart'; // Add repository import
+import 'package:lenski/data/course_repository.dart';
+import 'package:lenski/data/session_repository.dart'; // Add this import
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A screen for reviewing flashcards within a course.
@@ -35,14 +36,42 @@ class _ReviewScreenState extends State<ReviewScreen> {
   bool _hasIncrementedStreak = false; // New field to track streak updates
   List<lenski_card.Card> cards = [];
   final CardRepository repository = CardRepository();
-  final CourseRepository courseRepository = CourseRepository(); // Add repository
+  final CourseRepository courseRepository = CourseRepository();
+  final SessionRepository sessionRepository = SessionRepository(); // Add session repository
+  
+  // Add tracking variable for study time
+  late DateTime _startTime;
 
   @override
   void initState() {
     super.initState();
     _loadAudioPreference();
     _loadCards();
-    _checkTtsAvailability(); // Add this new method call
+    _checkTtsAvailability();
+    
+    // Initialize start time for tracking study duration
+    _startTime = DateTime.now();
+  }
+  
+  @override
+  void dispose() {
+    // Save study time when leaving screen
+    _saveStudyTime();
+    super.dispose();
+  }
+  
+  /// Saves the time spent studying to session repository
+  Future<void> _saveStudyTime() async {
+    final now = DateTime.now();
+    final minutesStudied = now.difference(_startTime).inMinutes;
+    
+    // Only update if user spent at least a minute
+    if (minutesStudied > 0) {
+      await sessionRepository.updateSessionStats(
+        courseCode: widget.course.code,
+        minutesStudied: minutesStudied,
+      );
+    }
   }
 
   /// Loads the audio preference from SharedPreferences.
@@ -104,6 +133,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
       _hasIncrementedStreak = true;
     }
 
+    // Track card review in the session stats
+    await sessionRepository.updateSessionStats(
+      courseCode: widget.course.code,
+      wordsReviewed: 1,
+    );
+
     final currentCard = cards.removeAt(0);
     final nextDue = await repository.updateCardEFactor(currentCard, quality);
     if (nextDue < 1) {
@@ -150,114 +185,121 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
     final currentCard = cards.first;
 
-    return Stack(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(boxPadding),
-          child: Center(
-            child: Container(
-              decoration: BoxDecoration(
-                color: isFront ? const Color(0xFFF5F0F6) : const Color(0xFFFFFFFF),
-                borderRadius: BorderRadius.circular(5.0),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 4.0,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: EdgeInsets.all(p.standardPadding()),
-                child: isFront
-                    ? currentCard.type == 'reading' 
-                        ? ReadingCard(
-                            card: currentCard,
-                            courseCode: widget.course.code,
-                            onShowAnswer: toggleCard,
-                          )
-                        :
-                      currentCard.type == 'listening'
-                        ? ListeningCard(
-                            card: currentCard,
-                            courseCode: widget.course.code,
-                            onShowAnswer: toggleCard,
-                          )
-                        :
-                      currentCard.type == 'speaking'
-                        ? SpeakingCard(
-                            card: currentCard,
-                            courseCode: widget.course.code,
-                            onShowAnswer: toggleCard,
-                          )
-                        :
-                      currentCard.type == 'writing'
-                        ? WritingCard(
-                            card: currentCard,
-                            courseCode: widget.course.code,
-                            onShowAnswer: toggleCard,
-                          )
-                        :
-                      ReadingCard(
-                        card: currentCard,
-                        courseCode: widget.course.code,
-                        onShowAnswer: toggleCard,
-                      )
-                    : BackCard(
-                        card: currentCard,
-                        courseFromCode: widget.course.fromCode,
-                        onDifficultySelected: handleDifficulty,
-                      ),
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        await _saveStudyTime();
+        return;
+      },
+      child: Stack(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(boxPadding),
+            child: Center(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isFront ? const Color(0xFFF5F0F6) : const Color(0xFFFFFFFF),
+                  borderRadius: BorderRadius.circular(5.0),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 4.0,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(p.standardPadding()),
+                  child: isFront
+                      ? currentCard.type == 'reading' 
+                          ? ReadingCard(
+                              card: currentCard,
+                              courseCode: widget.course.code,
+                              onShowAnswer: toggleCard,
+                            )
+                          :
+                        currentCard.type == 'listening'
+                          ? ListeningCard(
+                              card: currentCard,
+                              courseCode: widget.course.code,
+                              onShowAnswer: toggleCard,
+                            )
+                          :
+                        currentCard.type == 'speaking'
+                          ? SpeakingCard(
+                              card: currentCard,
+                              courseCode: widget.course.code,
+                              onShowAnswer: toggleCard,
+                            )
+                          :
+                        currentCard.type == 'writing'
+                          ? WritingCard(
+                              card: currentCard,
+                              courseCode: widget.course.code,
+                              onShowAnswer: toggleCard,
+                            )
+                          :
+                        ReadingCard(
+                          card: currentCard,
+                          courseCode: widget.course.code,
+                          onShowAnswer: toggleCard,
+                        )
+                      : BackCard(
+                          card: currentCard,
+                          courseFromCode: widget.course.fromCode,
+                          onDifficultySelected: handleDifficulty,
+                        ),
+                ),
               ),
             ),
           ),
-        ),
 
-        /// Icons and decor
-        Positioned(
-          top: boxPadding - iconSize / 3,
-          left: boxPadding - iconSize / 3,
-          child: FlagIcon(
-            size: iconSize,
-            borderWidth: 5.0,
-            borderColor: const Color(0xFFD9D0DB),
-            language: widget.course.name,
-          ),
-        ),
-        Positioned(
-          top: boxPadding + 10,
-          right: boxPadding + 10,
-          child: IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            icon: const Icon(Icons.close_rounded),
-          ),
-        ),
-        Positioned(
-          bottom: boxPadding + 10,
-          left: boxPadding + 10,
-          child: Tooltip(
-            message: 
-              currentCard.type == 'writing' ? "How do you write this word?"
-              : currentCard.type == 'speaking' ? "How do you pronounce this word?" 
-              : "What does this word mean?",
-            child: CompetenceIcon(
-              type: currentCard.type,
-              size: iconSize/2,
+          /// Icons and decor
+          Positioned(
+            top: boxPadding - iconSize / 3,
+            left: boxPadding - iconSize / 3,
+            child: FlagIcon(
+              size: iconSize,
+              borderWidth: 5.0,
+              borderColor: const Color(0xFFD9D0DB),
+              language: widget.course.name,
             ),
-          )
-        ),
-        Positioned(
-          bottom: boxPadding + 20,
-          right: boxPadding + 20,
-          child: FloatingActionButton(
-            onPressed: handleDelete,
-            backgroundColor: const Color(0xFFFFD38D),
-            child: const Icon(Icons.delete, color: Colors.black),
           ),
-        ),
-      ],
+          Positioned(
+            top: boxPadding + 10,
+            right: boxPadding + 10,
+            child: IconButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              icon: const Icon(Icons.close_rounded),
+            ),
+          ),
+          Positioned(
+            bottom: boxPadding + 10,
+            left: boxPadding + 10,
+            child: Tooltip(
+              message: 
+                currentCard.type == 'writing' ? "How do you write this word?"
+                : currentCard.type == 'speaking' ? "How do you pronounce this word?" 
+                : "What does this word mean?",
+              child: CompetenceIcon(
+                type: currentCard.type,
+                size: iconSize/2,
+              ),
+            )
+          ),
+          Positioned(
+            bottom: boxPadding + 20,
+            right: boxPadding + 20,
+            child: FloatingActionButton(
+              onPressed: handleDelete,
+              backgroundColor: const Color(0xFFFFD38D),
+              child: const Icon(Icons.delete, color: Colors.black),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/home/competences/competence_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
+import 'package:lenski/data/session_repository.dart'; // Add this import
 import 'package:lenski/models/card_model.dart' as card_model;
 import 'package:lenski/services/translation_service.dart';
 
@@ -207,6 +208,14 @@ class _AddCardScreenState extends State<AddCardScreen> {
                         );
                         await CardRepository().insertCard(card);
                       }
+                      
+                      //TODO: update the metrics widget when a card is added
+                      // Update the session statistics - increment words added
+                      await SessionRepository().updateSessionStats(
+                        courseCode: widget.course.code,
+                        wordsAdded: 1,
+                      );
+                      
                       widget.onBackPressed();
                     },
                     style: ElevatedButton.styleFrom(
