@@ -42,7 +42,9 @@ class CourseRepository {
           'color INTEGER, '
           'imageUrl TEXT, '
           'streak INTEGER DEFAULT 0, '
-          'lastAccess INTEGER DEFAULT 0'
+          'lastAccess INTEGER DEFAULT 0, '
+          'dailyGoal INTEGER DEFAULT 100, '
+          'totalGoal INTEGER DEFAULT 10000'
           ')',
         );
       },

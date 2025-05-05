@@ -14,6 +14,8 @@ class Course {
   String imageUrl;
   int streak;
   int lastAccess;
+  int dailyGoal; // Daily word reading goal
+  int totalGoal; // Total word reading goal
 
   /// Creates a Course object.
   /// 
@@ -29,6 +31,8 @@ class Course {
   /// [imageUrl] is the URL of the course's image.
   /// [streak] is the current streak count.
   /// [lastAccess] is the last day the course was accessed (stored as days since epoch).
+  /// [dailyGoal] is the targeted number of words to read per day.
+  /// [totalGoal] is the total number of words goal for the course.
   Course({
     required this.name,
     required this.level,
@@ -42,6 +46,8 @@ class Course {
     required this.imageUrl,
     this.streak = 0,
     DateTime? lastAccess,
+    this.dailyGoal = 100,
+    this.totalGoal = 10000,
   }) : lastAccess = _dateTimeToInt(
          lastAccess ?? DateTime.now().subtract(const Duration(days: 1))
        );
@@ -58,10 +64,12 @@ class Course {
       'speaking': speaking ? 1 : 0,
       'reading': reading ? 1 : 0,
       'writing': writing ? 1 : 0,
-      'color': color.value,
+      'color': color.toARGB32(),
       'imageUrl': imageUrl,
       'streak': streak,
       'lastAccess': lastAccess,
+      'dailyGoal': dailyGoal,
+      'totalGoal': totalGoal,
     };
   }
 
@@ -80,6 +88,8 @@ class Course {
       imageUrl: map['imageUrl'],
       streak: map['streak'] ?? 0,
       lastAccess: _intToDateTime(map['lastAccess'] ?? _dateTimeToInt(DateTime.now().subtract(const Duration(days: 1)))),
+      dailyGoal: map['dailyGoal'] ?? 100,
+      totalGoal: map['totalGoal'] ?? 10000,
     );
   }
 
@@ -97,6 +107,8 @@ class Course {
     String? imageUrl,
     int? streak,
     DateTime? lastAccess,
+    int? dailyGoal,
+    int? totalGoal,
   }) {
     return Course(
       name: name ?? this.name,
@@ -111,6 +123,8 @@ class Course {
       imageUrl: imageUrl ?? this.imageUrl,
       streak: streak ?? this.streak,
       lastAccess: lastAccess ?? _intToDateTime(this.lastAccess),
+      dailyGoal: dailyGoal ?? this.dailyGoal,
+      totalGoal: totalGoal ?? this.totalGoal,
     );
   }
 
