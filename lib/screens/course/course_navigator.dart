@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/book_model.dart';
 import 'package:lenski/models/course_model.dart';
-import 'package:lenski/screens/course/books/edit_book_screen.dart';
-import 'package:lenski/screens/course/books/library.dart';
-import 'package:lenski/screens/course/books/add_book_screen.dart';
+import 'package:lenski/screens/course/books/acid/edit_book_screen.dart';
+import 'package:lenski/screens/course/books/library/library.dart';
+import 'package:lenski/screens/course/books/acid/add_book_screen.dart';
 import 'package:lenski/screens/course/review_cards/review_pile.dart';
 import 'package:lenski/screens/course/review_cards/add_card_screen.dart';
 import 'package:lenski/utils/proportions.dart';

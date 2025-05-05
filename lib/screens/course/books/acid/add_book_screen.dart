@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lenski/screens/course/books/loading_overlay.dart';
+import 'package:lenski/screens/course/books/acid/loading_overlay.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_creator.dart';
 import 'package:file_picker/file_picker.dart';

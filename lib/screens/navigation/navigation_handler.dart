@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/course_model.dart';
-import 'package:lenski/screens/course/books/book_screen_scroll.dart';
+import 'package:lenski/screens/course/books/reader/book_screen_scroll.dart';
 import 'package:lenski/screens/home/courses.dart';
 import 'package:lenski/screens/course/course_home.dart';
 import 'package:lenski/screens/course/review_cards/review_screen.dart';
