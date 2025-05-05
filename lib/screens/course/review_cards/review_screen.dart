@@ -127,11 +127,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
   /// Handles the difficulty selection and updates streak on first review.
   void handleDifficulty(int quality) async {
-    // Update streak only on first card review of the session
-    if (!_hasIncrementedStreak) {
-      await courseRepository.incrementStreak(widget.course);
-      _hasIncrementedStreak = true;
-    }
 
     // Track card review in the session stats
     await sessionRepository.updateSessionStats(

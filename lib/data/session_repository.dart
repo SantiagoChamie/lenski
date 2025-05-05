@@ -1,11 +1,13 @@
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import '../models/session_model.dart';
+import '../data/course_repository.dart';
 
 /// A repository class for managing user session data in the database.
 class SessionRepository {
   static final SessionRepository _instance = SessionRepository._internal();
   Database? _database;
+  final CourseRepository _courseRepository = CourseRepository();
 
   /// Factory constructor to return the singleton instance of SessionRepository.
   factory SessionRepository() {
@@ -37,14 +39,16 @@ class SessionRepository {
           'wordsReviewed INTEGER DEFAULT 0, '
           'linesRead INTEGER DEFAULT 0, '
           'minutesStudied INTEGER DEFAULT 0, '
-          'UNIQUE(courseCode, date)'  // Ensure one session per course per day
+          'streakIncremented INTEGER DEFAULT 0, '
+          'UNIQUE(courseCode, date)'
           ')',
         );
       },
       version: 1,
     );
   }
-    /// Converts a DateTime object to an integer representing the number of days since Unix epoch.
+
+  /// Converts a DateTime object to an integer representing the number of days since Unix epoch.
   static int _dateTimeToInt(DateTime date) {
     return DateTime(date.year, date.month, date.day)
         .toUtc()
@@ -84,7 +88,7 @@ class SessionRepository {
     );
   }
 
-  /// Updates session statistics for today.
+  /// Updates session statistics for today and checks if daily goal is met.
   Future<void> updateSessionStats({
     required String courseCode, 
     int? wordsAdded, 
@@ -102,6 +106,50 @@ class SessionRepository {
     
     // Save the updated session
     await updateSession(session);
+    
+    // Check if daily goal is met and update streak if needed
+    if (wordsAdded != null) {
+      await _checkAndUpdateStreak(courseCode, session.wordsAdded);
+    }
+  }
+
+  /// Checks if daily goal is met and updates streak if needed.
+  Future<void> _checkAndUpdateStreak(String courseCode, int wordsAdded) async {
+    final db = await database;
+    final today = _dateTimeToInt(DateTime.now());
+    
+    // Check if streak was already incremented today
+    final List<Map<String, dynamic>> sessionMaps = await db.query(
+      'sessions',
+      columns: ['streakIncremented'],
+      where: 'courseCode = ? AND date = ?',
+      whereArgs: [courseCode, today],
+    );
+    
+    // If streak was already incremented today, exit early
+    if (sessionMaps.isNotEmpty && sessionMaps.first['streakIncremented'] == 1) {
+      return;
+    }
+    
+    // Get the course to check daily goal and potentially update streak
+    final courses = await _courseRepository.courses();
+    final course = courses.firstWhere(
+      (c) => c.code == courseCode,
+      orElse: () => throw Exception('Course not found'),
+    );
+    
+    // If daily goal is met, increment streak and mark as incremented
+    if (wordsAdded >= course.dailyGoal) {
+      await _courseRepository.incrementStreak(course);
+      
+      // Mark streak as incremented for today
+      await db.update(
+        'sessions',
+        {'streakIncremented': 1},
+        where: 'courseCode = ? AND date = ?',
+        whereArgs: [courseCode, today],
+      );
+    }
   }
 
   /// Updates an existing session in the database.
