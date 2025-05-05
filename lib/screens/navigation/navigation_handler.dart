@@ -6,7 +6,7 @@ import 'package:lenski/screens/course/course_home.dart';
 import 'package:lenski/screens/course/review_cards/review_screen.dart';
 import 'package:lenski/models/book_model.dart';
 import 'package:lenski/screens/settings/settings_screen.dart';
-import 'package:lenski/screens/course/archive_screen.dart';
+import 'package:lenski/screens/course/archive/archive_screen.dart';
 import 'sidebar.dart';
 
 /// A widget that handles navigation within the app.

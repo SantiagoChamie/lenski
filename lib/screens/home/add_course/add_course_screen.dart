@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/screens/home/add_course/buttons/competence_selector_button.dart';
+import 'package:lenski/screens/home/add_course/buttons/goal_selector_button.dart';
 import 'package:lenski/screens/home/add_course/course_difficulty_text.dart';
 import 'package:lenski/screens/home/add_course/buttons/language_selector_button.dart';
 import 'package:lenski/utils/course_colors.dart';
@@ -244,10 +245,33 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                             SizedBox(height: p.createCourseButtonHeight()),
                             const Text("Goal", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
                             SizedBox(height: p.standardPadding() * 3),
-                            Text(
-                              "Coming soon...",
-                              style: TextStyle(fontSize: 20, fontFamily: "Telex", color: Colors.grey[700]),
+                            SizedBox(
+                              width: p.createCourseButtonWidth(),
+                              height: p.createCourseButtonHeight(),
+                              child: const Icon(Icons.sunny, color: Color(0xFFEE9A1D), size: 40),
                             ),
+                            SizedBox(height: p.standardPadding()),
+                            GoalSelectorButton(
+                              initialValue: 20,
+                              onValueChanged: (value) {
+                                // Handle the value change
+                              },
+                            ),
+                            SizedBox(height: p.standardPadding()),
+                            SizedBox(
+                              width: p.createCourseButtonWidth(),
+                              height: p.createCourseButtonHeight(),
+                              child: const Icon(Icons.nightlight_round_outlined, color: Color(0xFF71BDE0), size: 40),
+                            ),
+                            SizedBox(height: p.standardPadding()),
+                            GoalSelectorButton(
+                              initialValue: 2000,
+                              isDaily: false,
+                              onValueChanged: (value) {
+                                // Handle the value change
+                              },
+                            ),
+                            SizedBox(height: p.standardPadding()),
                           ],
                         ),
                       ),

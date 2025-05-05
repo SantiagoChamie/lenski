@@ -161,7 +161,9 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10), 
         ),
-        fixedSize: Size(p.createCourseButtonWidth(), p.createCourseButtonHeight())
+        fixedSize: Size(p.createCourseButtonWidth(), p.createCourseButtonHeight()),
+        backgroundColor: Colors.white,
+        overlayColor: Colors.transparent
       ),
       onPressed: () => _showLanguageSelector(context),
       child: Row(

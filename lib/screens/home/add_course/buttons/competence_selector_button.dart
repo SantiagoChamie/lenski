@@ -53,7 +53,9 @@ class _CompetenceSelectorButtonState extends State<CompetenceSelectorButton> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        fixedSize: Size(p.createCourseButtonWidth(), p.createCourseButtonHeight())
+        fixedSize: Size(p.createCourseButtonWidth(), p.createCourseButtonHeight()),
+        backgroundColor: Colors.white,
+        overlayColor: Colors.transparent
       ),
       onPressed: _toggleSelection,
       child: Row(
