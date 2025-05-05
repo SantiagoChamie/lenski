@@ -55,6 +55,10 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
 
   final List<String> _selectedCompetences = [];
   bool _isMessageDisplayed = false;
+  
+  // Add state variables for daily and total goals
+  int _dailyGoal = 20;
+  int _totalGoal = 2000;
 
   @override
   void dispose() {
@@ -95,6 +99,8 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       writing: _selectedCompetences.contains('writing'),
       color: randomColor,
       imageUrl: _selectedFlagUrl,
+      dailyGoal: _dailyGoal,
+      totalGoal: _totalGoal,
     );
 
     final existingCourses = await _courseRepository.courses();
@@ -254,7 +260,9 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                             GoalSelectorButton(
                               initialValue: 20,
                               onValueChanged: (value) {
-                                // Handle the value change
+                                setState(() {
+                                  _dailyGoal = value;
+                                });
                               },
                             ),
                             SizedBox(height: p.standardPadding()),
@@ -268,7 +276,9 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                               initialValue: 2000,
                               isDaily: false,
                               onValueChanged: (value) {
-                                // Handle the value change
+                                setState(() {
+                                  _totalGoal = value;
+                                });
                               },
                             ),
                             SizedBox(height: p.standardPadding()),

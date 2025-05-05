@@ -46,8 +46,8 @@ class Course {
     required this.imageUrl,
     this.streak = 0,
     DateTime? lastAccess,
-    this.dailyGoal = 100,
-    this.totalGoal = 10000,
+    required this.dailyGoal,
+    required this.totalGoal,
   }) : lastAccess = _dateTimeToInt(
          lastAccess ?? DateTime.now().subtract(const Duration(days: 1))
        );
@@ -88,8 +88,8 @@ class Course {
       imageUrl: map['imageUrl'],
       streak: map['streak'] ?? 0,
       lastAccess: _intToDateTime(map['lastAccess'] ?? _dateTimeToInt(DateTime.now().subtract(const Duration(days: 1)))),
-      dailyGoal: map['dailyGoal'] ?? 100,
-      totalGoal: map['totalGoal'] ?? 10000,
+      dailyGoal: map['dailyGoal'],
+      totalGoal: map['totalGoal'],
     );
   }
 
