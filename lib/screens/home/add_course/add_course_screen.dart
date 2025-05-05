@@ -305,6 +305,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                         Expanded(
                           child: Center(
                             child: CourseDifficultyText(
+                              dailyWords: _dailyGoal,
                               competences: _selectedCompetences.length,
                               startingLanguage: languageCodes[_selectedOriginLanguage]!,
                               targetLanguage: languageCodes[_selectedLanguage]!,

@@ -3,6 +3,8 @@ import 'package:lenski/utils/languages.dart';
 
 /// A widget that displays the difficulty and intensity of a course as styled text.
 class CourseDifficultyText extends StatelessWidget {
+  
+  final int dailyWords;
   final String startingLanguage;
   final String targetLanguage;
   final int competences;
@@ -14,6 +16,7 @@ class CourseDifficultyText extends StatelessWidget {
   /// [intensity] is the intensity level of the course.
   const CourseDifficultyText({
     super.key,
+    required this.dailyWords,
     required this.startingLanguage,
     required this.targetLanguage,
     required this.competences,
@@ -62,9 +65,13 @@ class CourseDifficultyText extends StatelessWidget {
   }
 
   String get intensity {
-    if (competences == 1) return "low";
-    if (competences == 2) return "medium";
-    if (competences == 3) return "high";
+    // Calculate intensity as daily words × number of competences
+    int intensityScore = dailyWords * competences;
+    
+    // Determine intensity level based on the calculated score
+    if (intensityScore < 20) return "low";
+    if (intensityScore < 40) return "medium";
+    if (intensityScore < 100) return "high";
     return "extreme";
   }
 

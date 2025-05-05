@@ -322,10 +322,9 @@ class _AddBookScreenState extends State<AddBookScreen> {
                               Padding(
                                 padding: const EdgeInsets.only(left: 8.0),
                                 child: Tooltip(
-                                  message: 'Poor quality PDFs will not work properly.'
-                                    + ((['JA', 'ZH', 'KO'].contains(widget.languageCode)) 
+                                  message: 'Poor quality PDFs will not work properly.${(['JA', 'ZH', 'KO'].contains(widget.languageCode)) 
                                       ? '\n\nPDFs with vertical text (top to bottom) are not supported'
-                                      : ''),
+                                      : ''}',
                                   child: Icon(Icons.help_outline, 
                                     size: 20, 
                                     color: Colors.grey[600]
