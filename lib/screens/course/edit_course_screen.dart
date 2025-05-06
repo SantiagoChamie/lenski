@@ -118,6 +118,22 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
       return;
     }
 
+    // Check if total goal is less than words already added
+    if (_totalGoal < _totalWordsAdded) {
+      if (!_isMessageDisplayed) {
+        _isMessageDisplayed = true;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Total goal cannot be less than words already added ($_totalWordsAdded)'),
+            duration: const Duration(seconds: 2),
+          ),
+        ).closed.then((_) {
+          _isMessageDisplayed = false;
+        });
+      }
+      return;
+    }
+
     final updatedCourse = widget.course.copyWith(
       fromCode: _selectedOriginLanguageCode,
       listening: _selectedCompetences.contains('listening'),
@@ -414,7 +430,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
         border: Border.all(color: const Color(0xFFE5E0E6), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withAlpha(13),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),

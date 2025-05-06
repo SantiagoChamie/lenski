@@ -5,6 +5,7 @@ import 'package:lenski/data/course_repository.dart';
 import 'package:lenski/utils/course_colors.dart';
 import '../../../models/course_model.dart';
 import '../../../widgets/flag_icon.dart';
+import '../../../data/session_repository.dart'; // Add this import
 
 /// CourseButton is a widget that displays a course as a button.
 /// It shows the competences, the course name, the flag, and the level.
@@ -27,6 +28,38 @@ class CourseButton extends StatefulWidget {
 class _CourseButtonState extends State<CourseButton> {
   bool _showColorMenu = false;
   final _repository = CourseRepository();
+  final _sessionRepository = SessionRepository(); // Add this
+  int _totalWordsAdded = 0; // Add this
+  bool _isLoading = true; // Add this
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCourseStats();
+  }
+
+  // Add this method to load course stats
+  Future<void> _loadCourseStats() async {
+    try {
+      // Get all sessions for this course
+      final sessions = await _sessionRepository.getSessionsByCourse(widget.course.code);
+      
+      // Sum up all words added
+      int totalWords = 0;
+      for (var session in sessions) {
+        totalWords += session.wordsAdded;
+      }
+      
+      setState(() {
+        _totalWordsAdded = totalWords;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +103,25 @@ class _CourseButtonState extends State<CourseButton> {
                         language: widget.course.name,
                       ),
                       const SizedBox(height: 20, width: 20),
-                      Text(widget.course.name, style: const TextStyle(fontSize: 40, fontFamily: "Unbounded", color: Colors.white)),
+                      Text(
+                        widget.course.name, 
+                        style: const TextStyle(
+                          fontSize: 40, 
+                          fontFamily: "Unbounded", 
+                          color: Colors.white
+                        )
+                      ),
+                      
+                      // Add the gold star if goal is achieved
+                      if (!_isLoading && _totalWordsAdded >= widget.course.totalGoal)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Icon(
+                            Icons.star,
+                            color: Colors.amber[300],
+                            size: 32,
+                          ),
+                        ),
                     ],
                   ),
                   const Spacer(),
