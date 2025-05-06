@@ -11,11 +11,13 @@ import 'package:lenski/services/translation_service.dart';
 class AddCardScreen extends StatefulWidget {
   final VoidCallback onBackPressed;
   final Course course;
+  final VoidCallback? onCardAdded; // Add this callback
 
   const AddCardScreen({
     super.key, 
     required this.onBackPressed, 
-    required this.course
+    required this.course,
+    this.onCardAdded, // Add this parameter
   });
 
   @override
@@ -209,13 +211,17 @@ class _AddCardScreenState extends State<AddCardScreen> {
                         await CardRepository().insertCard(card);
                       }
                       
-                      //TODO: update the metrics widget when a card is added
                       // Update the session statistics - increment words added
                       await SessionRepository().updateSessionStats(
                         courseCode: widget.course.code,
                         wordsAdded: 1,
                       );
-                      
+
+                      // Call the onCardAdded callback if provided
+                      if (widget.onCardAdded != null) {
+                        widget.onCardAdded!();
+                      }
+
                       widget.onBackPressed();
                     },
                     style: ElevatedButton.styleFrom(

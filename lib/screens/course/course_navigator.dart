@@ -100,6 +100,18 @@ class _CourseNavigatorState extends State<CourseNavigator> {
     }
   }
 
+  // Add a method to refresh the course data which will rebuild the metrics
+  void _refreshCourse() {
+    setState(() {
+      // This empty setState will rebuild the widget with the latest data
+    });
+    
+    // Notify parent if needed
+    if (widget.onCourseUpdate != null) {
+      widget.onCourseUpdate!(_currentCourse);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
@@ -124,7 +136,11 @@ class _CourseNavigatorState extends State<CourseNavigator> {
           Row(
             children: [
               _showAddCardScreen
-                  ? AddCardScreen(onBackPressed: _toggleAddCardScreen, course: _currentCourse) // Use updated course
+                  ? AddCardScreen(
+                      onBackPressed: _toggleAddCardScreen, 
+                      course: _currentCourse,
+                      onCardAdded: _refreshCourse, // Add this callback
+                    )
                   : ReviewPile(course: _currentCourse, onNewPressed: _toggleAddCardScreen), // Use updated course
               const Spacer(),
               Center(

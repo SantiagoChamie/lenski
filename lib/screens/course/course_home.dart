@@ -22,6 +22,8 @@ class CourseHome extends StatefulWidget {
 
 class _CourseHomeState extends State<CourseHome> {
   late Course _currentCourse;
+  // Add this to track refreshes
+  int _refreshCounter = 0;
   
   @override
   void initState() {
@@ -32,6 +34,7 @@ class _CourseHomeState extends State<CourseHome> {
   void _handleCourseUpdate(Course updatedCourse) {
     setState(() {
       _currentCourse = updatedCourse;
+      _refreshCounter++; // Increment on updates, forcing metrics refresh
     });
   }
 
@@ -80,7 +83,10 @@ class _CourseHomeState extends State<CourseHome> {
               ),
               const Spacer(),
               Flexible(
-                child: Metrics(course: _currentCourse),
+                child: Metrics(
+                  course: _currentCourse,
+                  refreshKey: _refreshCounter, // Pass the counter as refresh key
+                ),
               ),
               SizedBox(width: p.standardPadding()),
             ],

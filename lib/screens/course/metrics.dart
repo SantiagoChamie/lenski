@@ -9,11 +9,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Metrics extends StatefulWidget {
   final double height;
   final Course course;
+  final Object refreshKey;
 
   const Metrics({
     super.key, 
     this.height = 100,
     required this.course,
+    this.refreshKey = const Object(),
   });
 
   @override
@@ -33,9 +35,23 @@ class _MetricsState extends State<Metrics> {
     super.initState();
     _repository = MetricsRepository();
     _sessionRepository = SessionRepository();
+    _refreshData();
+    _initPrefs = _loadLastMetric();
+  }
+
+  void _refreshData() {
     _metricsFuture = _repository.getCourseMetrics(widget.course);
     _sessionFuture = _sessionRepository.getOrCreateTodaySession(widget.course.code);
-    _initPrefs = _loadLastMetric();
+  }
+
+  @override
+  void didUpdateWidget(Metrics oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.course.code != widget.course.code || 
+        oldWidget.course.hashCode != widget.course.hashCode ||
+        oldWidget.refreshKey != widget.refreshKey) {
+      _refreshData();
+    }
   }
 
   Future<void> _loadLastMetric() async {
