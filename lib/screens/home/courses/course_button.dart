@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lenski/screens/home/competences/competence_icon.dart';
 import 'package:lenski/screens/home/competences/competence_list.dart'; // Uncomment this import
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/course_repository.dart';
@@ -90,7 +91,7 @@ class _CourseButtonState extends State<CourseButton> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   // Icons on the left indicating the competences
-                  CompetenceList(course: widget.course), // Uncomment this line
+                  _buildCompetenceSection(widget.course),
                   const SizedBox(width: 50),
                   // Column with image and text in the center
                   Row(
@@ -244,5 +245,48 @@ class _CourseButtonState extends State<CourseButton> {
         ],
       ),
     );
+  }
+
+  Widget _buildCompetenceSection(Course course) {
+    // Count enabled competences
+    int enabledCompetences = 0;
+    String enabledCompetenceType = '';
+    
+    if (course.listening) {
+      enabledCompetences++;
+      enabledCompetenceType = 'listening';
+    }
+    if (course.speaking) {
+      enabledCompetences++;
+      enabledCompetenceType = 'speaking';
+    }
+    if (course.reading) {
+      enabledCompetences++;
+      enabledCompetenceType = 'reading';
+    }
+    if (course.writing) {
+      enabledCompetences++;
+      enabledCompetenceType = 'writing';
+    }
+    
+    // If exactly one competence is enabled, display just that icon
+    if (enabledCompetences == 1) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            CompetenceIcon(
+              size: 40, // Larger size for single icon
+              type: enabledCompetenceType,
+            ),
+          ],
+        ),
+      );
+    } 
+    // Otherwise display the competence list
+    else {
+      return CompetenceList(course: course);
+    }
   }
 }

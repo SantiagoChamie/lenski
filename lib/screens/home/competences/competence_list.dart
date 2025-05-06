@@ -27,55 +27,59 @@ class CompetenceList extends StatelessWidget {
     final p = Proportions(context);
     final dotSize = p.standardPadding()/2; // Smaller size for dots
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        SizedBox(height: p.standardPadding()),
-        if (course.listening) ...[
-          Container(
-            height: dotSize,
-            width: dotSize,
-            decoration: BoxDecoration(
-              color: _getColor('listening'),
-              shape: BoxShape.circle,
+    return Container(
+      width: 40, // Fixed width container
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start, // Align children to the left
+        children: [
+          SizedBox(height: p.standardPadding()),
+          if (course.listening) ...[
+            Container(
+              height: dotSize,
+              width: dotSize,
+              decoration: BoxDecoration(
+                color: _getColor('listening'),
+                shape: BoxShape.circle,
+              ),
             ),
-          ),
-          SizedBox(height: p.standardPadding() / 4),
-        ],
-        if (course.speaking) ...[
-          Container(
-            height: dotSize,
-            width: dotSize,
-            decoration: BoxDecoration(
-              color: _getColor('speaking'),
-              shape: BoxShape.circle,
+            SizedBox(height: p.standardPadding() / 4),
+          ],
+          if (course.speaking) ...[
+            Container(
+              height: dotSize,
+              width: dotSize,
+              decoration: BoxDecoration(
+                color: _getColor('speaking'),
+                shape: BoxShape.circle,
+              ),
             ),
-          ),
-          SizedBox(height: p.standardPadding() / 4),
-        ],
-        if (course.reading) ...[
-          Container(
-            height: dotSize,
-            width: dotSize,
-            decoration: BoxDecoration(
-              color: _getColor('reading'),
-              shape: BoxShape.circle,
+            SizedBox(height: p.standardPadding() / 4),
+          ],
+          if (course.reading) ...[
+            Container(
+              height: dotSize,
+              width: dotSize,
+              decoration: BoxDecoration(
+                color: _getColor('reading'),
+                shape: BoxShape.circle,
+              ),
             ),
-          ),
-          SizedBox(height: p.standardPadding() / 4),
-        ],
-        if (course.writing) ...[
-          Container(
-            height: dotSize,
-            width: dotSize,
-            decoration: BoxDecoration(
-              color: _getColor('writing'),
-              shape: BoxShape.circle,
+            SizedBox(height: p.standardPadding() / 4),
+          ],
+          if (course.writing) ...[
+            Container(
+              height: dotSize,
+              width: dotSize,
+              decoration: BoxDecoration(
+                color: _getColor('writing'),
+                shape: BoxShape.circle,
+              ),
             ),
-          ),
-          SizedBox(height: p.standardPadding() / 4),
+            SizedBox(height: p.standardPadding() / 4),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
