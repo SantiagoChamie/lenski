@@ -93,6 +93,23 @@ class CourseRepository {
     return course.lastAccess == todayDays;
   }
 
+  Future<Course> getCourse(String code) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'courses',
+      where: 'code = ?',
+      whereArgs: [code],
+    );
+    
+    if (maps.isNotEmpty) {
+      final course = Course.fromMap(maps.first);
+      checkStreak(course); // Check for streak breaks
+      return course;
+    } else {
+      throw Exception('Course not found');
+    }
+  }
+
   /// Retrieves all courses and checks their streaks
   Future<List<Course>> courses() async {
     final db = await database;

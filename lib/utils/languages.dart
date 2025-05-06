@@ -416,6 +416,46 @@ const Map<String, String> languageCodes = {
   '汉语 (Traditional)': 'ZH-HANT',
 };
 
+// Language names for each code (keys and values swapped from original)
+const Map<String, String> codeToLanguage = {
+  'AR': 'العربية',
+  'BG': 'Български',
+  'CS': 'Čeština',
+  'DA': 'Dansk',
+  'DE': 'Deutsch',
+  'EL': 'Ελληνικά',
+  'EN': 'English',
+  'EN-GB': 'English (British)',
+  'EN-US': 'English (American)',
+  'ES': 'Español',
+  'ET': 'Eesti',
+  'FI': 'Suomi',
+  'FR': 'Français',
+  'HU': 'Magyar',
+  'ID': 'Bahasa Indonesia',
+  'IT': 'Italiano',
+  'JA': '日本語',
+  'KO': '한국어',
+  'LT': 'Lietuvių',
+  'LV': 'Latviešu',
+  'NB': 'Norsk Bokmål',
+  'NL': 'Nederlands',
+  'PL': 'Polski',
+  'PT': 'Português',
+  'PT-BR': 'Português (Brazilian)',
+  'PT-PT': 'Português (Portugal)',
+  'RO': 'Română',
+  'RU': 'Русский',
+  'SK': 'Slovenčina',
+  'SL': 'Slovenščina',
+  'SV': 'Svenska',
+  'TR': 'Türkçe',
+  'UK': 'Українська',
+  'ZH': '汉语',
+  'ZH-HANS': '汉语 (Simplified)',
+  'ZH-HANT': '汉语 (Traditional)',
+};
+
 // Language attributes for each language
 final Map<String, Map<String, dynamic>> languageAttributes = {
   'AR': {

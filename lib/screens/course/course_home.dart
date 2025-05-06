@@ -8,13 +8,32 @@ import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/widgets/ltext.dart';
 
 /// A screen that displays the home page for a specific course.
-class CourseHome extends StatelessWidget {
+class CourseHome extends StatefulWidget {
   final Course course;
 
   /// Creates a CourseHome widget.
   /// 
   /// [course] is the course for which the home screen is being created.
   const CourseHome({super.key, required this.course});
+
+  @override
+  State<CourseHome> createState() => _CourseHomeState();
+}
+
+class _CourseHomeState extends State<CourseHome> {
+  late Course _currentCourse;
+  
+  @override
+  void initState() {
+    super.initState();
+    _currentCourse = widget.course;
+  }
+  
+  void _handleCourseUpdate(Course updatedCourse) {
+    setState(() {
+      _currentCourse = updatedCourse;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,21 +49,21 @@ class CourseHome extends StatelessWidget {
                 size: 100.0,
                 borderWidth: 5.0,
                 borderColor: const Color(0xFFD9D0DB),
-                language: course.name,
+                language: _currentCourse.name,
               ),
               SizedBox(width: p.standardPadding()),
               LText(
-                text: getWelcomeMessage(course.name),
+                text: getWelcomeMessage(_currentCourse.name),
                 style: TextStyle(
                   fontSize: 24.0,
                   color: const Color.fromARGB(255, 0, 0, 0),
-                  fontFamily: course.code != 'EL' ? "Unbounded": "Lexend",
+                  fontFamily: _currentCourse.code != 'EL' ? "Unbounded": "Lexend",
                   decoration: TextDecoration.underline,
                   decorationStyle: TextDecorationStyle.dotted,
                   decorationColor: const Color.fromARGB(255, 0, 0, 0),
                 ),
-                fromLanguage: course.fromCode,
-                toLanguage: course.code,
+                fromLanguage: _currentCourse.fromCode,
+                toLanguage: _currentCourse.code,
                 position: 'below',
               ),
               Container(
@@ -61,14 +80,17 @@ class CourseHome extends StatelessWidget {
               ),
               const Spacer(),
               Flexible(
-                child: Metrics(course: course),
+                child: Metrics(course: _currentCourse),
               ),
               SizedBox(width: p.standardPadding()),
             ],
           ),
         ),
         Expanded(
-          child: CourseNavigator(course: course),
+          child: CourseNavigator(
+            course: _currentCourse,
+            onCourseUpdate: _handleCourseUpdate,
+          ),
         ),
       ],
     );

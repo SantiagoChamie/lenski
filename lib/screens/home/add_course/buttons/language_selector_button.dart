@@ -10,6 +10,7 @@ class LanguageSelectorButton extends StatefulWidget {
   final String startingLanguage;
   final bool isSource; // New parameter to determine if it's a 'from' language
   final String selectorTitle; // Add this new parameter
+  final bool hideTooltip; // New parameter to hide tooltip
 
   /// Creates a LanguageSelectorButton widget.
   /// 
@@ -17,12 +18,14 @@ class LanguageSelectorButton extends StatefulWidget {
   /// [startingLanguage] is the initial language to be displayed.
   /// [isSource] determines if it's a 'from' language. Defaults to true.
   /// [selectorTitle] is the title of the language selector dialog. Defaults to 'Select a Language'.
+  /// [hideTooltip] determines if the tooltip should be hidden. Defaults to false.
   const LanguageSelectorButton({
     super.key,
     required this.onLanguageSelected,
     this.startingLanguage = 'English',
     this.isSource = true, // Default to true
     this.selectorTitle = 'Select a Language', // Default value
+    this.hideTooltip = false, // Default value
   });
 
   @override
@@ -178,12 +181,12 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
           const SizedBox(width: 8), // Space between flag icon and text
           Text(_selectedLanguage, style: const TextStyle(fontSize: 20, fontFamily: "Varela Round", color: Colors.black)), // Text on the left
           const SizedBox(width: 8), // Space between text and icon
-          if (!widget.isSource) 
+          if (!widget.isSource && !widget.hideTooltip) // Show tooltip only if not a source language
             Tooltip(
               message: "A language you already know.",
               child: Icon(Icons.help_outline, color: Colors.grey[600]),
             ),
-          if (widget.isSource)
+          if (widget.isSource && !widget.hideTooltip) // Show tooltip only if it's a source language
             Tooltip(
               message: "A language you want to learn.",
               child: Icon(Icons.help_outline, color: Colors.grey[600]),

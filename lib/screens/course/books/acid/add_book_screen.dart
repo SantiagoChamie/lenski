@@ -399,7 +399,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
                   ),
                   Positioned(
                     top: 10,
-                    left: 10,
+                    right: 10,
                     child: IconButton(
                       icon: const Icon(Icons.close),
                       onPressed: isLoading ? null : () {
