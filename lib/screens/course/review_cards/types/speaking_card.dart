@@ -39,27 +39,31 @@ class _SpeakingCardState extends State<SpeakingCard> {
             children: [
               Text.rich(
                 TextSpan(
-                  text: widget.card.context.substring(0, widget.card.context.indexOf(widget.card.front)),
+                  text: widget.card.context.contains(widget.card.front)
+                      ? widget.card.context.substring(0, widget.card.context.indexOf(widget.card.front))
+                      : widget.card.context,
                   style: const TextStyle(
                     fontSize: 24.0,
                     color: Color.fromARGB(255, 0, 0, 0),
                     fontFamily: "Varela Round",
                   ),
-                  children: [
-                    const TextSpan(
-                      text: '_______',
-                      style: TextStyle(
-                        fontSize: 24.0,
-                        color: Color(0xFFDE2C50), // Speaking competence color
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    TextSpan(
-                      text: widget.card.context.substring(
-                        widget.card.context.indexOf(widget.card.front) + widget.card.front.length
-                      ),
-                    ),
-                  ],
+                  children: widget.card.context.contains(widget.card.front)
+                      ? [
+                          const TextSpan(
+                            text: '_______',
+                            style: TextStyle(
+                              fontSize: 24.0,
+                              color: Color(0xFFDE2C50), // Speaking competence color
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextSpan(
+                            text: widget.card.context.substring(
+                              widget.card.context.indexOf(widget.card.front) + widget.card.front.length,
+                            ),
+                          ),
+                        ]
+                      : [],
                 ),
               ),
               const SizedBox(height: 16.0),
