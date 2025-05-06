@@ -45,33 +45,7 @@ class ReadingCard extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text.rich(
                     TextSpan(
-                      text: card.context.substring(0, card.context.indexOf(card.front)),
-                      style: const TextStyle(
-                        fontSize: 18.0,
-                        color: Color(0xFF99909B),
-                        fontFamily: "Varela Round",
-                      ),
-                      children: [
-                        TextSpan(
-                          text: card.front,
-                          style: const TextStyle(
-                            fontSize: 18.0,
-                            color: Color(0xFFEDA42E),
-                            fontFamily: "Varela Round",
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextSpan(
-                          text: card.context.substring(
-                            card.context.indexOf(card.front) + card.front.length
-                          ),
-                          style: const TextStyle(
-                            fontSize: 18.0,
-                            color: Color(0xFF99909B),
-                            fontFamily: "Varela Round",
-                          ),
-                        ),
-                      ],
+                      children: _buildContextTextSpans(),
                     ),
                   ),
                 ),
@@ -91,5 +65,56 @@ class ReadingCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  List<TextSpan> _buildContextTextSpans() {
+    // Check if the front text is contained in the context
+    final int index = card.context.indexOf(card.front);
+    
+    // If front text isn't in context, just show the context as plain text
+    if (index == -1) {
+      return [
+        TextSpan(
+          text: card.context,
+          style: const TextStyle(
+            fontSize: 18.0,
+            color: Color(0xFF99909B),
+            fontFamily: "Varela Round",
+          ),
+        ),
+      ];
+    }
+    
+    // If front text is in context, split into three parts
+    return [
+      // Text before the highlighted word
+      TextSpan(
+        text: card.context.substring(0, index),
+        style: const TextStyle(
+          fontSize: 18.0,
+          color: Color(0xFF99909B),
+          fontFamily: "Varela Round",
+        ),
+      ),
+      // The highlighted word
+      TextSpan(
+        text: card.front,
+        style: const TextStyle(
+          fontSize: 18.0,
+          color: Color(0xFFEDA42E),
+          fontFamily: "Varela Round",
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      // Text after the highlighted word
+      TextSpan(
+        text: card.context.substring(index + card.front.length),
+        style: const TextStyle(
+          fontSize: 18.0,
+          color: Color(0xFF99909B),
+          fontFamily: "Varela Round",
+        ),
+      ),
+    ];
   }
 }

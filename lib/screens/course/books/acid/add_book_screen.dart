@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lenski/screens/course/books/loading_overlay.dart';
+import 'package:lenski/screens/course/books/acid/loading_overlay.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_creator.dart';
 import 'package:file_picker/file_picker.dart';
@@ -322,10 +322,9 @@ class _AddBookScreenState extends State<AddBookScreen> {
                               Padding(
                                 padding: const EdgeInsets.only(left: 8.0),
                                 child: Tooltip(
-                                  message: 'Poor quality PDFs will not work properly.'
-                                    + ((['JA', 'ZH', 'KO'].contains(widget.languageCode)) 
+                                  message: 'Poor quality PDFs will not work properly.${(['JA', 'ZH', 'KO'].contains(widget.languageCode)) 
                                       ? '\n\nPDFs with vertical text (top to bottom) are not supported'
-                                      : ''),
+                                      : ''}',
                                   child: Icon(Icons.help_outline, 
                                     size: 20, 
                                     color: Colors.grey[600]
@@ -400,7 +399,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
                   ),
                   Positioned(
                     top: 10,
-                    left: 10,
+                    right: 10,
                     child: IconButton(
                       icon: const Icon(Icons.close),
                       onPressed: isLoading ? null : () {

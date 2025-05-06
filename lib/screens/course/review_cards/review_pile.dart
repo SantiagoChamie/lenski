@@ -128,7 +128,23 @@ class _ReviewPileState extends State<ReviewPile> {
                         style: const TextStyle(fontSize: 24, fontFamily: 'Telex'),
                       ),
                     ),
-                    
+                    Positioned(
+                      bottom: 20,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: Text(
+                          cardFronts.isEmpty 
+                              ? '' 
+                              : '${cardFronts.length} card${cardFronts.length != 1 ? 's' : ''} to review',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontFamily: 'Telex',
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

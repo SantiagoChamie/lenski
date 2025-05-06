@@ -3,6 +3,7 @@ import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/home/competences/competence_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
+import 'package:lenski/data/session_repository.dart'; // Add this import
 import 'package:lenski/models/card_model.dart' as card_model;
 import 'package:lenski/services/translation_service.dart';
 
@@ -10,11 +11,13 @@ import 'package:lenski/services/translation_service.dart';
 class AddCardScreen extends StatefulWidget {
   final VoidCallback onBackPressed;
   final Course course;
+  final VoidCallback? onCardAdded; // Add this callback
 
   const AddCardScreen({
     super.key, 
     required this.onBackPressed, 
-    required this.course
+    required this.course,
+    this.onCardAdded, // Add this parameter
   });
 
   @override
@@ -26,13 +29,26 @@ class _AddCardScreenState extends State<AddCardScreen> {
   final TextEditingController backController = TextEditingController();
   final TextEditingController contextController = TextEditingController();
   
-  // Track selected competences
-  final Map<String, bool> selectedCompetences = {
-    'reading': true,
-    'writing': false,
-    'listening': false,
-    'speaking': false,
-  };
+  // Use late initialization for the competences map
+  late final Map<String, bool> selectedCompetences;
+  
+  @override
+  void initState() {
+    super.initState();
+    
+    // Initialize competences from the course model
+    selectedCompetences = {
+      'reading': widget.course.reading,
+      'writing': widget.course.writing, 
+      'listening': widget.course.listening,
+      'speaking': widget.course.speaking,
+    };
+    
+    // Ensure at least one competence is selected
+    if (!selectedCompetences.values.contains(true)) {
+      selectedCompetences['reading'] = true; // Default to reading if nothing is enabled
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -207,6 +223,18 @@ class _AddCardScreenState extends State<AddCardScreen> {
                         );
                         await CardRepository().insertCard(card);
                       }
+                      
+                      // Update the session statistics - increment words added
+                      await SessionRepository().updateSessionStats(
+                        courseCode: widget.course.code,
+                        wordsAdded: 1,
+                      );
+
+                      // Call the onCardAdded callback if provided
+                      if (widget.onCardAdded != null) {
+                        widget.onCardAdded!();
+                      }
+
                       widget.onBackPressed();
                     },
                     style: ElevatedButton.styleFrom(

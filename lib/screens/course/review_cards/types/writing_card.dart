@@ -47,41 +47,45 @@ class _WritingCardState extends State<WritingCard> {
             children: [
               Text.rich(
                 TextSpan(
-                  text: widget.card.context.substring(0, widget.card.context.indexOf(widget.card.front)),
+                  text: widget.card.context.contains(widget.card.front)
+                      ? widget.card.context.substring(0, widget.card.context.indexOf(widget.card.front))
+                      : widget.card.context,
                   style: const TextStyle(
                     fontSize: 24.0,
                     color: Color.fromARGB(255, 0, 0, 0),
                     fontFamily: "Varela Round",
                   ),
-                  children: [
-                    WidgetSpan(
-                      child: SizedBox(
-                        width: 120,
-                        child: TextField(
-                          controller: _controller,
-                          cursorColor: const Color(0xFFEDE72D),
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),     
+                  children: widget.card.context.contains(widget.card.front)
+                      ? [
+                          WidgetSpan(
+                            child: SizedBox(
+                              width: 120,
+                              child: TextField(
+                                controller: _controller,
+                                cursorColor: const Color(0xFFEDE72D),
+                                decoration: const InputDecoration(
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
+                                  ),
+                                  border: UnderlineInputBorder(),
+                                  isDense: true,
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 24.0,
+                                  color: Color.fromARGB(255, 0, 0, 0),
+                                  fontFamily: "Varela Round",
+                                ),
+                              ),
                             ),
-                            border: UnderlineInputBorder(),
-                            isDense: true,
                           ),
-                          style: const TextStyle(
-                            fontSize: 24.0,
-                            color: Color.fromARGB(255, 0, 0, 0),
-                            fontFamily: "Varela Round",
+                          TextSpan(
+                            text: widget.card.context.substring(
+                              widget.card.context.indexOf(widget.card.front) + widget.card.front.length,
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                    TextSpan(
-                      text: widget.card.context.substring(
-                        widget.card.context.indexOf(widget.card.front) + widget.card.front.length
-                      ),
-                    ),
-                  ],
+                        ]
+                      : null,
                 ),
               ),
               const SizedBox(height: 16.0),
