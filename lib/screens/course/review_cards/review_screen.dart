@@ -63,7 +63,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   /// Saves the time spent studying to session repository
   Future<void> _saveStudyTime() async {
     final now = DateTime.now();
-    final minutesStudied = now.difference(_startTime).inMinutes;
+    final minutesStudied = now.difference(_startTime).inMinutes-1; 
     
     // Only update if user spent at least a minute
     if (minutesStudied > 0) {
@@ -116,9 +116,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
   /// Toggles the visibility of the card (front/back).
   /// If the card is on the front and audio is enabled, it reads the front of the card.
   void toggleCard() async {
-    print(cards.first.front);
-    print(cards.first.back);
-    print(cards.first.context);
     if (isFront && isAudioEnabled) {
       // ignore: empty_catches
       try {await TtsService().speak(cards.first.front, widget.course.code);} catch (e) {}

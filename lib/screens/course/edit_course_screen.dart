@@ -7,6 +7,7 @@ import 'package:lenski/utils/languages.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/data/course_repository.dart';
+import 'package:lenski/data/session_repository.dart';
 
 /// A screen for editing an existing course
 class EditCourseScreen extends StatefulWidget {
@@ -29,6 +30,14 @@ class EditCourseScreen extends StatefulWidget {
 
 class _EditCourseScreenState extends State<EditCourseScreen> {
   final CourseRepository _courseRepository = CourseRepository();
+  final SessionRepository _sessionRepository = SessionRepository(); // Add repository
+  
+  // Add statistics variables
+  int _totalMinutesStudied = 0;
+  int _totalWordsAdded = 0;
+  int _totalWordsReviewed = 0;
+  int _totalLinesRead = 0;
+  bool _isLoadingStats = true;
 
   // Initialize with course values
   late String _selectedOriginLanguage;
@@ -57,6 +66,38 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
     
     _dailyGoal = widget.course.dailyGoal;
     _totalGoal = widget.course.totalGoal;
+    
+    // Load statistics
+    _loadStatistics();
+  }
+  
+  // Add this method to load statistics
+  Future<void> _loadStatistics() async {
+    setState(() {
+      _isLoadingStats = true;
+    });
+    
+    final sessions = await _sessionRepository.getSessionsByCourse(widget.course.code);
+    
+    int minutes = 0;
+    int words = 0;
+    int reviewed = 0;
+    int lines = 0;
+    
+    for (var session in sessions) {
+      minutes += session.minutesStudied;
+      words += session.wordsAdded;
+      reviewed += session.wordsReviewed;
+      lines += session.linesRead;
+    }
+    
+    setState(() {
+      _totalMinutesStudied = minutes;
+      _totalWordsAdded = words;
+      _totalWordsReviewed = reviewed;
+      _totalLinesRead = lines;
+      _isLoadingStats = false;
+    });
   }
 
   /// Updates the course in the repository.
@@ -118,7 +159,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
           children: [
             // Main content
             Padding(
-              padding: EdgeInsets.all(p.standardPadding()),
+              padding: EdgeInsets.only(left: p.standardPadding(),right: p.standardPadding(),bottom: p.standardPadding()),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [                  
@@ -226,6 +267,46 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                                     ),
                                   ],
                                 ),
+                                
+                                const Divider(height: 40),
+                                
+                                // Statistics in a row
+                                _isLoadingStats 
+                                    ? const Center(child: CircularProgressIndicator())
+                                    : Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        _buildStatisticBox(
+                                          Icons.watch_later_outlined, 
+                                          'Study time', 
+                                          _formatTime(_totalMinutesStudied)
+                                        ),
+                                        const SizedBox(width: 16),
+                                        _buildStatisticBox(
+                                          Icons.add_circle_outline, 
+                                          'Words added', 
+                                          '$_totalWordsAdded'
+                                        ),
+                                        const SizedBox(width: 16),
+                                        _buildStatisticBox(
+                                          Icons.replay, 
+                                          'Words reviewed', 
+                                          '$_totalWordsReviewed'
+                                        ),
+                                        const SizedBox(width: 16),
+                                        _buildStatisticBox(
+                                          Icons.menu_book, 
+                                          'Lines read', 
+                                          '$_totalLinesRead'
+                                        ),
+                                        const SizedBox(width: 16),
+                                        _buildStatisticBox(
+                                          Icons.local_fire_department, 
+                                          'Streak', 
+                                          '${widget.course.streak} days'
+                                        ),
+                                      ],
+                                    ),
                               ],
                             ),
                           ),
@@ -287,6 +368,86 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+  
+  String _formatTime(int minutes) {
+    if (minutes < 60) {
+      return '$minutes min';
+    } else if (minutes < 24 * 60) { // Less than a day
+      final hours = minutes ~/ 60;
+      final mins = minutes % 60;
+      return '$hours h ${mins > 0 ? '$mins min' : ''}';
+    } else if (minutes < 365 * 24 * 60) { // Less than a year
+      final days = minutes ~/ (24 * 60);
+      final remainingMinutes = minutes % (24 * 60);
+      final hours = remainingMinutes ~/ 60;
+      
+      if (days > 7) {
+        // For more than a week, just show days
+        return '$days days';
+      } else {
+        // Show days and hours for less than a week
+        return '$days day${days > 1 ? 's' : ''} ${hours > 0 ? '$hours h' : ''}';
+      }
+    } else { // Years or more
+      final years = minutes ~/ (365 * 24 * 60);
+      final remainingMinutes = minutes % (365 * 24 * 60);
+      final days = remainingMinutes ~/ (24 * 60);
+      
+      if (days > 0) {
+        return '$years year${years > 1 ? 's' : ''} $days day${days > 1 ? 's' : ''}';
+      } else {
+        return '$years year${years > 1 ? 's' : ''}';
+      }
+    }
+  }
+  
+  // Add this helper method to create statistic boxes
+  Widget _buildStatisticBox(IconData icon, String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F0F6),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE5E0E6), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: const Color(0xFF2C73DE), size: 24),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF99909B),
+                  fontFamily: "Varela Round",
+                ),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: "Varela Round",
+                ),
+              ),
+            ],
+          )
+        ],
       ),
     );
   }
