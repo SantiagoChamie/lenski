@@ -8,6 +8,7 @@ import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/data/course_repository.dart';
 import 'package:lenski/data/session_repository.dart';
+import 'package:lenski/data/card_repository.dart';
 
 /// A screen for editing an existing course
 class EditCourseScreen extends StatefulWidget {
@@ -30,13 +31,15 @@ class EditCourseScreen extends StatefulWidget {
 
 class _EditCourseScreenState extends State<EditCourseScreen> {
   final CourseRepository _courseRepository = CourseRepository();
-  final SessionRepository _sessionRepository = SessionRepository(); // Add repository
+  final SessionRepository _sessionRepository = SessionRepository();
+  final CardRepository _cardRepository = CardRepository(); // Add this
   
   // Add statistics variables
   int _totalMinutesStudied = 0;
   int _totalWordsAdded = 0;
   int _totalWordsReviewed = 0;
   int _totalLinesRead = 0;
+  int _totalCards = 0; // Add this
   bool _isLoadingStats = true;
 
   // Initialize with course values
@@ -71,13 +74,14 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
     _loadStatistics();
   }
   
-  // Add this method to load statistics
+  // Update the _loadStatistics method
   Future<void> _loadStatistics() async {
     setState(() {
       _isLoadingStats = true;
     });
     
     final sessions = await _sessionRepository.getSessionsByCourse(widget.course.code);
+    final cardCount = await _cardRepository.getCardCount(widget.course.code); // Add this
     
     int minutes = 0;
     int words = 0;
@@ -96,6 +100,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
       _totalWordsAdded = words;
       _totalWordsReviewed = reviewed;
       _totalLinesRead = lines;
+      _totalCards = cardCount; // Add this
       _isLoadingStats = false;
     });
   }
@@ -317,9 +322,9 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                                         ),
                                         const SizedBox(width: 16),
                                         _buildStatisticBox(
-                                          Icons.local_fire_department, 
-                                          'Streak', 
-                                          '${widget.course.streak} days'
+                                          Icons.style, // or Icons.credit_card
+                                          'Cards',  
+                                          '$_totalCards'
                                         ),
                                       ],
                                     ),

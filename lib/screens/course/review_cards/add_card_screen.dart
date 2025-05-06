@@ -29,13 +29,26 @@ class _AddCardScreenState extends State<AddCardScreen> {
   final TextEditingController backController = TextEditingController();
   final TextEditingController contextController = TextEditingController();
   
-  // Track selected competences
-  final Map<String, bool> selectedCompetences = {
-    'reading': true,
-    'writing': false,
-    'listening': false,
-    'speaking': false,
-  };
+  // Use late initialization for the competences map
+  late final Map<String, bool> selectedCompetences;
+  
+  @override
+  void initState() {
+    super.initState();
+    
+    // Initialize competences from the course model
+    selectedCompetences = {
+      'reading': widget.course.reading,
+      'writing': widget.course.writing, 
+      'listening': widget.course.listening,
+      'speaking': widget.course.speaking,
+    };
+    
+    // Ensure at least one competence is selected
+    if (!selectedCompetences.values.contains(true)) {
+      selectedCompetences['reading'] = true; // Default to reading if nothing is enabled
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

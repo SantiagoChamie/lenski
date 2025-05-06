@@ -1,3 +1,4 @@
+import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import '../../models/card_model.dart';
@@ -85,6 +86,19 @@ class CardRepository {
     return List.generate(maps.length, (i) {
       return Card.fromMap(maps[i]);
     });
+  }
+
+  /// Counts the total number of cards for a specific language.
+  /// 
+  /// [language] is the language code of the cards.
+  /// Returns the count of cards.
+  Future<int> getCardCount(String language) async {
+    final db = await database;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM cards WHERE language = ?',
+      [language]
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
   }
 
   /// Updates an existing card in the database.
