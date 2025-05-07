@@ -42,7 +42,7 @@ class BookCreator {
       int wordCount = 0;
 
       for (String word in words) {
-        if (wordCount >= 15) {
+        if (wordCount >= 10) {
           processedLines.add(currentLine.toString().trim());
           currentLine.clear();
           wordCount = 0;

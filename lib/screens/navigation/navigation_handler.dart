@@ -71,8 +71,17 @@ class NavigationHandlerState extends State<NavigationHandler> {
                     builder = (BuildContext _) => CourseHome(course: course);
                     break;
                   case 'Review':
-                    final course = settings.arguments as Course;
-                    builder = (BuildContext _) => ReviewScreen(course: course);
+                    // Support both new map format and old direct course format
+                    if (settings.arguments is Map<String, dynamic>) {
+                      final args = settings.arguments as Map<String, dynamic>;
+                      final course = args['course'] as Course;
+                      final firstWord = args['firstWord'] as String?;
+                      builder = (BuildContext _) => ReviewScreen(course: course, firstWord: firstWord);
+                    } else {
+                      // Backward compatibility for existing code
+                      final course = settings.arguments as Course;
+                      builder = (BuildContext _) => ReviewScreen(course: course);
+                    }
                     break;
                   case 'Book':
                     final args = settings.arguments as Map<String, dynamic>;

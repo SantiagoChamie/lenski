@@ -19,11 +19,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// A screen for reviewing flashcards within a course.
 class ReviewScreen extends StatefulWidget {
   final Course course;
+  final String? firstWord; // Add this field
 
   /// Creates a ReviewScreen widget.
   /// 
   /// [course] is the course for which the review screen is being created.
-  const ReviewScreen({super.key, required this.course});
+  /// [firstWord] is the word that should be displayed first (optional)
+  const ReviewScreen({
+    super.key, 
+    required this.course,
+    this.firstWord,
+  });
 
   @override
   _ReviewScreenState createState() => _ReviewScreenState();
@@ -33,7 +39,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
   bool isFront = true;
   bool isAudioEnabled = true; // Default value
   bool isTtsAvailable = false; // New state variable
-  bool _hasIncrementedStreak = false; // New field to track streak updates
   List<lenski_card.Card> cards = [];
   final CardRepository repository = CardRepository();
   final CourseRepository courseRepository = CourseRepository();
@@ -86,7 +91,36 @@ class _ReviewScreenState extends State<ReviewScreen> {
   Future<void> _loadCards() async {
     final today = DateTime.now();
     final fetchedCards = await repository.cards(today, widget.course.code);
+    
     setState(() {
+      if (fetchedCards.isEmpty) {
+        cards = [];
+        return;
+      }
+
+      // Check if we have a specific first word to show
+      if (widget.firstWord != null) {
+        // Find the card with matching front text to show first
+        final firstCardIndex = fetchedCards.indexWhere((card) => card.front == widget.firstWord);
+        
+        if (firstCardIndex != -1) {
+          // Remove the first card from its position
+          final firstCard = fetchedCards.removeAt(firstCardIndex);
+          
+          // Randomize the remaining cards
+          fetchedCards.shuffle();
+          
+          // Add the first card back at the beginning
+          fetchedCards.insert(0, firstCard);
+        } else {
+          // If the firstWord isn't found (unusual case), just shuffle all cards
+          fetchedCards.shuffle();
+        }
+      } else {
+        // No specific first word, so shuffle all cards
+        fetchedCards.shuffle();
+      }
+      
       cards = fetchedCards;
     });
   }
@@ -127,7 +161,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
   /// Handles the difficulty selection and updates streak on first review.
   void handleDifficulty(int quality) async {
-
     // Track card review in the session stats
     await sessionRepository.updateSessionStats(
       courseCode: widget.course.code,
