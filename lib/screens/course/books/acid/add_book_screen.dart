@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/screens/course/books/acid/loading_overlay.dart';
+import 'package:lenski/utils/languages.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_creator.dart';
 import 'package:file_picker/file_picker.dart';
@@ -234,12 +235,22 @@ class _AddBookScreenState extends State<AddBookScreen> {
                                   }
                                   setState(() => isLoading = true);
                                   try {
-                                    _bookCreator.processBook(textController.text, widget.languageCode);
+                                    bool success = await _bookCreator.processBook(
+                                      textController.text, 
+                                      widget.languageCode
+                                    );
                                     if (!_bookCreator.isCancelled) {
-                                      widget.onBackPressed();
+                                      if (success) {
+                                        widget.onBackPressed();
+                                      } else {
+                                        // Show dialog instead of SnackBar
+                                        _showLanguageMismatchDialog(textController.text, false);
+                                      }
                                     }
                                   } finally {
-                                    setState(() => isLoading = false);
+                                    if (!_bookCreator.isCancelled) {
+                                      setState(() => isLoading = false);
+                                    }
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -358,19 +369,34 @@ class _AddBookScreenState extends State<AddBookScreen> {
                                     }
                                     setState(() => isLoading = true);
                                     try {
+                                      bool success;
                                       if (isFileMode == true) {
-                                        await _bookCreator.processFile(selectedFilePath!, widget.languageCode);
-                                        if (!_bookCreator.isCancelled) {
-                                          widget.onBackPressed();
-                                        }
+                                        success = await _bookCreator.processFile(
+                                          selectedFilePath!, 
+                                          widget.languageCode
+                                        );
                                       } else {
-                                        _bookCreator.processBook(textController.text, widget.languageCode);
-                                        if (!_bookCreator.isCancelled) {
+                                        success = await _bookCreator.processBook(
+                                          textController.text, 
+                                          widget.languageCode
+                                        );
+                                      }
+                                      
+                                      if (!_bookCreator.isCancelled) {
+                                        if (success) {
                                           widget.onBackPressed();
+                                        } else {
+                                          // Show dialog instead of SnackBar
+                                          _showLanguageMismatchDialog(
+                                            isFileMode == true ? selectedFilePath! : textController.text,
+                                            isFileMode == true
+                                          );
                                         }
                                       }
                                     } finally {
-                                      setState(() => isLoading = false);
+                                      if (!_bookCreator.isCancelled) {
+                                        setState(() => isLoading = false);
+                                      }
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -501,6 +527,55 @@ class _AddBookScreenState extends State<AddBookScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _showLanguageMismatchDialog(String content, bool isFile) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Language Mismatch'),
+          content: Text(
+            'The text\'s language doesn\'t match the course\'s language: ${codeToLanguage[widget.languageCode]}'
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel',
+                style: TextStyle(color: Color(0xFF71BDE0)),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Add Anyway',
+                style: TextStyle(color: Colors.red),
+              ),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                setState(() => isLoading = true);
+                try {
+                  // Force add the book by bypassing language check
+                  if (isFile) {
+                    await _bookCreator.forceAddFile(content, widget.languageCode);
+                  } else {
+                    await _bookCreator.forceAddBook(content, widget.languageCode);
+                  }
+                  if (!_bookCreator.isCancelled) {
+                    widget.onBackPressed();
+                  }
+                } finally {
+                  if (!_bookCreator.isCancelled) {
+                    setState(() => isLoading = false);
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
