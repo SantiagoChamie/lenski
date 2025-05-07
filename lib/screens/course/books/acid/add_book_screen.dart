@@ -464,19 +464,27 @@ class _AddBookScreenState extends State<AddBookScreen> {
   }
 
   Widget _buildTextInput() {
-    return TextField(
-      controller: textController,
-      enabled: !isLoading,
-      decoration: const InputDecoration(
-        border: OutlineInputBorder(),
-        hintText: 'Place the text here',
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.blue, width: 2.0),
+    return Theme(
+      data: Theme.of(context).copyWith(
+        textSelectionTheme: const TextSelectionThemeData(
+          selectionColor: Color(0xFF71BDE0), // Light blue highlight
+          cursorColor: Color(0xFF2C73DE),    // Blue cursor
         ),
       ),
-      maxLines: null,
-      expands: true,
+      child: TextField(
+        controller: textController,
+        enabled: !isLoading,
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+          hintText: 'Place the text here',
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+          ),
+        ),
+        maxLines: null,
+        expands: true,
+      ),
     );
   }
 
