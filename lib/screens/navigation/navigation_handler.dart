@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async'; // Add this import
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/course/books/reader/book_screen_scroll.dart';
 import 'package:lenski/screens/home/courses.dart';
@@ -20,11 +21,21 @@ class NavigationHandler extends StatefulWidget {
 class NavigationHandlerState extends State<NavigationHandler> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   String _currentRoute = 'Home';
+  
+  // Add a static stream controller for home navigation events
+  static final StreamController<void> homeNavigationController = 
+      StreamController<void>.broadcast();
+  
+  // Stream getter for listeners
+  static Stream<void> get onHomeNavigation => homeNavigationController.stream;
 
   /// Handles item selection from the sidebar.
   /// Navigates to the selected route if it is different from the current route.
   void _onItemSelected(String item) {
     if (item == 'Home') {
+      // If navigating to Home, emit an event through the stream
+      homeNavigationController.add(null);
+      
       // If the selected item is 'Home', pop all routes until the first route.
       if (_navigatorKey.currentState?.canPop() == true) {
         _navigatorKey.currentState?.popUntil((route) => route.isFirst);

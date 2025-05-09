@@ -27,6 +27,18 @@ class AddCourseNavigator extends StatefulWidget {
 class _AddCourseNavigatorState extends State<AddCourseNavigator> {
   bool _isAddCourseScreenVisible = false;
 
+  @override
+  void didUpdateWidget(AddCourseNavigator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    // If parent widget collapsed but we're still showing the add course screen
+    if (!widget.isExpanded && _isAddCourseScreenVisible) {
+      setState(() {
+        _isAddCourseScreenVisible = false;
+      });
+    }
+  }
+
   /// Toggles the visibility of the add course screen.
   void _toggleAddCourseScreen() {
     setState(() {

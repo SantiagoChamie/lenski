@@ -17,14 +17,17 @@ class Sidebar extends StatelessWidget {
       color: const Color(0xFFF5F0F6),
       child: Column(
         children: [
-          // Logo at the top
-          const SizedBox(
-            height: 100,
-            child: Center(
-              child: Image(
-                image: AssetImage('assets/icon.png'),
-                width: 33,
-                height: 33,
+          // Logo at the top, now clickable
+          GestureDetector(
+            onTap: () => onItemSelected('Home'),
+            child: const SizedBox(
+              height: 100,
+              child: Center(
+                child: Image(
+                  image: AssetImage('assets/icon.png'),
+                  width: 33,
+                  height: 33,
+                ),
               ),
             ),
           ),
