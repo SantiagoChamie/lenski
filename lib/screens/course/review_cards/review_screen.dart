@@ -146,7 +146,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
       });
     }
   }
-
+  
   /// Toggles the visibility of the card (front/back).
   /// If the card is on the front and audio is enabled, it reads the front of the card.
   void toggleCard() async {
@@ -157,6 +157,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
     setState(() {
       isFront = !isFront;
     });
+    /**for (var card in cards) {
+      print('Due date for card ${card.id}: ${_intToDateTime(card.dueDate)}');
+    }
+    */
   }
 
   /// Handles the difficulty selection and updates streak on first review.

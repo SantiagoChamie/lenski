@@ -154,7 +154,7 @@ class CardRepository {
       eFactor: newEFactor,
       repetition: newRepetition,
     );
-    print('Next due date: $newDueDate');
+    print('Card: ${card.front} - Next due date: $newDueDate');
     await updateCard(updatedCard);
     return newInterval;
   }
