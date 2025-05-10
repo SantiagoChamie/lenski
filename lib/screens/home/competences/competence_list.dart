@@ -27,7 +27,7 @@ class CompetenceList extends StatelessWidget {
     final p = Proportions(context);
     final dotSize = p.standardPadding()/2; // Smaller size for dots
 
-    return Container(
+    return SizedBox(
       width: 40, // Fixed width container
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,

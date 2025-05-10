@@ -41,17 +41,17 @@ class _LTextState extends State<LText> {
     super.dispose();
   }
 
-  String truncateSelectedText(String text, {int maxLength = 100}) {
+  String truncateSelectedText(String text, {int maxLength = 75}) {
     if (text.length <= maxLength) return text;
 
-    // First try: Split by sentence-ending punctuation
-    final sentences = text.split(RegExp(r'(?<=[.!?])\s+'));
+    // First try: Split by sentence-ending punctuation (including CJK and Arabic)
+    final sentences = text.split(RegExp(r'(?<=[.!?。！？؟])\s*'));
     if (sentences.isNotEmpty && sentences[0].length <= maxLength) {
       return sentences[0].trim();
     }
 
-    // Second try: Split by all punctuation
-    final fragments = text.split(RegExp(r'(?<=[.!?,;:()\[\]{}<>\-])\s*'));
+    // Second try: Split by all punctuation (including CJK and Arabic)
+    final fragments = text.split(RegExp(r'(?<=[.!?,;:()\[\]{}<>\-。！？，；：（）【】［］｛｝「」『』、،؛])\s*'));
     if (fragments.isNotEmpty && fragments[0].length <= maxLength) {
       return fragments[0].trim();
     }
@@ -108,17 +108,18 @@ class _LTextState extends State<LText> {
   String findContext(String selectedText, String fullText, {int maxLength = 100}) {
     // First, create a sanitized version of the full text
     String sanitizedText = fullText.replaceAll('\n', ' ');
-    // Approach 1: Split by sentence-ending punctuation
-    final sentences = sanitizedText.split(RegExp(r'(?<=[.!?])\s+'));
+
+    // Approach 1: Split by sentence-ending punctuation (including CJK and Arabic)
+    final sentences = sanitizedText.split(RegExp(r'(?<=[.!?。！？؟])\s*'));
     for (final sentence in sentences) {
       if (sentence.contains(selectedText) && sentence.length <= maxLength) {
         return sentence.trim();
       }
     }
 
-    // Approach 2: Split by all punctuation (including sentence-ending)
+    // Approach 2: Split by all punctuation (including CJK and Arabic)
     // Using positive lookbehind (?<=...) to keep the punctuation marks
-    final fragments = sanitizedText.split(RegExp(r'(?<=[.!?,;:()\[\]{}<>\-])\s*'));
+    final fragments = sanitizedText.split(RegExp(r'(?<=[.!?,;:()\[\]{}<>\-。！？，；：（）【】［］｛｝「」『』、،؛])\s*'));
     for (final fragment in fragments) {
       if (fragment.contains(selectedText) && fragment.length <= maxLength) {
         return fragment.trim();

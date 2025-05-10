@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/book_model.dart';
 import 'package:lenski/data/book_repository.dart';
+import 'package:lenski/utils/fonts.dart';
 import 'package:lenski/utils/proportions.dart';
 
 class EditBookScreen extends StatefulWidget {
@@ -53,19 +54,37 @@ class _EditBookScreenState extends State<EditBookScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Delete Book'),
-          content: const Text('Are you sure you want to delete this book?'),
+          title: Text('Delete Book',
+            style: TextStyle(
+              fontSize: 24,
+              fontFamily: appFonts['Subtitle']!,
+            ),
+          ),
+          content: Text('Are you sure you want to delete this book?',
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: appFonts['Paragraph']!,
+            ),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
               style: TextButton.styleFrom(
-                foregroundColor: const Color.fromARGB(255, 171, 163, 172),
+                foregroundColor: const Color(0xFF2C73DE),
+                textStyle: TextStyle(
+                  fontSize: 14,
+                  fontFamily: appFonts['Detail']!,
+                ),
               ),
               child: const Text('Cancel'),
             ),
             TextButton(
               style: TextButton.styleFrom(
                 foregroundColor: Colors.red,
+                textStyle: TextStyle(
+                  fontSize: 14,
+                  fontFamily: appFonts['Detail']!,
+                ),
               ),
               onPressed: () => Navigator.of(context).pop(true),
               child: const Text('Delete'),
@@ -85,77 +104,95 @@ class _EditBookScreenState extends State<EditBookScreen> {
 
   Widget _buildDetailsSection() {
     return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextField(
-            controller: _titleController,
-            decoration: const InputDecoration(
-              labelText: 'Book Title',
-              border: OutlineInputBorder(),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
-              ),
+      child: Theme(
+        data: Theme.of(context).copyWith(
+            textSelectionTheme: const TextSelectionThemeData(
+              selectionColor: Color(0xFF71BDE0),
+              cursorColor: Colors.black54,   
             ),
           ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _imageUrlController,
-            decoration: const InputDecoration(
-              labelText: 'Image URL',
-              hintText: 'Enter image URL',
-              border: OutlineInputBorder(),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _titleController,
+              decoration: InputDecoration(
+                labelText: 'Book Title',
+                labelStyle: TextStyle(
+                    fontFamily: appFonts['Detail'],
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                  ),
+                  border: const OutlineInputBorder(),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                  ),
               ),
             ),
-          ),
-          const SizedBox(height: 32),
-          _buildDetailItem('Language', widget.book.language),
-          _buildDetailItem('Current Progress', 
-            '${widget.book.currentLine} / ${widget.book.totalLines} lines ' 
-            '(${(widget.book.currentLine / widget.book.totalLines * 100).toInt()}%)'
-          ),
-          if (widget.book.finished) // Only show archive button if book is finished
+            const SizedBox(height: 16),
+            TextField(
+              controller: _imageUrlController,
+              decoration: InputDecoration(
+                labelText: 'Image URL',
+                hintText: 'Enter image URL',
+                labelStyle: TextStyle(
+                    fontFamily: appFonts['Detail'],
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                  ),
+                  border: const OutlineInputBorder(),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                  ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            _buildDetailItem('Language', widget.book.language),
+            _buildDetailItem('Current Progress', 
+              '${widget.book.currentLine} / ${widget.book.totalLines} lines ' 
+              '(${(widget.book.currentLine / widget.book.totalLines * 100).toInt()}%)'
+            ),
+            if (widget.book.finished) // Only show archive button if book is finished
+              SizedBox(
+                child: TextButton(
+                  onPressed: () async {
+                    await _bookRepository.archiveBook(widget.book);
+                    if (mounted) {
+                      widget.onBackPressed();
+                    }
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF2C73DE),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: Text(
+                    'Archive book',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: appFonts['Detail'],
+                    ),
+                  ),
+                ),
+              ),
             SizedBox(
               child: TextButton(
-                onPressed: () async {
-                  await _bookRepository.archiveBook(widget.book);
-                  if (mounted) {
-                    widget.onBackPressed();
-                  }
-                },
+                onPressed: () => _deleteBook(context),
                 style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF2C73DE),
+                  foregroundColor: Colors.red,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text(
-                  'Archive book',
+                child: Text(
+                  'Delete book',
                   style: TextStyle(
                     fontSize: 16,
-                    fontFamily: 'Varela Round',
+                    fontFamily: appFonts['Detail'],
                   ),
                 ),
               ),
             ),
-          SizedBox(
-            child: TextButton(
-              onPressed: () => _deleteBook(context),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.red,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: const Text(
-                'Delete book',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontFamily: 'Varela Round',
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20)
-        ],
+            const SizedBox(height: 20)
+          ],
+        ),
       ),
     );
   }
@@ -168,18 +205,18 @@ class _EditBookScreenState extends State<EditBookScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               color: Colors.grey,
-              fontFamily: "Telex",
+              fontFamily: appFonts['Subtitle']!,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
-              fontFamily: "Varela Round",
+              fontFamily: appFonts['Detail']!,
             ),
           ),
         ],
@@ -217,9 +254,9 @@ class _EditBookScreenState extends State<EditBookScreen> {
                   padding: EdgeInsets.all(p.standardPadding() * 2),
                   child: Column(
                     children: [
-                      const Text(
+                      Text(
                         'Edit Book',
-                        style: TextStyle(fontSize: 24, fontFamily: "Unbounded"),
+                        style: TextStyle(fontSize: 24, fontFamily: appFonts['Title']!),
                       ),
                       const SizedBox(height: 24),
                       Expanded(
@@ -250,10 +287,10 @@ class _EditBookScreenState extends State<EditBookScreen> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             "Save Changes",
                             style: TextStyle(
-                              fontFamily: "Telex",
+                              fontFamily: appFonts['Detail']!,
                               fontSize: 30,
                               color: Colors.white,
                             ),

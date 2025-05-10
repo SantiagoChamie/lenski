@@ -94,7 +94,10 @@ class _ReviewPileState extends State<ReviewPile> {
           final navigatorKey = Navigator.of(context).widget.key as GlobalKey<NavigatorState>;
           navigatorKey.currentState?.pushNamed(
             'Review',
-            arguments: widget.course,
+            arguments: {
+              'course': widget.course,
+              'firstWord': displayText, // Pass the currently displayed word
+            },
           );
         },
         child: Stack(

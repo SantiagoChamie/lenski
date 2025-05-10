@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 /// A model class representing a daily user session for a specific course.
 class Session {
   final String courseCode;   // Foreign key to course

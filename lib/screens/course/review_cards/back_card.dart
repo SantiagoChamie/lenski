@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/card_model.dart' as lenski_card;
 import 'package:lenski/services/tts_service.dart';
+import 'package:lenski/widgets/ltext.dart';
 
 class BackCard extends StatelessWidget {
   final lenski_card.Card card;
@@ -74,8 +75,10 @@ class BackCard extends StatelessWidget {
             ),
             if (card.context != card.front) ...[
               const SizedBox(height: 16.0),
-              Text(
-                card.context,
+              LText(
+                text: card.context,
+                fromLanguage: courseFromCode,
+                toLanguage: card.language,
                 style: const TextStyle(
                   fontSize: 16.0,
                   color: Color(0xFF99909B),

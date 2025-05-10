@@ -142,7 +142,7 @@ class _CourseButtonState extends State<CourseButton> {
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: Colors.white.withAlpha(230),
                       borderRadius: BorderRadius.circular(33),
                     ),
                     child: Row(
@@ -236,10 +236,7 @@ class _CourseButtonState extends State<CourseButton> {
             right: 10,
             child: IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () async {
-                await _repository.deleteCourse(widget.course.code);
-                widget.onDelete();
-              },
+              onPressed: () => _showDeleteDialog(context),
             ),
           ),
         ],
@@ -287,6 +284,119 @@ class _CourseButtonState extends State<CourseButton> {
     // Otherwise display the competence list
     else {
       return CompetenceList(course: course);
+    }
+  }
+
+  void _showDeleteDialog(BuildContext context) async {
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Remove Course',
+            style: TextStyle(
+              fontSize: 24,
+              fontFamily: "Unbounded",
+            ),
+          ),
+          content: const Text('Do you want to hide this course or delete it permanently?',
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('cancel'),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF2C73DE),
+                textStyle: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.orange,
+                textStyle: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              onPressed: () => Navigator.of(context).pop('hide'),
+              child: const Text('Hide Course'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+                textStyle: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              onPressed: () => Navigator.of(context).pop('delete'),
+              child: const Text('Delete Permanently'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (choice == 'hide') {
+      await _repository.makeInvisible(widget.course.code);
+      widget.onDelete();
+    } else if (choice == 'delete') {
+      _showDeleteConfirmationDialog(context);
+    }
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion',
+            style: TextStyle(
+              fontSize: 24,
+              fontFamily: "Unbounded",
+            ),
+          ),
+          content: const Text(
+            'Warning: This will permanently delete all data associated with this course \nincluding progress, sessions, and saved words. This action cannot be undone.',
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+                // Reopen the first dialog when user presses cancel
+                _showDeleteDialog(context);
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF2C73DE),
+                textStyle: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+                textStyle: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Delete Permanently'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete == true) {
+      await _repository.deleteCourse(widget.course.code);
+      widget.onDelete();
     }
   }
 }

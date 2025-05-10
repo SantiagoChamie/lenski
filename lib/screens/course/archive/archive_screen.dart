@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/models/archived_book_model.dart';
+import 'package:lenski/utils/fonts.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
 
@@ -373,17 +374,37 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Book'),
-        content: const Text('Are you sure you want to delete this book from your archive?'),
+        title: Text('Delete Book',
+          style: TextStyle(
+            fontFamily: appFonts['Subtitle'],
+            fontSize: 24,
+          ),
+        ),
+        content: Text('Are you sure you want to delete this book from your archive?',
+          style: TextStyle(
+            fontFamily: appFonts['Paragraph'],
+            fontSize: 16,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('Cancel',
+              style: TextStyle(
+                fontFamily: appFonts['Detail'],
+                fontSize: 14,
+                color: const Color(0xFF2C73DE),
+              ),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
+              textStyle: TextStyle(
+                fontFamily: appFonts['Detail'],
+                fontSize: 14,
+              ),
             ),
             child: const Text('Delete'),
           ),
@@ -405,93 +426,146 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
       child: Container(
         padding: const EdgeInsets.all(24),
         width: 400,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Edit Book',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontFamily: 'Telex',
+        
+        child: Theme(
+          data: Theme.of(context).copyWith(
+            textSelectionTheme: const TextSelectionThemeData(
+              selectionColor: Color(0xFF71BDE0),
+              cursorColor: Colors.black54,   
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Edit Book',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontFamily: appFonts['Subtitle'],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: _deleteBook,
+                    icon: const Icon(Icons.delete_outline),
+                    color: Colors.red,
+                    tooltip: 'Delete book',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              TextField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: 'Name',
+                  labelStyle: TextStyle(
+                    fontFamily: appFonts['Detail'],
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                  ),
+                  border: const OutlineInputBorder(),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
                   ),
                 ),
-                IconButton(
-                  onPressed: _deleteBook,
-                  icon: const Icon(Icons.delete_outline),
-                  color: Colors.red,
-                  tooltip: 'Delete book',
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _imageUrlController,
+                decoration: InputDecoration(
+                  labelText: 'Image URL',
+                  labelStyle: TextStyle(
+                    fontFamily: appFonts['Detail'],
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                  ),
+                  border: const OutlineInputBorder(),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                  ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                border: OutlineInputBorder(),
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _imageUrlController,
-              decoration: const InputDecoration(
-                labelText: 'Image URL',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _categoryController,
-              decoration: const InputDecoration(
-                labelText: 'Category',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _subcategoryController,
-              decoration: const InputDecoration(
-                labelText: 'Subcategory (optional)',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _categoryController,
+                decoration: InputDecoration(
+                  labelText: 'Category',
+                  labelStyle: TextStyle(
+                    fontFamily: appFonts['Detail'],
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                  ),
+                  border: const OutlineInputBorder(),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                  ),
                 ),
-                const SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    final imageUrl = _imageUrlController.text.trim();
-                    final updatedBook = ArchivedBook(
-                      id: widget.book.id,
-                      name: _nameController.text.trim(),
-                      language: widget.book.language,
-                      imageUrl: imageUrl.isEmpty ? null : imageUrl,
-                      category: _categoryController.text.trim().toLowerCase(),
-                      subcategory: _subcategoryController.text.trim().isEmpty
-                          ? null
-                          : _subcategoryController.text.trim().toLowerCase(),
-                      finishedDate: DateTime.fromMillisecondsSinceEpoch(
-                        widget.book.finishedDate * 86400000,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _subcategoryController,
+                decoration: InputDecoration(
+                  labelText: 'Subcategory (optional)',
+                  labelStyle: TextStyle(
+                    fontFamily: appFonts['Detail'],
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                  ),
+                  border: const OutlineInputBorder(),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel',
+                      style: TextStyle(
+                        fontFamily: 'Sansation',
+                        fontSize: 14,
+                        color: Colors.red,
                       ),
-                    );
-                    widget.onSave(updatedBook);
-                    Navigator.pop(context, updatedBook); // Return the updated book
-                  },
-                  child: const Text('Save'),
-                ),
-              ],
-            ),
-          ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      final imageUrl = _imageUrlController.text.trim();
+                      final updatedBook = ArchivedBook(
+                        id: widget.book.id,
+                        name: _nameController.text.trim(),
+                        language: widget.book.language,
+                        imageUrl: imageUrl.isEmpty ? null : imageUrl,
+                        category: _categoryController.text.trim().toLowerCase(),
+                        subcategory: _subcategoryController.text.trim().isEmpty
+                            ? null
+                            : _subcategoryController.text.trim().toLowerCase(),
+                        finishedDate: DateTime.fromMillisecondsSinceEpoch(
+                          widget.book.finishedDate * 86400000,
+                        ),
+                      );
+                      widget.onSave(updatedBook);
+                      Navigator.pop(context, updatedBook); // Return the updated book
+                    },
+                    child: const Text('Save',
+                      style: TextStyle(
+                        fontFamily: 'Sansation',
+                        fontSize: 14,
+                        color: Color(0xFF2C73DE),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

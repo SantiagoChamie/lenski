@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart'; // Import this for PointerSignalEvent
 import 'package:lenski/models/book_model.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/models/sentence_model.dart';
+import 'package:lenski/utils/fonts.dart';
 import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
@@ -188,17 +189,30 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Archive Book'),
-        content: const Text('Are you sure you want to archive this book? Archiving will remove all of this book\'s contents.'),
+        title: Text('Archive Book',
+          style: TextStyle(
+            fontSize: 24, 
+            fontFamily: appFonts['Subtitle'],
+          ),
+        ),
+        content: Text('Are you sure you want to archive this book? Archiving will remove all of this book\'s contents.',
+          style: TextStyle(
+            fontSize: 16, 
+            fontFamily: appFonts['Paragraph'],
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('Cancel',
+              style: TextStyle(color: Colors.red, fontSize: 14, fontFamily: appFonts['Detail']),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
-              foregroundColor: Colors.blue,
+              foregroundColor: const Color(0xFF2C73DE),
+              textStyle: TextStyle(fontSize: 14, fontFamily: appFonts['Detail']),
             ),
             child: const Text('Archive'),
           ),
@@ -442,7 +456,7 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                               child: Slider(
                                 value: _visibleLines.toDouble(),
                                 activeColor: const Color(0xFF71BDE0),
-                                min: 3,
+                                min: 1,
                                 max: 21,
                                 divisions: 9,
                                 label: _visibleLines.toString(),

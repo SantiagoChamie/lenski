@@ -166,7 +166,7 @@ class _CourseNavigatorState extends State<CourseNavigator> {
                 ),
               ),
               child: IconButton(
-                icon: const Icon(Icons.edit),
+                icon: const Icon(Icons.settings),
                 color: const Color(0xFF2C73DE),
                 onPressed: _toggleEditCourseScreen,
               ),

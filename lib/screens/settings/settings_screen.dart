@@ -73,83 +73,88 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings', style: TextStyle(fontFamily: 'Unbounded')),
-      ),
+      
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'API Keys',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Telex'),
+        child: Theme(
+          data: Theme.of(context).copyWith(
+            textSelectionTheme: const TextSelectionThemeData(
+              selectionColor: Color(0xFFFFD38D),
             ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _apiKeyController,
-                    obscureText: true,
-                    cursorColor: const Color.fromARGB(255, 0, 0, 0),
-                    decoration: const InputDecoration(
-                      labelText: 'DeepL API Key',
-                      labelStyle: TextStyle(fontFamily: 'Sansation', color: Colors.black),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),     
+          ),   
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'API Keys',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Telex'),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _apiKeyController,
+                      obscureText: true,
+                      cursorColor: const Color.fromARGB(255, 0, 0, 0),
+                      decoration: const InputDecoration(
+                        labelText: 'DeepL API Key',
+                        labelStyle: TextStyle(fontFamily: 'Sansation', color: Colors.black),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),     
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: _saveApiKey,
-                  child: const Text(
-                    'Save API Key',
-                    style: TextStyle(color: Color(0xFF2C73DE)),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: _saveApiKey,
+                    child: const Text(
+                      'Save API Key',
+                      style: TextStyle(color: Color(0xFF2C73DE)),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                
-                const Text(
-                  'Use Premium DeepL API',
-                  style: TextStyle(fontFamily: 'Sansation'),
-                ),
-                const SizedBox(width: 10),
-                Switch(
-                  value: _premiumApiEnabled,
-                  onChanged: _savePremiumApiSetting,
-                  activeColor: const Color(0xFF2C73DE),
-                ),
-                
-              ],
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Translation Settings',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Telex'),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Toggle between contextual and non-contextual translation in the overlay',
-                  style: TextStyle(fontFamily: 'Sansation'),
-                ),
-                Switch(
-                  value: _contextualTranslationEnabled,
-                  onChanged: _saveContextualTranslationSetting,
-                  activeColor: const Color(0xFF2C73DE),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  
+                  const Text(
+                    'Use Premium DeepL API',
+                    style: TextStyle(fontFamily: 'Sansation'),
+                  ),
+                  const SizedBox(width: 10),
+                  Switch(
+                    value: _premiumApiEnabled,
+                    onChanged: _savePremiumApiSetting,
+                    activeColor: const Color(0xFF2C73DE),
+                  ),
+                  
+                ],
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Translation Settings',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Telex'),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Toggle between contextual and non-contextual translation in the overlay',
+                    style: TextStyle(fontFamily: 'Sansation'),
+                  ),
+                  Switch(
+                    value: _contextualTranslationEnabled,
+                    onChanged: _saveContextualTranslationSetting,
+                    activeColor: const Color(0xFF2C73DE),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

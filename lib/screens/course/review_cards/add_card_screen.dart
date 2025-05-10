@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/home/competences/competence_icon.dart';
+import 'package:lenski/utils/fonts.dart';
+import 'package:lenski/utils/languages.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
 import 'package:lenski/data/session_repository.dart'; // Add this import
@@ -78,104 +80,112 @@ class _AddCardScreenState extends State<AddCardScreen> {
                 Expanded(
                   child: Padding(
                     padding: EdgeInsets.all(p.standardPadding()),
-                    child: Column(
-                      children: [
-                        TextField(
-                          controller: frontController,
-                          style: const TextStyle(fontFamily: "Sansation"),
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Front text',
-                            floatingLabelBehavior: FloatingLabelBehavior.always,
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blue, width: 2.0),
-                            ),
-                          ),
-                          maxLines: 1,
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                        textSelectionTheme: const TextSelectionThemeData(
+                          selectionColor: Color(0xFF71BDE0),
+                          cursorColor: Colors.black54,   
                         ),
-                        SizedBox(height: p.standardPadding()),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: backController,
-                                style: const TextStyle(fontFamily: "Sansation"),
-                                decoration: const InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  hintText: 'Back text',
-                                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.blue, width: 2.0),
-                                  ),
-                                ),
-                                maxLines: 1,
-                              ),
-                            ),
-                            Tooltip(
-                              message: 'Translate front text',
-                              child: IconButton(
-                                icon: const Icon(Icons.translate),
-                                onPressed: () async {
-                                  final translatedText = await TranslationService().translate(
-                                    text: frontController.text,
-                                    sourceLang: widget.course.code,
-                                    targetLang: widget.course.fromCode,
-                                    context: contextController.text,
-                                  );
-                                  backController.text = translatedText;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: p.standardPadding()),
-                        Expanded(
-                          child: TextField(
-                            controller: contextController,
-                            style: const TextStyle(fontFamily: "Sansation"),
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: 'Context (optional)',
+                      ),
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: frontController,
+                            style: TextStyle(fontFamily: appFonts['Detail']),
+                            decoration: InputDecoration(
+                              border: const OutlineInputBorder(),
+                              hintText: '${widget.course.name} text',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
-                              focusedBorder: OutlineInputBorder(
+                              focusedBorder: const OutlineInputBorder(
                                 borderSide: BorderSide(color: Colors.blue, width: 2.0),
                               ),
                             ),
-                            maxLines: null,
-                            expands: true,
+                            maxLines: 1,
                           ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: p.standardPadding()),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          SizedBox(height: p.standardPadding()),
+                          Row(
                             children: [
-                              for (final type in ['reading', 'writing', 'listening', 'speaking'])
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      // Only toggle if it's not the last selected competence
-                                      if (selectedCompetences[type] == false || 
-                                          selectedCompetences.values.where((e) => e).length > 1) {
-                                        selectedCompetences[type] = !selectedCompetences[type]!;
-                                      }
-                                    });
+                              Expanded(
+                                child: TextField(
+                                  controller: backController,
+                                  style: TextStyle(fontFamily: appFonts['Detail']),
+                                  decoration: InputDecoration(
+                                    border: const OutlineInputBorder(),
+                                    hintText: '${codeToLanguage[widget.course.fromCode]} text',
+                                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                                    focusedBorder: const OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                                    ),
+                                  ),
+                                  maxLines: 1,
+                                ),
+                              ),
+                              Tooltip(
+                                message: 'Translate front text',
+                                child: IconButton(
+                                  icon: const Icon(Icons.translate),
+                                  onPressed: () async {
+                                    final translatedText = await TranslationService().translate(
+                                      text: frontController.text,
+                                      sourceLang: widget.course.code,
+                                      targetLang: widget.course.fromCode,
+                                      context: contextController.text,
+                                    );
+                                    backController.text = translatedText;
                                   },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                    child: Opacity(
-                                      opacity: selectedCompetences[type]! ? 1.0 : 0.3,
-                                      child: CompetenceIcon(
-                                        size: 40,
-                                        type: type,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: p.standardPadding()),
+                          Expanded(
+                            child: TextField(
+                              controller: contextController,
+                              style: TextStyle(fontFamily: appFonts['Detail']),
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: 'Context (optional)',
+                                floatingLabelBehavior: FloatingLabelBehavior.always,
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                                ),
+                              ),
+                              maxLines: null,
+                              expands: true,
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(top: p.standardPadding()),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                for (final type in ['reading', 'writing', 'listening', 'speaking'])
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        // Only toggle if it's not the last selected competence
+                                        if (selectedCompetences[type] == false || 
+                                            selectedCompetences.values.where((e) => e).length > 1) {
+                                          selectedCompetences[type] = !selectedCompetences[type]!;
+                                        }
+                                      });
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                      child: Opacity(
+                                        opacity: selectedCompetences[type]! ? 1.0 : 0.3,
+                                        child: CompetenceIcon(
+                                          size: 40,
+                                          type: type,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -243,9 +253,9 @@ class _AddCardScreenState extends State<AddCardScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       "Add card!",
-                      style: TextStyle(fontFamily: "Telex", fontSize: 30, color: Colors.white),
+                      style: TextStyle(fontFamily: appFonts['Subtitle'], fontSize: 30, color: Colors.white),
                     ),
                   ),
                 ),
