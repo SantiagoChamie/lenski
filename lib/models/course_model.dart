@@ -16,6 +16,7 @@ class Course {
   int lastAccess;
   int dailyGoal; // Daily word reading goal
   int totalGoal; // Total word reading goal
+  bool visible; // Whether the course should be visible on the main screen
 
   /// Creates a Course object.
   /// 
@@ -33,6 +34,7 @@ class Course {
   /// [lastAccess] is the last day the course was accessed (stored as days since epoch).
   /// [dailyGoal] is the targeted number of words to read per day.
   /// [totalGoal] is the total number of words goal for the course.
+  /// [visible] indicates if the course should be visible on the main screen.
   Course({
     required this.name,
     required this.level,
@@ -48,6 +50,7 @@ class Course {
     DateTime? lastAccess,
     required this.dailyGoal,
     required this.totalGoal,
+    this.visible = true,
   }) : lastAccess = _dateTimeToInt(
          lastAccess ?? DateTime.now().subtract(const Duration(days: 1))
        );
@@ -70,6 +73,7 @@ class Course {
       'lastAccess': lastAccess,
       'dailyGoal': dailyGoal,
       'totalGoal': totalGoal,
+      'visible': visible ? 1 : 0,
     };
   }
 
@@ -90,6 +94,7 @@ class Course {
       lastAccess: _intToDateTime(map['lastAccess'] ?? _dateTimeToInt(DateTime.now().subtract(const Duration(days: 1)))),
       dailyGoal: map['dailyGoal'],
       totalGoal: map['totalGoal'],
+      visible: map['visible'] == null ? true : map['visible'] == 1,
     );
   }
 
@@ -109,6 +114,7 @@ class Course {
     DateTime? lastAccess,
     int? dailyGoal,
     int? totalGoal,
+    bool? visible,
   }) {
     return Course(
       name: name ?? this.name,
@@ -125,6 +131,7 @@ class Course {
       lastAccess: lastAccess ?? _intToDateTime(this.lastAccess),
       dailyGoal: dailyGoal ?? this.dailyGoal,
       totalGoal: totalGoal ?? this.totalGoal,
+      visible: visible ?? this.visible,
     );
   }
 

@@ -1,3 +1,6 @@
+import 'package:lenski/data/book_repository.dart';
+import 'package:lenski/data/card_repository.dart';
+import 'package:lenski/data/session_repository.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import '../../models/course_model.dart';
@@ -44,24 +47,53 @@ class CourseRepository {
           'streak INTEGER DEFAULT 0, '
           'lastAccess INTEGER DEFAULT 0, '
           'dailyGoal INTEGER DEFAULT 100, '
-          'totalGoal INTEGER DEFAULT 10000'
+          'totalGoal INTEGER DEFAULT 10000, '
+          'visible INTEGER DEFAULT 1'
           ')',
         );
       },
-      version: 1,
+      version: 2,
     );
   }
 
   /// Inserts a new course into the database.
   /// 
+  /// If the course already exists, it updates specific fields and makes it visible again.
+  /// 
   /// [course] is the course to be inserted.
   Future<void> insertCourse(Course course) async {
     final db = await database;
-    await db.insert(
+    
+    // Check if course already exists
+    final List<Map<String, dynamic>> existingCourses = await db.query(
       'courses',
-      course.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      where: 'code = ?',
+      whereArgs: [course.code],
     );
+    
+    if (existingCourses.isNotEmpty) {
+      // Course exists, update specific fields and make visible
+      final existingCourse = Course.fromMap(existingCourses.first);
+      final updatedCourse = existingCourse.copyWith(
+        fromCode: course.fromCode,
+        listening: course.listening,
+        speaking: course.speaking,
+        reading: course.reading,
+        writing: course.writing,
+        dailyGoal: course.dailyGoal,
+        totalGoal: course.totalGoal,
+        visible: true,
+      );
+      
+      await updateCourse(updatedCourse);
+    } else {
+      // New course, insert it
+      await db.insert(
+        'courses',
+        course.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
   }
 
   /// Checks and resets streak if more than one day has passed since last access
@@ -110,10 +142,14 @@ class CourseRepository {
     }
   }
 
-  /// Retrieves all courses and checks their streaks
+  /// Retrieves all visible courses and checks their streaks
   Future<List<Course>> courses() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('courses');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'courses',
+      where: 'visible = ?',
+      whereArgs: [1],
+    );
     final List<Course> courseList = List.generate(maps.length, (i) {
       final course = Course.fromMap(maps[i]);
       checkStreak(course); // Only check for streak breaks
@@ -146,15 +182,96 @@ class CourseRepository {
     );
   }
 
-  /// Deletes a course from the database.
+  /// Deletes a course from the database along with all associated data.
+  /// 
+  /// This includes:
+  /// - All flashcards for the language
+  /// - All books for the language
+  /// - All session data for the course
+  /// - The course record itself
   /// 
   /// [code] is the language code of the course to be deleted.
   Future<void> deleteCourse(String code) async {
+    // Get references to other repositories
+    final cardRepository = CardRepository();
+    final bookRepository = BookRepository();
+    final sessionRepository = SessionRepository();
+    
+    try {
+      // 1. Delete all sessions for this course
+      await sessionRepository.deleteSessionsByCourse(code);
+      
+      // 2. Delete all cards for this language
+      final db = await cardRepository.database;
+      await db.delete(
+        'cards',
+        where: 'language = ?',
+        whereArgs: [code],
+      );
+      
+      // 3. Delete all books for this language
+      // First get all books for this language
+      final books = await bookRepository.booksByLanguage(code);
+      
+      // Delete each book (this will also delete associated book databases)
+      for (var book in books) {
+        if (book.id != null) {
+          await bookRepository.deleteBook(book.id!);
+        }
+      }
+      
+      // Also delete any archived books for this language
+      final archiveDb = await bookRepository.archiveDatabase;
+      await archiveDb.delete(
+        'archived_books',
+        where: 'language = ?',
+        whereArgs: [code],
+      );
+      
+      // 4. Finally, delete the course itself
+      final courseDb = await database;
+      await courseDb.delete(
+        'courses',
+        where: 'code = ?',
+        whereArgs: [code],
+      );
+      
+    } catch (e) {
+      // Handle any errors
+      print('Error deleting course: $e');
+      throw Exception('Failed to delete course: $e');
+    }
+  }
+
+  /// Makes a course invisible instead of completely deleting it.
+  /// This allows the course to be restored later while hiding it from the main screen.
+  /// 
+  /// [code] is the language code of the course to be made invisible.
+  Future<void> makeInvisible(String code) async {
     final db = await database;
-    await db.delete(
-      'courses',
-      where: 'code = ?',
-      whereArgs: [code],
-    );
+    
+    try {
+      // Find the course first
+      final List<Map<String, dynamic>> maps = await db.query(
+        'courses',
+        where: 'code = ?',
+        whereArgs: [code],
+      );
+      
+      if (maps.isNotEmpty) {
+        
+        // Update only the visible field in the database
+        await db.update(
+          'courses',
+          {'visible': 0},
+          where: 'code = ?',
+          whereArgs: [code],
+        );
+      }
+    } catch (e) {
+      // Handle any errors
+      print('Error making course invisible: $e');
+      throw Exception('Failed to make course invisible');
+    }
   }
 }
