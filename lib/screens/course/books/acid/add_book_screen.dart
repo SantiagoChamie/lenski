@@ -30,6 +30,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
   final BookCreator _bookCreator = BookCreator();
   bool? isFileMode;
   bool isHelpVisible = false;
+  bool isShuffleEnabled = false; 
 
   static const String _prefKey = 'last_used_file_mode';
   static const int animationDuration = 300;
@@ -104,6 +105,9 @@ class _AddBookScreenState extends State<AddBookScreen> {
 
   Widget _buildAnimatedSection() {
     
+    // If help is visible, show help section instead of input methods
+    if (isHelpVisible) {
+      return const HelpSectionScreen();
     }
 
     // For Arabic, directly return text input
@@ -146,6 +150,9 @@ class _AddBookScreenState extends State<AddBookScreen> {
   void _toggleHelpSection() {
     setState(() {
       isHelpVisible = !isHelpVisible;
+    });
+  }
+
   void _switchMode(bool toFileMode) async {
     // For Arabic, don't allow mode switching
     if (widget.languageCode == 'AR') return;
@@ -214,8 +221,8 @@ class _AddBookScreenState extends State<AddBookScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text('Add your own texts!', 
-                                style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
+                              Text('Add your own texts!', 
+                                style: TextStyle(fontSize: 24, fontFamily: appFonts['Title'])),
                               Padding(
                                 padding: const EdgeInsets.only(left: 8.0),
                                 child: IconButton(
@@ -239,68 +246,109 @@ class _AddBookScreenState extends State<AddBookScreen> {
                             children: [
                               if (!isHelpVisible) _buildPageIndicator(),
                               SizedBox(height: p.standardPadding()),
-                              SizedBox(
-                                height: p.sidebarButtonWidth(),
-                                child: ElevatedButton(
-                                  onPressed: isLoading || isHelpVisible ? null : () async {
-                                    if (!_hasText()) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Please add some text or file before creating a book'),
-                                          duration: Duration(seconds: 2),
-                                        ),
-                                      );
-                                      return;
-                                    }
-                                    setState(() => isLoading = true);
-                                    try {
-                                      bool success;
-                                      if (isFileMode == true) {
-                                        success = await _bookCreator.processFile(
-                                          selectedFilePath!, 
-                                          widget.languageCode
-                                        );
-                                      } else {
-                                        success = await _bookCreator.processBook(
-                                          textController.text, 
-                                          widget.languageCode
-                                        );
-                                      }
-                                      
-                                      if (!_bookCreator.isCancelled) {
-                                        if (success) {
-                                          widget.onBackPressed();
-                                        } else {
-                                          // Show dialog instead of SnackBar
-                                          _showLanguageMismatchDialog(
-                                            isFileMode == true ? selectedFilePath! : textController.text,
-                                            isFileMode == true
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Main start learning button with proper width constraint
+                                  Container(
+                                    width: 300,
+                                    height: p.sidebarButtonWidth(),
+                                    child: ElevatedButton(
+                                      onPressed: isLoading || isHelpVisible ? null : () async {
+                                        if (!_hasText()) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Please add some text or file before creating a book'),
+                                              duration: Duration(seconds: 2),
+                                            ),
                                           );
+                                          return;
                                         }
-                                      }
-                                    } finally {
-                                      if (!_bookCreator.isCancelled) {
-                                        setState(() => isLoading = false);
-                                      }
-                                    }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF2C73DE),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
+                                        setState(() => isLoading = true);
+                                        try {
+                                          bool success;
+                                          if (isFileMode == true) {
+                                            success = await _bookCreator.processFile(
+                                              selectedFilePath!, 
+                                              widget.languageCode,
+                                              shuffleSentences: isShuffleEnabled,
+                                            );
+                                          } else {
+                                            success = await _bookCreator.processBook(
+                                              textController.text, 
+                                              widget.languageCode,
+                                              shuffleSentences: isShuffleEnabled,
+                                            );
+                                          }
+                                          
+                                          if (!_bookCreator.isCancelled) {
+                                            if (success) {
+                                              widget.onBackPressed();
+                                            } else {
+                                              _showLanguageMismatchDialog(
+                                                isFileMode == true ? selectedFilePath! : textController.text,
+                                                isFileMode == true
+                                              );
+                                            }
+                                          }
+                                        } finally {
+                                          if (!_bookCreator.isCancelled) {
+                                            setState(() => isLoading = false);
+                                          }
+                                        }
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF2C73DE),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        disabledBackgroundColor: Colors.grey[300],
+                                        disabledForegroundColor: Colors.grey[600],
+                                      ),
+                                      child: Text(
+                                        "Start learning!",
+                                        style: TextStyle(
+                                          fontFamily: appFonts['Subtitle'], 
+                                          fontSize: 30, 
+                                          color: Colors.white
+                                        ),
+                                      ),
                                     ),
-                                    disabledBackgroundColor: Colors.grey[300],
-                                    disabledForegroundColor: Colors.grey[600],
                                   ),
-                                  child: const Text(
-                                    "Start learning!",
-                                    style: TextStyle(
-                                      fontFamily: "Telex", 
-                                      fontSize: 30, 
-                                      color: Colors.white
+                                  // Shuffle toggle button with improved tooltip
+                                  Container(
+                                    height: p.sidebarButtonWidth(),
+                                    margin: const EdgeInsets.only(left: 8),
+                                    child: Tooltip(
+                                      message: isShuffleEnabled 
+                                          ? 'Sentences will be shuffled randomly' 
+                                          : 'Text will be in original order',
+                                      verticalOffset: -40,
+                                      waitDuration: const Duration(milliseconds: 500),
+                                      preferBelow: false,
+                                      child: ElevatedButton(
+                                        onPressed: isLoading || isHelpVisible ? null : () {
+                                          setState(() {
+                                            isShuffleEnabled = !isShuffleEnabled;
+                                          });
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: isShuffleEnabled 
+                                              ? const Color(0xFF71BDE0) // Light blue when active
+                                              : Colors.grey[300], // Grey when inactive
+                                          shape: const CircleBorder(),
+                                          padding: const EdgeInsets.all(16),
+                                          disabledBackgroundColor: Colors.grey[200],
+                                          disabledForegroundColor: Colors.grey[400],
+                                        ),
+                                        child: Icon(
+                                          isShuffleEnabled ? Icons.shuffle : Icons.format_list_numbered,
+                                          color: isShuffleEnabled ? Colors.white : Colors.grey[700],
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
+                                ],
                               ),
                             ],
                           ),
@@ -461,9 +509,17 @@ class _AddBookScreenState extends State<AddBookScreen> {
                 try {
                   // Force add the book by bypassing language check
                   if (isFile) {
-                    await _bookCreator.forceAddFile(content, widget.languageCode);
+                    await _bookCreator.forceAddFile(
+                      content, 
+                      widget.languageCode,
+                      shuffleSentences: isShuffleEnabled, // Add shuffle parameter
+                    );
                   } else {
-                    await _bookCreator.forceAddBook(content, widget.languageCode);
+                    await _bookCreator.forceAddBook(
+                      content, 
+                      widget.languageCode,
+                      shuffleSentences: isShuffleEnabled, // Add shuffle parameter
+                    );
                   }
                   if (!_bookCreator.isCancelled) {
                     widget.onBackPressed();
