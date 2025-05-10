@@ -250,7 +250,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   // Main start learning button with proper width constraint
-                                  Container(
+                                  SizedBox(
                                     width: 300,
                                     height: p.sidebarButtonWidth(),
                                     child: ElevatedButton(
@@ -321,8 +321,8 @@ class _AddBookScreenState extends State<AddBookScreen> {
                                     margin: const EdgeInsets.only(left: 8),
                                     child: Tooltip(
                                       message: isShuffleEnabled 
-                                          ? 'Sentences will be shuffled randomly' 
-                                          : 'Text will be in original order',
+                                          ? 'Random sentences' 
+                                          : 'Real sentences',
                                       verticalOffset: -40,
                                       waitDuration: const Duration(milliseconds: 500),
                                       preferBelow: false,
