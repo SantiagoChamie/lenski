@@ -456,7 +456,7 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                               child: Slider(
                                 value: _visibleLines.toDouble(),
                                 activeColor: const Color(0xFF71BDE0),
-                                min: 3,
+                                min: 1,
                                 max: 21,
                                 divisions: 9,
                                 label: _visibleLines.toString(),

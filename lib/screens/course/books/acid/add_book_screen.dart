@@ -1,9 +1,11 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:lenski/screens/course/books/acid/loading_overlay.dart';
+import 'package:lenski/screens/course/books/acid/help_section_screen.dart';
+import 'package:lenski/utils/fonts.dart';
 import 'package:lenski/utils/languages.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_creator.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,9 +28,11 @@ class _AddBookScreenState extends State<AddBookScreen> {
   bool isLoading = false;
   String? selectedFilePath;
   final BookCreator _bookCreator = BookCreator();
-  bool? isFileMode; // We'll still keep this for type safety
+  bool? isFileMode;
+  bool isHelpVisible = false;
 
   static const String _prefKey = 'last_used_file_mode';
+  static const int animationDuration = 300;
 
   @override
   void initState() {
@@ -99,15 +103,19 @@ class _AddBookScreenState extends State<AddBookScreen> {
   }
 
   Widget _buildAnimatedSection() {
+    
+    }
+
     // For Arabic, directly return text input
     if (widget.languageCode == 'AR') {
       return _buildTextInput();
     }
 
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: animationDuration),
         transitionBuilder: (Widget child, Animation<double> animation) {
           final bool slideLeft = child.key == const ValueKey('file');
           
@@ -135,9 +143,19 @@ class _AddBookScreenState extends State<AddBookScreen> {
         : textController.text.trim().isNotEmpty;
   }
 
+  void _toggleHelpSection() {
+    setState(() {
+      isHelpVisible = !isHelpVisible;
   void _switchMode(bool toFileMode) async {
     // For Arabic, don't allow mode switching
     if (widget.languageCode == 'AR') return;
+
+    // If help section is visible, hide it when switching modes
+    if (isHelpVisible) {
+      setState(() {
+        isHelpVisible = false;
+      });
+    }
 
     if (isFileMode != toFileMode) {
       setState(() {
@@ -163,138 +181,6 @@ class _AddBookScreenState extends State<AddBookScreen> {
       return const Center(
         child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2C73DE)),
-        ),
-      );
-    }
-
-    // Remove the arrow buttons for Arabic
-    if (widget.languageCode == 'AR') {
-      return Scaffold(
-        body: Stack(
-          children: [
-            Center(
-              child: Padding(
-                padding: EdgeInsets.only(bottom: p.standardPadding() * 2),
-                child: Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5F0F6),
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 2,
-                            offset: Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      width: p.mainScreenWidth() - p.standardPadding() * 4,
-                      child: Padding(
-                        padding: EdgeInsets.all(p.standardPadding() * 2),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text('Add your own texts!', 
-                                  style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  child: Tooltip(
-                                    message: 'Poor quality PDFs will not work properly.${(['JA', 'ZH', 'KO'].contains(widget.languageCode)) 
-                                        ? '\n\nPDFs with vertical text (top to bottom) are not supported'
-                                        : ''}',
-                                    child: Icon(Icons.help_outline, 
-                                      size: 20, 
-                                      color: Colors.grey[600]
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.all(p.standardPadding()),
-                                child: _buildTextInput(),
-                              ),
-                            ),
-                            SizedBox(
-                              height: p.sidebarButtonWidth(),
-                              child: ElevatedButton(
-                                onPressed: isLoading ? null : () async {
-                                  if (!_hasText()) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Please add some text before creating a book'),
-                                        duration: Duration(seconds: 2),
-                                      ),
-                                    );
-                                    return;
-                                  }
-                                  setState(() => isLoading = true);
-                                  try {
-                                    bool success = await _bookCreator.processBook(
-                                      textController.text, 
-                                      widget.languageCode
-                                    );
-                                    if (!_bookCreator.isCancelled) {
-                                      if (success) {
-                                        widget.onBackPressed();
-                                      } else {
-                                        // Show dialog instead of SnackBar
-                                        _showLanguageMismatchDialog(textController.text, false);
-                                      }
-                                    }
-                                  } finally {
-                                    if (!_bookCreator.isCancelled) {
-                                      setState(() => isLoading = false);
-                                    }
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF2C73DE),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  disabledBackgroundColor: Colors.grey[300],
-                                  disabledForegroundColor: Colors.grey[600],
-                                ),
-                                child: const Text(
-                                  "Start learning!",
-                                  style: TextStyle(
-                                    fontFamily: "Telex", 
-                                    fontSize: 30, 
-                                    color: Colors.white
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 10,
-                      left: 10,
-                      child: IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: isLoading ? null : widget.onBackPressed,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            if (isLoading)
-              LoadingOverlay(
-                onCancel: () {
-                  _bookCreator.cancelProcessing();
-                  setState(() => isLoading = false);
-                },
-              ),
-          ],
         ),
       );
     }
@@ -332,14 +218,13 @@ class _AddBookScreenState extends State<AddBookScreen> {
                                 style: TextStyle(fontSize: 24, fontFamily: "Unbounded")),
                               Padding(
                                 padding: const EdgeInsets.only(left: 8.0),
-                                child: Tooltip(
-                                  message: 'Poor quality PDFs will not work properly.${(['JA', 'ZH', 'KO'].contains(widget.languageCode)) 
-                                      ? '\n\nPDFs with vertical text (top to bottom) are not supported'
-                                      : ''}',
-                                  child: Icon(Icons.help_outline, 
+                                child: IconButton(
+                                  icon: Icon(
+                                    isHelpVisible ? Icons.close : Icons.help_outline, 
                                     size: 20, 
                                     color: Colors.grey[600]
                                   ),
+                                  onPressed: _toggleHelpSection,
                                 ),
                               ),
                             ],
@@ -352,12 +237,12 @@ class _AddBookScreenState extends State<AddBookScreen> {
                           ),
                           Column(
                             children: [
-                              _buildPageIndicator(),
+                              if (!isHelpVisible) _buildPageIndicator(),
                               SizedBox(height: p.standardPadding()),
                               SizedBox(
                                 height: p.sidebarButtonWidth(),
                                 child: ElevatedButton(
-                                  onPressed: isLoading ? null : () async {
+                                  onPressed: isLoading || isHelpVisible ? null : () async {
                                     if (!_hasText()) {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(
@@ -433,20 +318,21 @@ class _AddBookScreenState extends State<AddBookScreen> {
                       },
                     ),
                   ),
-                  Positioned(
-                    top: p.createCourseHeight() / 3,
-                    left: isFileMode == true ? null : 0,
-                    right: isFileMode == true ? 0 : null,
-                    child: IconButton(
-                      onPressed: () => _switchMode(!(isFileMode == true)),
-                      icon: Icon(
-                        isFileMode == true 
-                          ? Icons.keyboard_arrow_right
-                          : Icons.keyboard_arrow_left
+                  if (!isHelpVisible && widget.languageCode != 'AR')
+                    Positioned(
+                      top: p.createCourseHeight() / 3,
+                      left: isFileMode == true ? null : 0,
+                      right: isFileMode == true ? 0 : null,
+                      child: IconButton(
+                        onPressed: () => _switchMode(!(isFileMode == true)),
+                        icon: Icon(
+                          isFileMode == true 
+                            ? Icons.keyboard_arrow_right
+                            : Icons.keyboard_arrow_left
+                        ),
+                        iconSize: 40,
                       ),
-                      iconSize: 40,
                     ),
-                  ),
                 ],
               ),
             ),
@@ -488,49 +374,57 @@ class _AddBookScreenState extends State<AddBookScreen> {
     );
   }
 
+  // File selector widget
   Widget _buildFileSelector() {
-    return DottedBorder(
-      color: Colors.grey,
-      strokeWidth: 2,
-      borderType: BorderType.RRect,
-      radius: const Radius.circular(10),
-      padding: EdgeInsets.zero,
-      dashPattern: const [12, 4],
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: isLoading ? null : pickFile,
+    return Tooltip(
+      message: 'Poor quality PDFs will not work properly.${(['JA', 'ZH', 'KO'].contains(widget.languageCode)) 
+          ? '\n\nPDFs with vertical text (top to bottom) are not supported'
+          : ''}',
+      verticalOffset: 70,
+      waitDuration: const Duration(milliseconds: 500),
+      child: DottedBorder(
+        color: Colors.grey,
+        strokeWidth: 2,
+        borderType: BorderType.RRect,
+        radius: const Radius.circular(10),
+        padding: EdgeInsets.zero,
+        dashPattern: const [12, 4],
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.upload_file,
-                  size: 64,
-                  color: Colors.grey,
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                 'Add files (.txt .pdf .srt)',
-                  style: TextStyle(
-                    fontSize: 18,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: isLoading ? null : pickFile,
+              borderRadius: BorderRadius.circular(10),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.upload_file,
+                    size: 64,
                     color: Colors.grey,
                   ),
-                ),
-                if (selectedFilePath != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Text(
-                      'Selected file: ${selectedFilePath!.split('\\').last}',
-                      style: const TextStyle(fontSize: 16),
+                  const SizedBox(height: 16),
+                  const Text(
+                   'Add files (.txt .pdf .srt)',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey,
                     ),
                   ),
-              ],
+                  if (selectedFilePath != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Text(
+                        'Selected file: ${selectedFilePath!.split('\\').last}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
