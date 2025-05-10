@@ -30,7 +30,7 @@ class BookCreator {
 
   /// Processes text directly pasted into the app
   /// Returns true if book was created successfully, false if language doesn't match
-  Future<bool> processBook(String text, String code) async {
+  Future<bool> processBook(String text, String code, {bool shuffleSentences = false}) async {
     // Process the text into lines
     final List<String> processedLines = _processTextContent(text);
 
@@ -45,7 +45,14 @@ class BookCreator {
       return false; // Language doesn't match
     }
 
-    await _createBook(processedLines, code);
+    // Create the book with either original or shuffled lines
+    if (shuffleSentences) {
+      final shuffledLines = _shuffleLines(processedLines);
+      await _createBook(shuffledLines, code);
+    } else {
+      await _createBook(processedLines, code);
+    }
+    
     return true;
   }
 
@@ -86,7 +93,7 @@ class BookCreator {
 
   /// Processes a file and creates a book based on its contents
   /// Returns true if book was created successfully, false if language doesn't match
-  Future<bool> processFile(String filePath, String code) async {
+  Future<bool> processFile(String filePath, String code, {bool shuffleSentences = false}) async {
     if (filePath.isEmpty) return false;
 
     final extension = path.extension(filePath).toLowerCase();
@@ -117,7 +124,14 @@ class BookCreator {
         return false; // Language doesn't match
       }
 
-      await _createBook(content, code);
+      // Create the book with either original or shuffled lines
+      if (shuffleSentences) {
+        final shuffledLines = _shuffleLines(content);
+        await _createBook(shuffledLines, code);
+      } else {
+        await _createBook(content, code);
+      }
+      
       return true;
     } catch (e) {
       // Handle errors appropriately in your UI
@@ -128,15 +142,25 @@ class BookCreator {
 
   /// Forces adding the book using already processed content
   /// If no processed content is available, processes the text again
-  Future<void> forceAddBook(String text, String code) async {
+  Future<void> forceAddBook(String text, String code, {bool shuffleSentences = false}) async {
     if (_lastProcessedContent != null && _lastLanguageCode == code) {
       // Use the cached content if available
-      await _createBook(_lastProcessedContent!, code);
+      if (shuffleSentences) {
+        final shuffledLines = _shuffleLines(_lastProcessedContent!);
+        await _createBook(shuffledLines, code);
+      } else {
+        await _createBook(_lastProcessedContent!, code);
+      }
     } else {
       // Otherwise process the text again
       final processedLines = _processTextContent(text);
       if (processedLines.isNotEmpty) {
-        await _createBook(processedLines, code);
+        if (shuffleSentences) {
+          final shuffledLines = _shuffleLines(processedLines);
+          await _createBook(shuffledLines, code);
+        } else {
+          await _createBook(processedLines, code);
+        }
       }
     }
 
@@ -147,10 +171,15 @@ class BookCreator {
 
   /// Forces adding a file using already processed content
   /// If no processed content is available, processes the file again
-  Future<void> forceAddFile(String filePath, String code) async {
+  Future<void> forceAddFile(String filePath, String code, {bool shuffleSentences = false}) async {
     if (_lastProcessedContent != null && _lastLanguageCode == code) {
       // Use the cached content if available
-      await _createBook(_lastProcessedContent!, code);
+      if (shuffleSentences) {
+        final shuffledLines = _shuffleLines(_lastProcessedContent!);
+        await _createBook(shuffledLines, code);
+      } else {
+        await _createBook(_lastProcessedContent!, code);
+      }
     } else {
       // Otherwise process the file again
       if (filePath.isEmpty) return;
@@ -173,7 +202,12 @@ class BookCreator {
       }
 
       if (content.isNotEmpty) {
-        await _createBook(content, code);
+        if (shuffleSentences) {
+          final shuffledLines = _shuffleLines(content);
+          await _createBook(shuffledLines, code);
+        } else {
+          await _createBook(content, code);
+        }
       }
     }
 
@@ -461,5 +495,91 @@ class BookCreator {
 
     await _bookRepository.createBookDatabase(insertedBook.id!, content);
     _currentBook = null;
+  }
+
+  /// Shuffles content by extracting sentences based on punctuation, then shuffling them
+  /// 
+  /// This method:
+  /// 1. Preserves the title (first line)
+  /// 2. Extracts proper sentences divided by punctuation
+  /// 3. Shuffles all sentences together regardless of paragraph structure
+  /// 4. Removes empty lines
+  List<String> _shuffleLines(List<String> lines) {
+    if (lines.length <= 1) return List.from(lines); // Nothing to shuffle
+    
+    // Always keep the title (first line) in place
+    final title = lines.isNotEmpty ? lines.first : "";
+    final result = [title];
+    
+    // If we only have a title, return early
+    if (lines.length <= 1) return result;
+    
+    // Skip the title for processing
+    final remainingLines = lines.sublist(1);
+    
+    // Join all lines with spaces and extract sentences
+    final allText = remainingLines
+        .where((line) => line.trim().isNotEmpty) // Remove empty lines
+        .join(' ');
+        
+    // Extract sentences from the joined text
+    final sentences = _extractSentences(allText);
+    
+    // Shuffle all sentences together
+    if (sentences.isNotEmpty) {
+      sentences.shuffle();
+    }
+    
+    // Add the shuffled sentences to the result
+    result.addAll(sentences);
+    
+    return result;
+  }
+
+  /// Extracts sentences from text based on punctuation
+  List<String> _extractSentences(String text) {
+    // Define regex pattern for sentence boundaries
+    // This looks for punctuation followed by a space or end of string
+    final sentencePattern = RegExp(r'(?<=[.!?,;:()\[\]{}<>\。！？，；：（）【】［］｛｝「」『』、、؛])\s*');
+    
+    // Split the text into sentences
+    final sentences = <String>[];
+    int startIndex = 0;
+    
+    // Find all sentence boundaries
+    for (final match in sentencePattern.allMatches(text)) {
+      final endIndex = match.end;
+      // Extract and clean the sentence
+      String sentence = text.substring(startIndex, endIndex).trim();
+      
+      // 1. Remove trailing punctuation at the end of the sentence
+      sentence = sentence.replaceAll(RegExp(r'[.!?,;:()\[\]{}<>\。！？，；：（）【】［］｛｝「」『』、、؛]+$'), '').trim();
+      
+      // 2. Skip sentences that are only numbers
+      if (sentence.isNotEmpty && !_isOnlyNumbers(sentence)) {
+        sentences.add(sentence);
+      }
+      startIndex = endIndex;
+    }
+    
+    // Add any remaining text as the last sentence (also clean it)
+    String remainingText = text.substring(startIndex).trim();
+    remainingText = remainingText.replaceAll(RegExp(r'[.!?,;:()\[\]{}<>\。！？，；：（）【】［］｛｝「」『』、、؛]+$'), '').trim();
+    
+    if (remainingText.isNotEmpty && !_isOnlyNumbers(remainingText)) {
+      sentences.add(remainingText);
+    }
+    
+    return sentences;
+  }
+
+  /// Checks if a string contains only numbers, spaces, and number-related characters
+  bool _isOnlyNumbers(String text) {
+    // This regex checks if the string consists only of:
+    // - digits (0-9)
+    // - spaces
+    // - commas and periods (common in numbers)
+    // - percent, plus, minus signs (for percentages, positive/negative numbers)
+    return RegExp(r'^[\d\s.,+\-%]+$').hasMatch(text);
   }
 }
