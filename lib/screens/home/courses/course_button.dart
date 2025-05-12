@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/screens/home/competences/competence_icon.dart';
-import 'package:lenski/screens/home/competences/competence_list.dart'; // Uncomment this import
+import 'package:lenski/screens/home/competences/competence_list.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/course_repository.dart';
 import 'package:lenski/utils/course_colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../models/course_model.dart';
 import '../../../widgets/flag_icon.dart';
-import '../../../data/session_repository.dart'; // Add this import
+import '../../../data/session_repository.dart';
 
 /// CourseButton is a widget that displays a course as a button.
 /// It shows the competences, the course name, the flag, and the level.
@@ -29,14 +30,16 @@ class CourseButton extends StatefulWidget {
 class _CourseButtonState extends State<CourseButton> {
   bool _showColorMenu = false;
   final _repository = CourseRepository();
-  final _sessionRepository = SessionRepository(); // Add this
-  int _totalWordsAdded = 0; // Add this
-  bool _isLoading = true; // Add this
+  final _sessionRepository = SessionRepository();
+  int _totalWordsAdded = 0;
+  bool _isLoading = true;
+  bool _streakIndicatorEnabled = true;
 
   @override
   void initState() {
     super.initState();
     _loadCourseStats();
+    _loadStreakIndicatorSetting();
   }
 
   // Add this method to load course stats
@@ -60,6 +63,14 @@ class _CourseButtonState extends State<CourseButton> {
         _isLoading = false;
       });
     }
+  }
+
+  // Add this method to load the streak indicator setting
+  Future<void> _loadStreakIndicatorSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _streakIndicatorEnabled = prefs.getBool('streak_indicator_enabled') ?? true;
+    });
   }
 
   @override
@@ -130,8 +141,8 @@ class _CourseButtonState extends State<CourseButton> {
               ),
             ),
           ),
-          // Add Streak Indicator
-          if (widget.course.streak > 0)
+          // Add Streak Indicator (conditionally)
+          if (_streakIndicatorEnabled && widget.course.streak > 0)
             Positioned(
               bottom: 10,
               left: 10,
