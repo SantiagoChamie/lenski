@@ -41,7 +41,7 @@ class _LTextState extends State<LText> {
     super.dispose();
   }
 
-  String truncateSelectedText(String text, {int maxLength = 75}) {
+  String truncateSelectedText(String text, {int maxLength = 100}) {
     if (text.length <= maxLength) return text;
 
     // First try: Split by sentence-ending punctuation (including CJK and Arabic)
@@ -70,6 +70,9 @@ class _LTextState extends State<LText> {
     // Find the context using our existing algorithm
     final contextText = findContext(truncatedText, widget.text);
 
+    // Find the translation context using the new approach (longer context)
+    final translationContext = findTranslationContext(truncatedText, widget.text);
+
     overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
         top: widget.position == 'above' ? mousePosition!.dy - 200 : rect.bottom + 50,
@@ -79,6 +82,7 @@ class _LTextState extends State<LText> {
           child: TranslationOverlay(
             text: truncatedText, // Use truncated text instead of full selection
             contextText: contextText,
+            translationContext: translationContext,
             sourceLang: widget.toLanguage,
             targetLang: widget.fromLanguage,
             onClose: () => hideOverlay(instant: true),
@@ -104,25 +108,51 @@ class _LTextState extends State<LText> {
     }
   }
 
-  // Add this method to _LTextState class:
+  String findTranslationContext(String selectedText, String fullText) {
+    // Create a sanitized version of the full text
+    String sanitizedText = fullText.replaceAll('\n', ' ');
+
+    // Use only Approach 1 (sentence-based) with a longer max length
+    final sentences = sanitizedText.split(RegExp(r'(?<=[.!?。！？？])\s*'));
+    for (final sentence in sentences) {
+      if (sentence.contains(selectedText) && sentence.length <= 1000) {
+        return _cleanTrailingPunctuation(sentence.trim());
+      }
+    }
+
+    // If no suitable sentence found, return a larger substring around the selected text
+    int selectedIndex = sanitizedText.indexOf(selectedText);
+    if (selectedIndex != -1) {
+      int contextStart = selectedIndex - 500;
+      int contextEnd = selectedIndex + selectedText.length + 500;
+      
+      if (contextStart < 0) contextStart = 0;
+      if (contextEnd > sanitizedText.length) contextEnd = sanitizedText.length;
+      
+      return sanitizedText.substring(contextStart, contextEnd).trim();
+    }
+
+    // Last resort: return the selected text itself
+    return selectedText;
+  }
+
   String findContext(String selectedText, String fullText, {int maxLength = 100}) {
     // First, create a sanitized version of the full text
     String sanitizedText = fullText.replaceAll('\n', ' ');
 
     // Approach 1: Split by sentence-ending punctuation (including CJK and Arabic)
-    final sentences = sanitizedText.split(RegExp(r'(?<=[.!?。！？؟])\s*'));
+    final sentences = sanitizedText.split(RegExp(r'(?<=[.!?。！？？])\s*'));
     for (final sentence in sentences) {
       if (sentence.contains(selectedText) && sentence.length <= maxLength) {
-        return sentence.trim();
+        return _cleanTrailingPunctuation(sentence.trim());
       }
     }
 
     // Approach 2: Split by all punctuation (including CJK and Arabic)
-    // Using positive lookbehind (?<=...) to keep the punctuation marks
-    final fragments = sanitizedText.split(RegExp(r'(?<=[.!?,;:()\[\]{}<>\-。！？，；：（）【】［］｛｝「」『』、،؛])\s*'));
+    final fragments = sanitizedText.split(RegExp(r'(?<=[.!?,;:()\[\]{}<>\-。！？，；：（）【】［］｛｝「」『』、،；¿¡])\s*'));
     for (final fragment in fragments) {
       if (fragment.contains(selectedText) && fragment.length <= maxLength) {
-        return fragment.trim();
+        return _cleanTrailingPunctuation(fragment.trim());
       }
     }
 
@@ -130,7 +160,7 @@ class _LTextState extends State<LText> {
     final lines = fullText.split('\n');
     for (final line in lines) {
       if (line.contains(selectedText) && line.length <= maxLength) {
-        return line.trim();
+        return _cleanTrailingPunctuation(line.trim());
       }
     }
 
@@ -143,11 +173,70 @@ class _LTextState extends State<LText> {
       if (contextStart < 0) contextStart = 0;
       if (contextEnd > sanitizedText.length) contextEnd = sanitizedText.length;
       
-      return sanitizedText.substring(contextStart, contextEnd).trim();
+      return _cleanTrailingPunctuation(sanitizedText.substring(contextStart, contextEnd).trim());
     }
 
     // Last resort: return the selected text itself
     return selectedText;
+  }
+
+  /// Cleans trailing punctuation while preserving balanced pairs
+  String _cleanTrailingPunctuation(String text) {
+    if (text.isEmpty) return text;
+    
+    // Define paired punctuation to check for balance
+    final punctuationPairs = {
+      '(': ')',
+      '[': ']',
+      '{': '}',
+      '<': '>',
+      '「': '」',
+      '『': '』',
+      '（': '）',
+      '【': '】',
+      '［': '］',
+      '｛': '｝',
+      '¿': '?',
+      '¡': '!'
+    };
+    
+    // Check if the text ends with any punctuation
+    final regex = RegExp(r'[.!?,;:()\[\]{}<>。！？，；：（）【】［］｛｝「」『』、、；¿¡]+$');
+    final match = regex.firstMatch(text);
+    
+    if (match == null) return text; // No trailing punctuation
+    
+    final trailingPunctuation = match.group(0)!;
+    final textWithoutTrailing = text.substring(0, text.length - trailingPunctuation.length);
+    
+    // Check each character in the trailing punctuation
+    for (int i = 0; i < trailingPunctuation.length; i++) {
+      final char = trailingPunctuation[i];
+      
+      // If it's a closing punctuation, check if it has a matching opening
+      if (punctuationPairs.containsValue(char)) {
+        final openingChar = punctuationPairs.entries
+            .firstWhere((entry) => entry.value == char, orElse: () => const MapEntry('', ''))
+            .key;
+        
+        if (openingChar.isNotEmpty && textWithoutTrailing.contains(openingChar)) {
+          // This is a balanced pair, so keep it
+          return text;
+        }
+      }
+      
+      // If it's an opening punctuation that should have a closing match
+      if (punctuationPairs.containsKey(char)) {
+        final closingChar = punctuationPairs[char]!;
+        if (trailingPunctuation.contains(closingChar)) {
+          // This is a balanced pair, so keep it
+          return text;
+        }
+      }
+    }
+    
+    // If we get here, the trailing punctuation isn't balanced, so remove it
+    return textWithoutTrailing;
   }
 
   @override

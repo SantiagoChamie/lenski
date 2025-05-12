@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart'; // Import shared_pr
 class TranslationOverlay extends StatefulWidget {
   final String text;
   final String contextText;
+  final String translationContext; // New property for translation context
   final String sourceLang;
   final String targetLang;
   final VoidCallback onClose; // Callback to close the overlay
@@ -21,10 +22,11 @@ class TranslationOverlay extends StatefulWidget {
     super.key,
     required this.text,
     required this.contextText,
+    required this.translationContext, // Add this required parameter
     required this.sourceLang,
     required this.targetLang,
-    required this.onClose, // Add this parameter
-    this.cardTypes, // Add this parameter
+    required this.onClose,
+    this.cardTypes,
   });
 
   @override
@@ -65,7 +67,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
         text: widget.text,
         sourceLang: widget.sourceLang,
         targetLang: widget.targetLang,
-        context: _useContext ? widget.contextText : widget.text, // Use text as context if not using context
+        context: _useContext ? widget.translationContext : widget.text, // Use translationContext instead of contextText
       );
     } on SocketException {
       return Future.error('Could not connect to the internet');
@@ -114,7 +116,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
       final card = custom_card.Card(
         front: widget.text,
         back: backText,
-        context: _useContext ? widget.contextText : widget.text,
+        context: widget.contextText, // Always use the display context for cards
         dueDate: DateTime.now().add(Duration(days: i)),
         language: widget.sourceLang,
         type: types[i],
@@ -335,7 +337,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
                                   borderRadius: BorderRadius.all(Radius.circular(10.0)),
                                 ),
                                 child: Tooltip(
-                                  message: _useContext ? 'Using contextual translation' : 'Using non-contextual translation',
+                                  message: _useContext ? 'Using contextual translation' : 'Using word-only translation',
                                   child: IconButton(
                                     icon: Text(
                                       _useContext ? 'C' : 'NC',

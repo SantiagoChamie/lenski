@@ -540,7 +540,7 @@ class BookCreator {
   List<String> _extractSentences(String text) {
     // Define regex pattern for sentence boundaries
     // This looks for punctuation followed by a space or end of string
-    final sentencePattern = RegExp(r'(?<=[.!?,;:()\[\]{}<>\。！？，；：（）【】［］｛｝「」『』、、؛])\s*');
+    final sentencePattern = RegExp(r'(?<=[.!?,;:()\[\]{}<>\。！？，；：（）【】［］｛｝「」『』、،؛¿¡])\s*');
     
     // Split the text into sentences
     final sentences = <String>[];
@@ -552,10 +552,10 @@ class BookCreator {
       // Extract and clean the sentence
       String sentence = text.substring(startIndex, endIndex).trim();
       
-      // 1. Remove trailing punctuation at the end of the sentence
-      sentence = sentence.replaceAll(RegExp(r'[.!?,;:()\[\]{}<>\。！？，；：（）【】［］｛｝「」『』、、؛]+$'), '').trim();
+      // Clean the sentence while preserving balanced punctuation
+      sentence = _cleanTrailingPunctuation(sentence);
       
-      // 2. Skip sentences that are only numbers
+      // Skip sentences that are only numbers
       if (sentence.isNotEmpty && !_isOnlyNumbers(sentence)) {
         sentences.add(sentence);
       }
@@ -564,13 +564,72 @@ class BookCreator {
     
     // Add any remaining text as the last sentence (also clean it)
     String remainingText = text.substring(startIndex).trim();
-    remainingText = remainingText.replaceAll(RegExp(r'[.!?,;:()\[\]{}<>\。！？，；：（）【】［］｛｝「」『』、、؛]+$'), '').trim();
+    remainingText = _cleanTrailingPunctuation(remainingText);
     
     if (remainingText.isNotEmpty && !_isOnlyNumbers(remainingText)) {
       sentences.add(remainingText);
     }
     
     return sentences;
+  }
+
+  /// Cleans trailing punctuation while preserving balanced pairs
+  String _cleanTrailingPunctuation(String text) {
+    if (text.isEmpty) return text;
+    
+    // Define paired punctuation to check for balance
+    final punctuationPairs = {
+      '(': ')',
+      '[': ']',
+      '{': '}',
+      '<': '>',
+      '「': '」',
+      '『': '』',
+      '（': '）',
+      '【': '】',
+      '［': '］',
+      '｛': '｝',
+      '¿': '?',
+      '¡': '!'
+    };
+    
+    // Check if the text ends with any punctuation
+    final regex = RegExp(r'[.!?,;:()\[\]{}<>\。！？，；：（）【】［］｛｝「」『』、،؛¿¡]+$');
+    final match = regex.firstMatch(text);
+    
+    if (match == null) return text; // No trailing punctuation
+    
+    final trailingPunctuation = match.group(0)!;
+    final textWithoutTrailing = text.substring(0, text.length - trailingPunctuation.length);
+    
+    // Check for balanced pairs in the trailing punctuation
+    for (int i = 0; i < trailingPunctuation.length; i++) {
+      final char = trailingPunctuation[i];
+      
+      // If it's a closing punctuation, check if it has a matching opening
+      if (punctuationPairs.containsValue(char)) {
+        final openingChar = punctuationPairs.entries
+            .firstWhere((entry) => entry.value == char, orElse: () => const MapEntry('', ''))
+            .key;
+        
+        if (openingChar.isNotEmpty && textWithoutTrailing.contains(openingChar)) {
+          // This is a balanced pair, so keep it
+          return text;
+        }
+      }
+      
+      // If it's an opening punctuation that should have a closing match
+      if (punctuationPairs.containsKey(char)) {
+        final closingChar = punctuationPairs[char]!;
+        if (trailingPunctuation.contains(closingChar)) {
+          // This is a balanced pair, so keep it
+          return text;
+        }
+      }
+    }
+    
+    // If we get here, the trailing punctuation isn't balanced, so remove it
+    return textWithoutTrailing;
   }
 
   /// Checks if a string contains only numbers, spaces, and number-related characters
