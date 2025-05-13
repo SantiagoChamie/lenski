@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/screens/home/competences/competence_icon.dart';
-import 'package:lenski/screens/home/competences/competence_list.dart'; // Uncomment this import
+import 'package:lenski/screens/home/competences/competence_list.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/course_repository.dart';
 import 'package:lenski/utils/course_colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../models/course_model.dart';
 import '../../../widgets/flag_icon.dart';
-import '../../../data/session_repository.dart'; // Add this import
+import '../../../data/session_repository.dart';
 
 /// CourseButton is a widget that displays a course as a button.
 /// It shows the competences, the course name, the flag, and the level.
@@ -29,30 +30,71 @@ class CourseButton extends StatefulWidget {
 class _CourseButtonState extends State<CourseButton> {
   bool _showColorMenu = false;
   final _repository = CourseRepository();
-  final _sessionRepository = SessionRepository(); // Add this
-  int _totalWordsAdded = 0; // Add this
-  bool _isLoading = true; // Add this
+  final _sessionRepository = SessionRepository();
+  bool _isGoalMet = false;  // Change to a boolean to track if goal is met
+  bool _isLoading = true;
+  bool _streakIndicatorEnabled = true;
 
   @override
   void initState() {
     super.initState();
     _loadCourseStats();
+    _loadStreakIndicatorSetting();
   }
 
-  // Add this method to load course stats
+  // Modify this method to check goal completion based on goal type
   Future<void> _loadCourseStats() async {
     try {
       // Get all sessions for this course
       final sessions = await _sessionRepository.getSessionsByCourse(widget.course.code);
       
-      // Sum up all words added
-      int totalWords = 0;
-      for (var session in sessions) {
-        totalWords += session.wordsAdded;
+      // Calculate progress based on goal type
+      bool goalMet = false;
+      
+      switch (widget.course.goalType) {
+        case 'learn':
+          // Sum up all words added
+          int totalWords = 0;
+          for (var session in sessions) {
+            totalWords += session.wordsAdded;
+          }
+          goalMet = totalWords >= widget.course.totalGoal;
+          break;
+          
+        case 'daily':
+          // Count unique days with any activity
+          final Set<int> daysWithActivity = {};
+          for (var session in sessions) {
+            if (session.wordsAdded > 0 || 
+                session.wordsReviewed > 0 || 
+                session.linesRead > 0 ||
+                session.minutesStudied > 0) {
+              daysWithActivity.add(session.date);
+            }
+          }
+          goalMet = daysWithActivity.length >= widget.course.totalGoal;
+          break;
+          
+        case 'time':
+          // Sum up all minutes studied
+          int totalMinutes = 0;
+          for (var session in sessions) {
+            totalMinutes += session.minutesStudied;
+          }
+          goalMet = totalMinutes >= widget.course.totalGoal;
+          break;
+          
+        default:
+          // Default to 'learn' behavior
+          int totalWords = 0;
+          for (var session in sessions) {
+            totalWords += session.wordsAdded;
+          }
+          goalMet = totalWords >= widget.course.totalGoal;
       }
       
       setState(() {
-        _totalWordsAdded = totalWords;
+        _isGoalMet = goalMet;
         _isLoading = false;
       });
     } catch (e) {
@@ -60,6 +102,14 @@ class _CourseButtonState extends State<CourseButton> {
         _isLoading = false;
       });
     }
+  }
+
+  // Add this method to load the streak indicator setting
+  Future<void> _loadStreakIndicatorSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _streakIndicatorEnabled = prefs.getBool('streak_indicator_enabled') ?? true;
+    });
   }
 
   @override
@@ -113,8 +163,8 @@ class _CourseButtonState extends State<CourseButton> {
                         )
                       ),
                       
-                      // Add the gold star if goal is achieved
-                      if (!_isLoading && _totalWordsAdded >= widget.course.totalGoal)
+                      // Add the gold star if goal is achieved based on goal type
+                      if (!_isLoading && _isGoalMet)
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0),
                           child: Icon(
@@ -130,8 +180,8 @@ class _CourseButtonState extends State<CourseButton> {
               ),
             ),
           ),
-          // Add Streak Indicator
-          if (widget.course.streak > 0)
+          // Add Streak Indicator (conditionally)
+          if (_streakIndicatorEnabled && widget.course.streak > 0)
             Positioned(
               bottom: 10,
               left: 10,

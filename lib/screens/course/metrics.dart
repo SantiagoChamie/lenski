@@ -74,6 +74,67 @@ class _MetricsState extends State<Metrics> {
     });
   }
 
+  IconData _getGoalIcon(String goalType) {
+    switch (goalType) {
+      case 'learn':
+        return Icons.trending_up;
+      case 'daily':
+        return Icons.calendar_today;
+      case 'time':
+        return Icons.timer;
+      default:
+        return Icons.trending_up;
+    }
+  }
+  
+  bool _isGoalMet(Course course, Session session) {
+    switch (course.goalType) {
+      case 'learn':
+        return session.wordsAdded >= course.dailyGoal;
+      case 'daily':
+        // For daily type, check if any activity was done
+        return session.wordsAdded > 0 || 
+               session.wordsReviewed > 0 || 
+               session.linesRead > 0 ||
+               session.minutesStudied > 0;
+      case 'time':
+        return session.minutesStudied >= course.dailyGoal;
+      default:
+        return session.wordsAdded >= course.dailyGoal;
+    }
+  }
+  
+  String _getGoalProgressText(Course course, Session session) {
+    switch (course.goalType) {
+      case 'learn':
+        return '${session.wordsAdded}/${course.dailyGoal}';
+      case 'daily':
+        // For daily type, show 1/1 if any activity was done, 0/1 if not
+        final hasActivity = session.wordsAdded > 0 || 
+                           session.wordsReviewed > 0 || 
+                           session.linesRead > 0 ||
+                           session.minutesStudied > 0;
+        return hasActivity ? '1/1' : '0/1';
+      case 'time':
+        return '${session.minutesStudied}/${course.dailyGoal}';
+      default:
+        return '${session.wordsAdded}/${course.dailyGoal}';
+    }
+  }
+  
+  String _getGoalLabel(String goalType) {
+    switch (goalType) {
+      case 'learn':
+        return ' Words Today';
+      case 'daily':
+        return ' Daily Activity';
+      case 'time':
+        return ' Minutes Today';
+      default:
+        return ' Daily Goal';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -134,30 +195,30 @@ class _MetricsState extends State<Metrics> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Icon(
-                          Icons.trending_up,
+                          _getGoalIcon(widget.course.goalType),
                           size: 28,
-                          color: todaySession.wordsAdded >= widget.course.dailyGoal 
+                          color: _isGoalMet(widget.course, todaySession) 
                               ? const Color(0xFF4CAF50)  // Complete: Material green
-                              : const Color(0xFFEE9A1D), // Incomplete: Orange (matches daily goal UI)
+                              : const Color(0xFFEE9A1D), // Incomplete: Orange
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '${todaySession.wordsAdded}/${widget.course.dailyGoal}',
+                          _getGoalProgressText(widget.course, todaySession),
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: todaySession.wordsAdded >= widget.course.dailyGoal
+                            color: _isGoalMet(widget.course, todaySession)
                               ? const Color(0xFF4CAF50)  // Complete: Material green
-                              : const Color(0xFFEE9A1D), // Incomplete: Orange (matches daily goal UI)
+                              : const Color(0xFFEE9A1D), // Incomplete: Orange
                           ),
                         ),
                         Text(
-                          ' Daily Goal',
+                          _getGoalLabel(widget.course.goalType),
                           style: TextStyle(
                             fontSize: 24,
-                            color: todaySession.wordsAdded >= widget.course.dailyGoal 
-                              ? const Color(0xFF4CAF50)  // Complete: Material green
-                              : const Color(0xFFEE9A1D), // Incomplete: Orange (matches daily goal UI)
+                            color: _isGoalMet(widget.course, todaySession) 
+                              ? const Color(0xFF4CAF50)
+                              : const Color(0xFFEE9A1D),
                           ),
                         ),
                         const SizedBox(width: 20),

@@ -107,14 +107,12 @@ class SessionRepository {
     // Save the updated session
     await updateSession(session);
     
-    // Check if daily goal is met and update streak if needed
-    if (wordsAdded != null) {
-      await _checkAndUpdateStreak(courseCode, session.wordsAdded);
-    }
+    // Always check if any goal is met when stats are updated
+    await _checkAndUpdateStreak(courseCode, session);
   }
 
-  /// Checks if daily goal is met and updates streak if needed.
-  Future<void> _checkAndUpdateStreak(String courseCode, int wordsAdded) async {
+  /// Checks if goal is met based on course goal type and updates streak if needed.
+  Future<void> _checkAndUpdateStreak(String courseCode, Session session) async {
     final db = await database;
     final today = _dateTimeToInt(DateTime.now());
     
@@ -131,15 +129,37 @@ class SessionRepository {
       return;
     }
     
-    // Get the course to check daily goal and potentially update streak
+    // Get the course to check goal and potentially update streak
     final courses = await _courseRepository.courses();
     final course = courses.firstWhere(
       (c) => c.code == courseCode,
       orElse: () => throw Exception('Course not found'),
     );
     
-    // If daily goal is met, increment streak and mark as incremented
-    if (wordsAdded >= course.dailyGoal) {
+    // Check if goal is met based on the course's goal type
+    bool isGoalMet = false;
+    
+    switch (course.goalType) {
+      case 'learn':
+        isGoalMet = session.wordsAdded >= course.dailyGoal;
+        break;
+      case 'daily':
+        // For daily type, any activity counts as meeting the goal
+        isGoalMet = session.wordsAdded > 0 || 
+                    session.wordsReviewed > 0 || 
+                    session.linesRead > 0 ||
+                    session.minutesStudied > 0;
+        break;
+      case 'time':
+        isGoalMet = session.minutesStudied >= course.dailyGoal;
+        break;
+      default:
+        // Default to 'learn' behavior
+        isGoalMet = session.wordsAdded >= course.dailyGoal;
+    }
+    
+    // If goal is met, increment streak and mark as incremented
+    if (isGoalMet) {
       await _courseRepository.incrementStreak(course);
       
       // Mark streak as incremented for today

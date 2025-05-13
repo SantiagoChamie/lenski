@@ -12,14 +12,16 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final TextEditingController _apiKeyController = TextEditingController();
   bool _contextualTranslationEnabled = false;
-  bool _premiumApiEnabled = false;  // New state variable
+  bool _premiumApiEnabled = false;
+  bool _streakIndicatorEnabled = true; // New state variable for streak indicator
 
   @override
   void initState() {
     super.initState();
     _loadApiKey();
     _loadContextualTranslationSetting();
-    _loadPremiumApiSetting();  // New method call
+    _loadPremiumApiSetting();
+    _loadStreakIndicatorSetting(); // Load streak indicator setting
   }
 
   /// Loads the saved API key from shared preferences and sets it in the text controller.
@@ -70,10 +72,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
+  /// Loads the streak indicator setting from shared preferences
+  Future<void> _loadStreakIndicatorSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _streakIndicatorEnabled = prefs.getBool('streak_indicator_enabled') ?? true;
+    });
+  }
+
+  /// Saves the streak indicator setting to shared preferences
+  Future<void> _saveStreakIndicatorSetting(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('streak_indicator_enabled', value);
+    setState(() {
+      _streakIndicatorEnabled = value;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Theme(
@@ -149,6 +167,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Switch(
                     value: _contextualTranslationEnabled,
                     onChanged: _saveContextualTranslationSetting,
+                    activeColor: const Color(0xFF2C73DE),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Display Settings',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Telex'),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Show streak indicators on courses',
+                    style: TextStyle(fontFamily: 'Sansation'),
+                  ),
+                  Switch(
+                    value: _streakIndicatorEnabled,
+                    onChanged: _saveStreakIndicatorSetting,
                     activeColor: const Color(0xFF2C73DE),
                   ),
                 ],

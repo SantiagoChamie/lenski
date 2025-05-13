@@ -59,6 +59,14 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   // Add state variables for daily and total goals
   int _dailyGoal = 20;
   int _totalGoal = 2000;
+  GoalType _currentGoalType = GoalType.learn; // Add this to track current goal type
+
+  // Add a method to update the goal type
+  void _updateGoalType(GoalType type) {
+    setState(() {
+      _currentGoalType = type;
+    });
+  }
 
   @override
   void dispose() {
@@ -86,6 +94,20 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       return;
     }
 
+    // Convert enum GoalType to string goalType
+    String goalTypeStr;
+    switch (_currentGoalType) {
+      case GoalType.learn:
+        goalTypeStr = 'learn';
+        break;
+      case GoalType.daily:
+        goalTypeStr = 'daily';
+        break;
+      case GoalType.time:
+        goalTypeStr = 'time';
+        break;
+    }
+
     final randomColor = CourseColors.getRandomColor();
 
     final newCourse = Course(
@@ -101,6 +123,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       imageUrl: _selectedFlagUrl,
       dailyGoal: _dailyGoal,
       totalGoal: _totalGoal,
+      goalType: goalTypeStr, // Add this line to set the goalType
     );
 
     final existingCourses = await _courseRepository.courses();
@@ -259,11 +282,13 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                             SizedBox(height: p.standardPadding()),
                             GoalSelectorButton(
                               initialValue: 20,
+                              initialGoalType: _currentGoalType, // Pass current goal type
                               onValueChanged: (value) {
                                 setState(() {
                                   _dailyGoal = value;
                                 });
                               },
+                              onGoalTypeChanged: _updateGoalType, // Add this callback
                             ),
                             SizedBox(height: p.standardPadding()),
                             SizedBox(
@@ -275,11 +300,13 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                             GoalSelectorButton(
                               initialValue: 2000,
                               isDaily: false,
+                              initialGoalType: _currentGoalType, // Pass same goal type
                               onValueChanged: (value) {
                                 setState(() {
                                   _totalGoal = value;
                                 });
                               },
+                              onGoalTypeChanged: _updateGoalType, // Add this callback
                             ),
                             SizedBox(height: p.standardPadding()),
                           ],
@@ -306,6 +333,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                           child: Center(
                             child: CourseDifficultyText(
                               dailyWords: _dailyGoal,
+                              goalType: _currentGoalType.toString().split('.').last,
                               competences: _selectedCompetences.length,
                               startingLanguage: languageCodes[_selectedOriginLanguage]!,
                               targetLanguage: languageCodes[_selectedLanguage]!,

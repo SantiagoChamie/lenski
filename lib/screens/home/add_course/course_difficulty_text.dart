@@ -8,18 +8,22 @@ class CourseDifficultyText extends StatelessWidget {
   final String startingLanguage;
   final String targetLanguage;
   final int competences;
+  final String goalType; // Add goal type parameter
 
   /// Creates a CourseDifficultyText widget.
   /// 
-  /// [difficulty] is the difficulty level of the course.
-  /// 
-  /// [intensity] is the intensity level of the course.
+  /// [dailyWords] is the number of words to learn daily.
+  /// [startingLanguage] is the language code of the source language.
+  /// [targetLanguage] is the language code of the target language.
+  /// [competences] is the number of selected competences.
+  /// [goalType] is the type of goal ('learn', 'daily', or 'time').
   const CourseDifficultyText({
     super.key,
     required this.dailyWords,
     required this.startingLanguage,
     required this.targetLanguage,
     required this.competences,
+    required this.goalType, // Default to 'learn' type
   });
 
   int calculateLanguageDifficulty(String lang1, String lang2) {
@@ -65,8 +69,28 @@ class CourseDifficultyText extends StatelessWidget {
   }
 
   String get intensity {
-    // Calculate intensity as daily words × number of competences
-    int intensityScore = dailyWords * competences;
+    // If goal type is 'daily', always return low intensity
+    if (goalType == 'daily') {
+      return "low";
+    }
+    
+    // For other goal types, calculate intensity based on type
+    int intensityScore;
+    
+    switch (goalType) {
+      case 'learn':
+        // Original calculation for learn type
+        intensityScore = dailyWords * competences;
+        break;
+      case 'time':
+        // For time goals, multiply minutes by competences
+        // Using dailyWords as minutes for time goal type
+        intensityScore = (dailyWords*2/3).floor(); // Higher intensity for time commitment
+        break;
+      default:
+        // Default fallback to original calculation
+        intensityScore = dailyWords * competences;
+    }
     
     // Determine intensity level based on the calculated score
     if (intensityScore < 20) return "low";
@@ -76,7 +100,7 @@ class CourseDifficultyText extends StatelessWidget {
   }
 
   /// Returns the appropriate color based on the difficulty or intensity level.
-  Color _getColor(String level) {  // Changed parameter type to String
+  Color _getColor(String level) {
     switch (level.toLowerCase()) {
       case 'light':
       case 'low':
@@ -105,12 +129,12 @@ class CourseDifficultyText extends StatelessWidget {
         children: [
           TextSpan(
             text: difficulty,
-            style: TextStyle(color: _getColor(difficulty)),  // Pass difficulty string
+            style: TextStyle(color: _getColor(difficulty)),
           ),
           const TextSpan(text: " course with "),
           TextSpan(
             text: intensity,
-            style: TextStyle(color: _getColor(intensity)),  // Pass intensity string
+            style: TextStyle(color: _getColor(intensity)),
           ),
           const TextSpan(text: " intensity"),
         ],

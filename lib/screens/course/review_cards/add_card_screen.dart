@@ -92,11 +92,11 @@ class _AddCardScreenState extends State<AddCardScreen> {
                           TextField(
                             controller: frontController,
                             style: TextStyle(fontFamily: appFonts['Detail']),
-                            decoration: InputDecoration(
-                              border: const OutlineInputBorder(),
-                              hintText: '${widget.course.name} text',
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              hintText: 'Front (word to learn)',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
-                              focusedBorder: const OutlineInputBorder(
+                              focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(color: Colors.blue, width: 2.0),
                               ),
                             ),
@@ -109,11 +109,11 @@ class _AddCardScreenState extends State<AddCardScreen> {
                                 child: TextField(
                                   controller: backController,
                                   style: TextStyle(fontFamily: appFonts['Detail']),
-                                  decoration: InputDecoration(
-                                    border: const OutlineInputBorder(),
-                                    hintText: '${codeToLanguage[widget.course.fromCode]} text',
+                                  decoration: const InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    hintText: 'Back (translation)',
                                     floatingLabelBehavior: FloatingLabelBehavior.always,
-                                    focusedBorder: const OutlineInputBorder(
+                                    focusedBorder: OutlineInputBorder(
                                       borderSide: BorderSide(color: Colors.blue, width: 2.0),
                                     ),
                                   ),
