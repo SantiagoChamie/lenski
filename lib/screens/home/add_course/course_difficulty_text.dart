@@ -85,7 +85,7 @@ class CourseDifficultyText extends StatelessWidget {
       case 'time':
         // For time goals, multiply minutes by competences
         // Using dailyWords as minutes for time goal type
-        intensityScore = dailyWords * competences * 2; // Higher intensity for time commitment
+        intensityScore = (dailyWords*2/3).floor(); // Higher intensity for time commitment
         break;
       default:
         // Default fallback to original calculation
