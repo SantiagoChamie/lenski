@@ -206,6 +206,31 @@ class _ReviewScreenState extends State<ReviewScreen> {
     }
   }
 
+  /// Shows a dialog for editing the current card
+  void _showEditCardDialog(lenski_card.Card card) async {
+    final result = await showDialog<lenski_card.Card>(
+      context: context,
+      builder: (context) => EditCardDialog(card: card),
+    );
+    
+    if (result != null) {
+      // Update the card in the repository
+      await repository.updateCard(result);
+      
+      // Update the card in the current list
+      setState(() {
+        cards[0] = result;
+      });
+      
+      // Show confirmation
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Card updated successfully')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
@@ -338,14 +363,254 @@ class _ReviewScreenState extends State<ReviewScreen> {
           Positioned(
             bottom: boxPadding + 20,
             right: boxPadding + 20,
-            child: FloatingActionButton(
-              onPressed: handleDelete,
-              backgroundColor: const Color(0xFFFFD38D),
-              child: const Icon(Icons.delete, color: Colors.black),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Edit button
+                FloatingActionButton.small(
+                  onPressed: () => _showEditCardDialog(currentCard),
+                  hoverElevation: 0,
+                  elevation: 0,
+                  backgroundColor: const Color(0xFFFFD38D),
+                  child: const Icon(Icons.edit, color: Colors.black, size: 20),
+                ),
+                const SizedBox(height: 16),
+                // Delete button (now smaller)
+                FloatingActionButton.small(
+                  onPressed: handleDelete,
+                  hoverElevation: 0,
+                  elevation: 0,
+                  backgroundColor: const Color(0xFFFFD38D),
+                  child: const Icon(Icons.delete, color: Colors.black, size: 20),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+}
+
+/// Dialog for editing a card
+class EditCardDialog extends StatefulWidget {
+  final lenski_card.Card card;
+  
+  const EditCardDialog({super.key, required this.card});
+  
+  @override
+  _EditCardDialogState createState() => _EditCardDialogState();
+}
+
+class _EditCardDialogState extends State<EditCardDialog> {
+  late TextEditingController _frontController;
+  late TextEditingController _backController;
+  late TextEditingController _contextController;
+  late String _selectedType;
+  final List<String> _cardTypes = ['reading', 'writing', 'speaking', 'listening'];
+  
+  @override
+  void initState() {
+    super.initState();
+    _frontController = TextEditingController(text: widget.card.front);
+    _backController = TextEditingController(text: widget.card.back);
+    _contextController = TextEditingController(text: widget.card.context);
+    _selectedType = widget.card.type;
+  }
+  
+  @override
+  void dispose() {
+    _frontController.dispose();
+    _backController.dispose();
+    _contextController.dispose();
+    super.dispose();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        width: 400,
+        child: Theme(
+          data: Theme.of(context).copyWith(
+            textSelectionTheme: const TextSelectionThemeData(
+              selectionColor: Color(0xFF71BDE0),
+              cursorColor: Colors.black54,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Edit Card',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontFamily: appFonts['Subtitle'],
+                ),
+              ),
+              const SizedBox(height: 24),
+              TextField(
+                controller: _frontController,
+                decoration: InputDecoration(
+                  labelText: 'Front (word to learn)',
+                  labelStyle: TextStyle(
+                    fontFamily: appFonts['Detail'],
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                  ),
+                  border: const OutlineInputBorder(),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _backController,
+                decoration: InputDecoration(
+                  labelText: 'Back (translation)',
+                  labelStyle: TextStyle(
+                    fontFamily: appFonts['Detail'],
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                  ),
+                  border: const OutlineInputBorder(),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _contextController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  labelText: 'Context (example sentence)',
+                  labelStyle: TextStyle(
+                    fontFamily: appFonts['Detail'],
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                  ),
+                  border: const OutlineInputBorder(),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedType,
+                decoration: InputDecoration(
+                  labelText: 'Card Type',
+                  labelStyle: TextStyle(
+                    fontFamily: appFonts['Detail'],
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                  ),
+                  border: const OutlineInputBorder(),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                  ),
+                ),
+                items: _cardTypes.map((type) {
+                  IconData icon;
+                  switch (type) {
+                    case 'reading':
+                      icon = Icons.menu_book;
+                      break;
+                    case 'writing':
+                      icon = Icons.edit_note;
+                      break;
+                    case 'speaking':
+                      icon = Icons.record_voice_over;
+                      break;
+                    case 'listening':
+                      icon = Icons.headphones;
+                      break;
+                    default:
+                      icon = Icons.question_mark;
+                  }
+                  
+                  return DropdownMenuItem<String>(
+                    value: type,
+                    child: Row(
+                      children: [
+                        Icon(icon, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          type.substring(0, 1).toUpperCase() + type.substring(1),
+                          style: TextStyle(
+                            fontFamily: appFonts['Detail'],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _selectedType = value;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel',
+                      style: TextStyle(
+                        fontFamily: 'Sansation',
+                        fontSize: 14,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      final updatedCard = lenski_card.Card(
+                        id: widget.card.id,
+                        front: _frontController.text.trim(),
+                        back: _backController.text.trim(),
+                        context: _contextController.text.trim(),
+                        dueDate: _intToDateTime(widget.card.dueDate),
+                        language: widget.card.language,
+                        type: _selectedType,
+                        prevInterval: widget.card.prevInterval,
+                        eFactor: widget.card.eFactor,
+                        repetition: widget.card.repetition,
+                      );
+                      Navigator.pop(context, updatedCard);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2C73DE),
+                    ),
+                    child: const Text('Save',
+                      style: TextStyle(
+                        fontFamily: 'Sansation',
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  /// Converts an integer representing the number of days since Unix epoch to a DateTime object.
+  static DateTime _intToDateTime(int days) {
+    return DateTime.utc(1970, 1, 1).add(Duration(days: days));
+  }
+
 }
