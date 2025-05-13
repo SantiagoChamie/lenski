@@ -31,7 +31,7 @@ class _CourseButtonState extends State<CourseButton> {
   bool _showColorMenu = false;
   final _repository = CourseRepository();
   final _sessionRepository = SessionRepository();
-  int _totalWordsAdded = 0;
+  bool _isGoalMet = false;  // Change to a boolean to track if goal is met
   bool _isLoading = true;
   bool _streakIndicatorEnabled = true;
 
@@ -42,20 +42,59 @@ class _CourseButtonState extends State<CourseButton> {
     _loadStreakIndicatorSetting();
   }
 
-  // Add this method to load course stats
+  // Modify this method to check goal completion based on goal type
   Future<void> _loadCourseStats() async {
     try {
       // Get all sessions for this course
       final sessions = await _sessionRepository.getSessionsByCourse(widget.course.code);
       
-      // Sum up all words added
-      int totalWords = 0;
-      for (var session in sessions) {
-        totalWords += session.wordsAdded;
+      // Calculate progress based on goal type
+      bool goalMet = false;
+      
+      switch (widget.course.goalType) {
+        case 'learn':
+          // Sum up all words added
+          int totalWords = 0;
+          for (var session in sessions) {
+            totalWords += session.wordsAdded;
+          }
+          goalMet = totalWords >= widget.course.totalGoal;
+          break;
+          
+        case 'daily':
+          // Count unique days with any activity
+          final Set<int> daysWithActivity = {};
+          for (var session in sessions) {
+            if (session.wordsAdded > 0 || 
+                session.wordsReviewed > 0 || 
+                session.linesRead > 0 ||
+                session.minutesStudied > 0) {
+              daysWithActivity.add(session.date);
+            }
+          }
+          goalMet = daysWithActivity.length >= widget.course.totalGoal;
+          break;
+          
+        case 'time':
+          // Sum up all minutes studied
+          int totalMinutes = 0;
+          for (var session in sessions) {
+            totalMinutes += session.minutesStudied;
+          }
+          goalMet = totalMinutes >= widget.course.totalGoal;
+          break;
+          
+        default:
+          // Default to 'learn' behavior
+          int totalWords = 0;
+          for (var session in sessions) {
+            totalWords += session.wordsAdded;
+          }
+          goalMet = totalWords >= widget.course.totalGoal;
       }
       
       setState(() {
-        _totalWordsAdded = totalWords;
+        _isGoalMet = goalMet;
         _isLoading = false;
       });
     } catch (e) {
@@ -124,8 +163,8 @@ class _CourseButtonState extends State<CourseButton> {
                         )
                       ),
                       
-                      // Add the gold star if goal is achieved
-                      if (!_isLoading && _totalWordsAdded >= widget.course.totalGoal)
+                      // Add the gold star if goal is achieved based on goal type
+                      if (!_isLoading && _isGoalMet)
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0),
                           child: Icon(
