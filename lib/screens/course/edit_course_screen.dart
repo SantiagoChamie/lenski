@@ -8,7 +8,6 @@ import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/data/course_repository.dart';
 import 'package:lenski/data/session_repository.dart';
-import 'package:lenski/data/card_repository.dart';
 
 /// A screen for editing an existing course
 class EditCourseScreen extends StatefulWidget {
@@ -32,14 +31,13 @@ class EditCourseScreen extends StatefulWidget {
 class _EditCourseScreenState extends State<EditCourseScreen> {
   final CourseRepository _courseRepository = CourseRepository();
   final SessionRepository _sessionRepository = SessionRepository();
-  final CardRepository _cardRepository = CardRepository(); // Add this
   
   // Add statistics variables
   int _totalMinutesStudied = 0;
   int _totalWordsAdded = 0;
   int _totalWordsReviewed = 0;
   int _totalLinesRead = 0;
-  int _totalCards = 0; // Add this
+  int _daysPracticed = 0; // Replace _totalCards with _daysPracticed
   bool _isLoadingStats = true;
 
   // Initialize with course values
@@ -90,25 +88,33 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
     _loadStatistics();
   }
   
-  // Update the _loadStatistics method
+  // Update the _loadStatistics method to include days practiced
   Future<void> _loadStatistics() async {
     setState(() {
       _isLoadingStats = true;
     });
     
     final sessions = await _sessionRepository.getSessionsByCourse(widget.course.code);
-    final cardCount = await _cardRepository.getCardCount(widget.course.code); // Add this
     
     int minutes = 0;
     int words = 0;
     int reviewed = 0;
     int lines = 0;
+    final Set<int> daysWithActivity = {}; // Set to track unique days with activity
     
     for (var session in sessions) {
       minutes += session.minutesStudied;
       words += session.wordsAdded;
       reviewed += session.wordsReviewed;
       lines += session.linesRead;
+      
+      // Add to days practiced if any activity was recorded
+      if (session.wordsAdded > 0 || 
+          session.wordsReviewed > 0 || 
+          session.linesRead > 0 ||
+          session.minutesStudied > 0) {
+        daysWithActivity.add(session.date);
+      }
     }
     
     setState(() {
@@ -116,7 +122,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
       _totalWordsAdded = words;
       _totalWordsReviewed = reviewed;
       _totalLinesRead = lines;
-      _totalCards = cardCount; // Add this
+      _daysPracticed = daysWithActivity.length; // Set days practiced count
       _isLoadingStats = false;
     });
   }
@@ -364,9 +370,9 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                                         ),
                                         const SizedBox(width: 16),
                                         _buildStatisticBox(
-                                          Icons.style, // or Icons.credit_card
-                                          'Cards',  
-                                          '$_totalCards'
+                                          Icons.calendar_today, // Calendar icon for days practiced
+                                          'Days practiced',  
+                                          '$_daysPracticed'
                                         ),
                                       ],
                                     ),

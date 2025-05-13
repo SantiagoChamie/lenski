@@ -41,8 +41,10 @@ class BackCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8.0),
-            Text(
-              card.front,
+            LText(
+              text: card.front,
+              toLanguage: card.language,
+              fromLanguage: courseFromCode,
               style: const TextStyle(
                 fontSize: 18.0,
                 color: Color(0xFF99909B),

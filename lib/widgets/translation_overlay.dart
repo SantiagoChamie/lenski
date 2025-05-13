@@ -77,24 +77,18 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
     }
   }
 
-  /// Modified toggle context method to check if feature is enabled
-  void _toggleContext() {
-    if (!_contextualTranslationEnabled) {
-      // Show a message indicating the feature is disabled
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Enable contextual translation toggle in settings to use this feature'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return;
-    }
-
+  /// Toggle between using context or not
+  void _toggleUseContext() {
+    if (!_contextualTranslationEnabled) return; // Don't toggle if feature is disabled
+    
     setState(() {
       _useContext = !_useContext;
-      _translatedText = _fetchTranslation(); // Refresh translation with new context setting
+      _translatedText = _fetchTranslation();
+      _cardExists = _checkCardExists();
     });
   }
+
+
 
   /// Checks if a card with the given text and context already exists in the CardRepository.
   Future<bool> _checkCardExists() async {
@@ -355,7 +349,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
                                       minWidth: 48.0,
                                       minHeight: 48.0,
                                     ),
-                                    onPressed: _toggleContext,
+                                    onPressed: _toggleUseContext,
                                   ),
                                 ),
                               ),

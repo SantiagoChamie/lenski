@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/home/competences/competence_icon.dart';
 import 'package:lenski/utils/fonts.dart';
-import 'package:lenski/utils/languages.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
 import 'package:lenski/data/session_repository.dart'; // Add this import
