@@ -52,6 +52,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
   // Goal values
   late int _dailyGoal;
   late int _totalGoal;
+  late GoalType _currentGoalType; // Add this to track current goal type
 
   @override
   void initState() {
@@ -69,6 +70,21 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
     
     _dailyGoal = widget.course.dailyGoal;
     _totalGoal = widget.course.totalGoal;
+    
+    // Convert string goalType to enum GoalType
+    switch (widget.course.goalType) {
+      case 'learn':
+        _currentGoalType = GoalType.learn;
+        break;
+      case 'daily':
+        _currentGoalType = GoalType.daily;
+        break;
+      case 'time':
+        _currentGoalType = GoalType.time;
+        break;
+      default:
+        _currentGoalType = GoalType.learn;
+    }
     
     // Load statistics
     _loadStatistics();
@@ -139,6 +155,20 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
       return;
     }
 
+    // Convert enum GoalType to string goalType
+    String goalTypeStr;
+    switch (_currentGoalType) {
+      case GoalType.learn:
+        goalTypeStr = 'learn';
+        break;
+      case GoalType.daily:
+        goalTypeStr = 'daily';
+        break;
+      case GoalType.time:
+        goalTypeStr = 'time';
+        break;
+    }
+
     final updatedCourse = widget.course.copyWith(
       fromCode: _selectedOriginLanguageCode,
       listening: _selectedCompetences.contains('listening'),
@@ -147,6 +177,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
       writing: _selectedCompetences.contains('writing'),
       dailyGoal: _dailyGoal,
       totalGoal: _totalGoal,
+      goalType: goalTypeStr, // Add this line to update the goalType
     );
     
     await _courseRepository.updateCourse(updatedCourse);
@@ -168,6 +199,13 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
       } else {
         _selectedCompetences.add(competence);
       }
+    });
+  }
+
+  // Add a method to update the goal type
+  void _updateGoalType(GoalType type) {
+    setState(() {
+      _currentGoalType = type;
     });
   }
 
@@ -264,11 +302,13 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                                     Expanded(
                                       child: GoalSelectorButton(
                                         initialValue: _dailyGoal,
+                                        initialGoalType: _currentGoalType, // Pass current goal type
                                         onValueChanged: (value) {
                                           setState(() {
                                             _dailyGoal = value;
                                           });
                                         },
+                                        onGoalTypeChanged: _updateGoalType, // Add this callback
                                       ),
                                     ),
                                     SizedBox(width: p.standardPadding()),
@@ -279,11 +319,13 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                                       child: GoalSelectorButton(
                                         initialValue: _totalGoal,
                                         isDaily: false,
+                                        initialGoalType: _currentGoalType, // Pass same goal type
                                         onValueChanged: (value) {
                                           setState(() {
                                             _totalGoal = value;
                                           });
                                         },
+                                        onGoalTypeChanged: _updateGoalType, // Add this callback
                                       ),
                                     ),
                                   ],
@@ -348,6 +390,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                         Expanded(
                           child: CourseDifficultyText(
                             dailyWords: _dailyGoal,
+                            goalType: _currentGoalType.toString().split('.').last, // Convert enum to string
                             competences: _selectedCompetences.length,
                             startingLanguage: _selectedOriginLanguageCode,  // Use selected value
                             targetLanguage: widget.course.code,
