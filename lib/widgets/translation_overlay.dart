@@ -62,6 +62,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
 
   /// Fetches the translation for the selected text using the TranslationService.
   Future<String> _fetchTranslation() async {
+
     try {
       return await TranslationService().translate(
         text: widget.text,
@@ -97,7 +98,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
 
   /// Checks if a card with the given text and context already exists in the CardRepository.
   Future<bool> _checkCardExists() async {
-    return await TranslationService().cardExists(widget.text, widget.contextText);
+  return await TranslationService().cardExists(widget.text, _useContext ? widget.contextText : widget.text);
   }
 
   /// Adds new cards to the CardRepository and updates session statistics.
@@ -116,7 +117,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
       final card = custom_card.Card(
         front: widget.text,
         back: backText,
-        context: widget.contextText, // Always use the display context for cards
+        context: _useContext ? widget.contextText: widget.text, // Always use the display context for cards
         dueDate: DateTime.now().add(Duration(days: i)),
         language: widget.sourceLang,
         type: types[i],

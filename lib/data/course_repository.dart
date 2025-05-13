@@ -48,11 +48,18 @@ class CourseRepository {
           'lastAccess INTEGER DEFAULT 0, '
           'dailyGoal INTEGER DEFAULT 100, '
           'totalGoal INTEGER DEFAULT 10000, '
-          'visible INTEGER DEFAULT 1'
+          'visible INTEGER DEFAULT 1, '
+          'goalType TEXT DEFAULT "learn"'
           ')',
         );
       },
-      version: 2,
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 3) {
+          // Add the goalType column if upgrading from version 1 or 2
+          await db.execute('ALTER TABLE courses ADD COLUMN goalType TEXT DEFAULT "learn"');
+        }
+      },
+      version: 3, // Increment version to trigger onUpgrade
     );
   }
 
@@ -82,6 +89,7 @@ class CourseRepository {
         writing: course.writing,
         dailyGoal: course.dailyGoal,
         totalGoal: course.totalGoal,
+        goalType: course.goalType,
         visible: true,
       );
       

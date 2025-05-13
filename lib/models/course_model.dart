@@ -17,6 +17,7 @@ class Course {
   int dailyGoal; // Daily word reading goal
   int totalGoal; // Total word reading goal
   bool visible; // Whether the course should be visible on the main screen
+  String goalType; // Type of goal: 'learn', 'daily', or 'time'
 
   /// Creates a Course object.
   /// 
@@ -35,6 +36,7 @@ class Course {
   /// [dailyGoal] is the targeted number of words to read per day.
   /// [totalGoal] is the total number of words goal for the course.
   /// [visible] indicates if the course should be visible on the main screen.
+  /// [goalType] indicates the type of goal for this course ('learn', 'daily', or 'time').
   Course({
     required this.name,
     required this.level,
@@ -51,6 +53,7 @@ class Course {
     required this.dailyGoal,
     required this.totalGoal,
     this.visible = true,
+    this.goalType = 'learn', // Default to 'learn'
   }) : lastAccess = _dateTimeToInt(
          lastAccess ?? DateTime.now().subtract(const Duration(days: 1))
        );
@@ -74,6 +77,7 @@ class Course {
       'dailyGoal': dailyGoal,
       'totalGoal': totalGoal,
       'visible': visible ? 1 : 0,
+      'goalType': goalType,
     };
   }
 
@@ -95,6 +99,7 @@ class Course {
       dailyGoal: map['dailyGoal'],
       totalGoal: map['totalGoal'],
       visible: map['visible'] == null ? true : map['visible'] == 1,
+      goalType: map['goalType'] ?? 'learn', // Default to 'learn' if not specified
     );
   }
 
@@ -115,6 +120,7 @@ class Course {
     int? dailyGoal,
     int? totalGoal,
     bool? visible,
+    String? goalType,
   }) {
     return Course(
       name: name ?? this.name,
@@ -132,6 +138,7 @@ class Course {
       dailyGoal: dailyGoal ?? this.dailyGoal,
       totalGoal: totalGoal ?? this.totalGoal,
       visible: visible ?? this.visible,
+      goalType: goalType ?? this.goalType,
     );
   }
 

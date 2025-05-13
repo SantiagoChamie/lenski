@@ -9,6 +9,7 @@ import 'package:lenski/screens/course/review_cards/types/speaking_card.dart';
 import 'package:lenski/screens/course/review_cards/types/writing_card.dart';
 import 'package:lenski/screens/home/competences/competence_icon.dart';
 import 'package:lenski/services/tts_service.dart';
+import 'package:lenski/utils/fonts.dart';
 import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
@@ -307,18 +308,31 @@ class _ReviewScreenState extends State<ReviewScreen> {
               icon: const Icon(Icons.close_rounded),
             ),
           ),
+          
           Positioned(
             bottom: boxPadding + 10,
             left: boxPadding + 10,
-            child: Tooltip(
-              message: 
-                currentCard.type == 'writing' ? "How do you write this word?"
-                : currentCard.type == 'speaking' ? "How do you pronounce this word?" 
-                : "What does this word mean?",
-              child: CompetenceIcon(
-                type: currentCard.type,
-                size: iconSize/2,
-              ),
+            child: Column(
+              children: [
+                Text(cards.length.toString(),
+                  style: TextStyle(
+                    fontFamily: appFonts['Paragraph'], 
+                    fontWeight: FontWeight.bold, 
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Tooltip(
+                  message: 
+                    currentCard.type == 'writing' ? "How do you write this word?"
+                    : currentCard.type == 'speaking' ? "How do you pronounce this word?" 
+                    : "What does this word mean?",
+                  child: CompetenceIcon(
+                    type: currentCard.type,
+                    size: iconSize/2,
+                  ),
+                ),
+              ],
             )
           ),
           Positioned(

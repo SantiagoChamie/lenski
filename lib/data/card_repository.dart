@@ -19,7 +19,7 @@ class CardRepository {
 
   /// Converts a DateTime object to an integer representing the number of days since Unix epoch.
   static int _dateTimeToInt(DateTime date) {
-    return date.toUtc().difference(DateTime.utc(1970, 1, 1)).inDays;
+    return _startOfDay(date).toUtc().difference(DateTime.utc(1970, 1, 1)).inDays;
   }
 
   /// Returns the start of the day for a given DateTime object.
