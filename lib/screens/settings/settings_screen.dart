@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:file_picker/file_picker.dart'; // Add this import
 
 /// A screen that allows the user to configure settings for the app.
 class SettingsScreen extends StatefulWidget {
@@ -89,6 +90,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
+  /// Handles file picking for importing data
+  Future<void> _importFile() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['txt'],
+      );
+      
+      if (result != null) {
+        // File selected - you would process it here
+        final path = result.files.single.path;
+        if (path != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Selected file: $path'))
+          );
+          // TODO: Process the imported file
+        }
+      } else {
+        // User canceled the picker
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking file: $e'))
+      );
+    }
+  }
+  
+  /// Placeholder method for export functionality
+  void _exportFile() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Export functionality not implemented yet'))
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,94 +138,133 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'API Keys',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Telex'),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _apiKeyController,
-                      obscureText: true,
-                      cursorColor: const Color.fromARGB(255, 0, 0, 0),
-                      decoration: const InputDecoration(
-                        labelText: 'DeepL API Key',
-                        labelStyle: TextStyle(fontFamily: 'Sansation', color: Colors.black),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),     
+              SingleChildScrollView( //if settings are too long, scroll
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'API Keys',
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Telex'),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _apiKeyController,
+                            obscureText: true,
+                            cursorColor: const Color.fromARGB(255, 0, 0, 0),
+                            decoration: const InputDecoration(
+                              labelText: 'DeepL API Key',
+                              labelStyle: TextStyle(fontFamily: 'Sansation', color: Colors.black),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),     
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: _saveApiKey,
+                          child: const Text(
+                            'Save API Key',
+                            style: TextStyle(color: Color(0xFF2C73DE)),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        
+                        const Text(
+                          'Use Premium DeepL API',
+                          style: TextStyle(fontFamily: 'Sansation'),
+                        ),
+                        const SizedBox(width: 10),
+                        Switch(
+                          value: _premiumApiEnabled,
+                          onChanged: _savePremiumApiSetting,
+                          activeColor: const Color(0xFF2C73DE),
+                        ),
+                        
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Translation Settings',
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Telex'),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Toggle between contextual and non-contextual translation in the overlay',
+                          style: TextStyle(fontFamily: 'Sansation'),
+                        ),
+                        Switch(
+                          value: _contextualTranslationEnabled,
+                          onChanged: _saveContextualTranslationSetting,
+                          activeColor: const Color(0xFF2C73DE),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Display Settings',
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Telex'),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Show streak indicators on courses',
+                          style: TextStyle(fontFamily: 'Sansation'),
+                        ),
+                        Switch(
+                          value: _streakIndicatorEnabled,
+                          onChanged: _saveStreakIndicatorSetting,
+                          activeColor: const Color(0xFF2C73DE),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const Spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
                   ElevatedButton(
-                    onPressed: _saveApiKey,
+                    onPressed: _exportFile,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE8E8E8),
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    ),
                     child: const Text(
-                      'Save API Key',
-                      style: TextStyle(color: Color(0xFF2C73DE)),
+                      'Export',
+                      style: TextStyle(fontFamily: 'Sansation'),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  ElevatedButton(
+                    onPressed: _importFile,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2C73DE),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    ),
+                    child: const Text(
+                      'Import',
+                      style: TextStyle(fontFamily: 'Sansation'),
                     ),
                   ),
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  
-                  const Text(
-                    'Use Premium DeepL API',
-                    style: TextStyle(fontFamily: 'Sansation'),
-                  ),
-                  const SizedBox(width: 10),
-                  Switch(
-                    value: _premiumApiEnabled,
-                    onChanged: _savePremiumApiSetting,
-                    activeColor: const Color(0xFF2C73DE),
-                  ),
-                  
-                ],
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Translation Settings',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Telex'),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Toggle between contextual and non-contextual translation in the overlay',
-                    style: TextStyle(fontFamily: 'Sansation'),
-                  ),
-                  Switch(
-                    value: _contextualTranslationEnabled,
-                    onChanged: _saveContextualTranslationSetting,
-                    activeColor: const Color(0xFF2C73DE),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Display Settings',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Telex'),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Show streak indicators on courses',
-                    style: TextStyle(fontFamily: 'Sansation'),
-                  ),
-                  Switch(
-                    value: _streakIndicatorEnabled,
-                    onChanged: _saveStreakIndicatorSetting,
-                    activeColor: const Color(0xFF2C73DE),
-                  ),
-                ],
-              ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
