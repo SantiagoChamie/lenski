@@ -17,6 +17,7 @@ class TranslationOverlay extends StatefulWidget {
   final String targetLang;
   final VoidCallback onClose; // Callback to close the overlay
   final List<String>? cardTypes; // New parameter
+  final VoidCallback? onCardAdded; // Add this new callback
 
   const TranslationOverlay({
     super.key,
@@ -27,6 +28,7 @@ class TranslationOverlay extends StatefulWidget {
     required this.targetLang,
     required this.onClose,
     this.cardTypes,
+    this.onCardAdded, // Add this parameter
   });
 
   @override
@@ -126,9 +128,15 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
       wordsAdded: 1,
     );
 
+    // Call the onCardAdded callback if provided
+    if (widget.onCardAdded != null) {
+      widget.onCardAdded!();
+    }
+
     setState(() {
       _cardAdded = true;
     });
+    widget.onCardAdded?.call(); // Call the onCardAdded callback if provided
     widget.onClose();
   }
 

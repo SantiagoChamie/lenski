@@ -10,6 +10,7 @@ class LText extends StatefulWidget {
   final TextAlign textAlign;
   final String position;
   final List<String>? cardTypes; // New parameter
+  final VoidCallback? onCardAdded; // Add this parameter
 
   const LText({
     super.key,
@@ -20,6 +21,7 @@ class LText extends StatefulWidget {
     this.textAlign = TextAlign.center,
     this.position = 'above',
     this.cardTypes, // Add this parameter
+    this.onCardAdded,
   });
 
   @override
@@ -87,6 +89,7 @@ class _LTextState extends State<LText> {
             targetLang: widget.fromLanguage,
             onClose: () => hideOverlay(instant: true),
             cardTypes: widget.cardTypes, // Pass the card types to the overlay
+            onCardAdded: widget.onCardAdded, // Pass the callback to the overlay
           ),
         ),
       ),

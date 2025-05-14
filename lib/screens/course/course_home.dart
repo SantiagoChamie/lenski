@@ -6,6 +6,7 @@ import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/languages.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/widgets/ltext.dart';
+import 'package:lenski/data/course_repository.dart'; // Add this import
 
 /// A screen that displays the home page for a specific course.
 class CourseHome extends StatefulWidget {
@@ -24,11 +25,35 @@ class _CourseHomeState extends State<CourseHome> {
   late Course _currentCourse;
   // Add this to track refreshes
   int _refreshCounter = 0;
+  bool _isLoading = true;
   
   @override
   void initState() {
     super.initState();
     _currentCourse = widget.course;
+    _fetchLatestCourseData();
+  }
+  
+  // Fetch the latest course data from the repository
+  Future<void> _fetchLatestCourseData() async {
+    try {
+      final CourseRepository repository = CourseRepository();
+      final updatedCourse = await repository.getCourse(_currentCourse.code);
+      
+      if (mounted) {
+        setState(() {
+          _currentCourse = updatedCourse;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching course data: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
   
   void _handleCourseUpdate(Course updatedCourse) {
@@ -38,9 +63,21 @@ class _CourseHomeState extends State<CourseHome> {
     });
   }
 
+  // Add this new method to refresh metrics
+  void _refreshMetrics() {
+    setState(() {
+      _refreshCounter++; // Increment counter to force metrics refresh
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
+    
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -68,6 +105,7 @@ class _CourseHomeState extends State<CourseHome> {
                 fromLanguage: _currentCourse.fromCode,
                 toLanguage: _currentCourse.code,
                 position: 'below',
+                onCardAdded: () => _refreshMetrics(), // Add this callback
               ),
               Container(
                 margin: const EdgeInsets.only(left: 8.0),
