@@ -178,7 +178,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
         }
         break;
       case GoalType.time:
-        if (_totalGoal < _totalMinutesStudied) {
+        if (_totalGoal*60 < _totalMinutesStudied) {
           isGoalValid = false;
           errorMessage = 'Total goal cannot be less than time already studied (${_formatTime(_totalMinutesStudied)})';
         }

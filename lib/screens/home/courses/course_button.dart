@@ -44,18 +44,22 @@ class _CourseButtonState extends State<CourseButton> {
 
   Future<void> _loadCourseStats() async {
     try {
-      // Simply use the course's goalComplete attribute
+      // Set initial state from course model
       setState(() {
         _isGoalMet = widget.course.goalComplete;
         _isLoading = false;
       });
       
-      // Optionally: Refresh the course data to ensure we have the latest goalComplete status
-      final courseRepository = CourseRepository();
-      final updatedCourse = await courseRepository.getCourse(widget.course.code);
-      if (mounted && updatedCourse.goalComplete != _isGoalMet) {
+      if(_isGoalMet) return; // No need to check if the goal is already met
+      
+      // Check for course completion explicitly (this will update the database if needed)
+      final updatedStatus = widget.course.totalGoal > 0 ?  
+        await _sessionRepository.checkCourseCompletion(widget.course.code) : false;
+      
+      // Only update state if the status has changed and the widget is still mounted
+      if (mounted && updatedStatus) {
         setState(() {
-          _isGoalMet = updatedCourse.goalComplete;
+          _isGoalMet = updatedStatus;
         });
       }
     } catch (e) {

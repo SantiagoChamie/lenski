@@ -107,7 +107,7 @@ class _MetricsState extends State<Metrics> {
   String _getGoalProgressText(Course course, Session session) {
     switch (course.goalType) {
       case 'learn':
-        return '${session.wordsAdded}/${course.dailyGoal}';
+        return course.dailyGoal > 0 ? '${session.wordsAdded}/${course.dailyGoal}' : session.wordsAdded.toString();
       case 'daily':
         // For daily type, show 1/1 if any activity was done, 0/1 if not
         final hasActivity = session.wordsAdded > 0 || 
@@ -116,7 +116,7 @@ class _MetricsState extends State<Metrics> {
                            session.minutesStudied > 0;
         return hasActivity ? '1/1' : '0/1';
       case 'time':
-        return '${session.minutesStudied}/${course.dailyGoal}';
+        return course.dailyGoal > 0 ? '${session.minutesStudied}/${course.dailyGoal}' : session.minutesStudied.toString();
       default:
         return '${session.wordsAdded}/${course.dailyGoal}';
     }

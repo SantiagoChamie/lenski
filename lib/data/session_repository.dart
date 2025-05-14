@@ -116,11 +116,11 @@ class SessionRepository {
     // Save the updated session
     await updateSession(session);
     
-    // Always check if any goal is met when stats are updated
+    // Only check daily goal when stats are updated
     await _checkAndUpdateStreak(courseCode, session);
   }
 
-  /// Checks if goal is met based on course goal type and updates streak if needed.
+  /// Checks if daily goal is met and updates streak if needed.
   Future<void> _checkAndUpdateStreak(String courseCode, Session session) async {
     final db = await database;
     final today = _dateTimeToInt(DateTime.now());
@@ -176,6 +176,12 @@ class SessionRepository {
         whereArgs: [courseCode, today],
       );
     }
+  }
+
+  /// Checks if the total course goal has been completed and updates the course status
+  Future<bool> checkCourseCompletion(String courseCode) async {
+    // Get the course to check goal
+    final course = await _courseRepository.getCourse(courseCode);
     
     // Check if the total goal has been met (course completion)
     final sessions = await getSessionsByCourse(courseCode);
@@ -230,30 +236,11 @@ class SessionRepository {
         for (var s in sessions) {
           totalMinutes += s.minutesStudied;
         }
-        isCourseGoalComplete = totalMinutes >= course.totalGoal;
+        isCourseGoalComplete = totalMinutes >= course.totalGoal*60; // Convert hours to minutes
         break;
         
       default:
-        // Default to 'learn' behavior
-        int words = 0;
-        int deleted = 0;
-        for (var s in sessions) {
-          words += s.wordsAdded;
-          deleted += s.cardsDeleted;
-        }
-        
-        int activeCompetences = 0;
-        if (course.reading) activeCompetences++;
-        if (course.writing) activeCompetences++;
-        if (course.speaking) activeCompetences++;
-        if (course.listening) activeCompetences++;
-        
-        activeCompetences = activeCompetences > 0 ? activeCompetences : 1;
-        
-        int adjustedWords = words - (deleted * (1 / activeCompetences)).floor();
-        adjustedWords = adjustedWords > 0 ? adjustedWords : 0;
-        
-        isCourseGoalComplete = adjustedWords >= course.totalGoal;
+        isCourseGoalComplete = false;
     }
     
     // Update the course's goalComplete status if needed
@@ -261,6 +248,8 @@ class SessionRepository {
       course.goalComplete = isCourseGoalComplete;
       await _courseRepository.updateCourse(course);
     }
+    
+    return isCourseGoalComplete;
   }
 
   /// Updates an existing session in the database.
