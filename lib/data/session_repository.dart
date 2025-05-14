@@ -39,12 +39,19 @@ class SessionRepository {
           'wordsReviewed INTEGER DEFAULT 0, '
           'linesRead INTEGER DEFAULT 0, '
           'minutesStudied INTEGER DEFAULT 0, '
+          'cardsDeleted INTEGER DEFAULT 0, '
           'streakIncremented INTEGER DEFAULT 0, '
           'UNIQUE(courseCode, date)'
           ')',
         );
       },
-      version: 1,
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          // Add cardsDeleted column if upgrading from version 1
+          await db.execute('ALTER TABLE sessions ADD COLUMN cardsDeleted INTEGER DEFAULT 0');
+        }
+      },
+      version: 2, // Increment the version number
     );
   }
 
@@ -95,6 +102,7 @@ class SessionRepository {
     int? wordsReviewed, 
     int? linesRead,
     int? minutesStudied,
+    int? cardsDeleted,
   }) async {
     final session = await getOrCreateTodaySession(courseCode);
     
@@ -103,6 +111,7 @@ class SessionRepository {
     if (wordsReviewed != null) session.wordsReviewed += wordsReviewed;
     if (linesRead != null) session.linesRead += linesRead;
     if (minutesStudied != null) session.minutesStudied += minutesStudied;
+    if (cardsDeleted != null) session.cardsDeleted += cardsDeleted;
     
     // Save the updated session
     await updateSession(session);
@@ -145,6 +154,7 @@ class SessionRepository {
         break;
       case 'daily':
         // For daily type, any activity counts as meeting the goal
+        // Explicitly EXCLUDING cardsDeleted from this check as specified
         isGoalMet = session.wordsAdded > 0 || 
                     session.wordsReviewed > 0 || 
                     session.linesRead > 0 ||
@@ -230,12 +240,14 @@ class SessionRepository {
     int totalWordsReviewed = 0;
     int totalLinesRead = 0;
     int totalMinutesStudied = 0;
+    int totalCardsDeleted = 0;
     
     for (var session in sessions) {
       totalWordsAdded += session.wordsAdded;
       totalWordsReviewed += session.wordsReviewed;
       totalLinesRead += session.linesRead;
       totalMinutesStudied += session.minutesStudied;
+      totalCardsDeleted += session.cardsDeleted;
     }
     
     return {
@@ -243,6 +255,7 @@ class SessionRepository {
       'wordsReviewed': totalWordsReviewed,
       'linesRead': totalLinesRead,
       'minutesStudied': totalMinutesStudied,
+      'cardsDeleted': totalCardsDeleted,
       'daysActive': sessions.length,
     };
   }

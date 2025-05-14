@@ -53,12 +53,31 @@ class _CourseButtonState extends State<CourseButton> {
       
       switch (widget.course.goalType) {
         case 'learn':
-          // Sum up all words added
-          int totalWords = 0;
+          // Calculate total words and deleted cards
+          int words = 0;
+          int deleted = 0;
           for (var session in sessions) {
-            totalWords += session.wordsAdded;
+            words += session.wordsAdded;
+            deleted += session.cardsDeleted;
           }
-          goalMet = totalWords >= widget.course.totalGoal;
+          
+          // Calculate number of active competences
+          int activeCompetences = 0;
+          if (widget.course.reading) activeCompetences++;
+          if (widget.course.writing) activeCompetences++;
+          if (widget.course.speaking) activeCompetences++;
+          if (widget.course.listening) activeCompetences++;
+          
+          // Ensure we don't divide by zero
+          activeCompetences = activeCompetences > 0 ? activeCompetences : 1;
+          
+          // Calculate adjusted words added
+          int adjustedWords = words - (deleted * (1 / activeCompetences)).floor();
+          
+          // Ensure we don't go negative
+          adjustedWords = adjustedWords > 0 ? adjustedWords : 0;
+          
+          goalMet = adjustedWords >= widget.course.totalGoal;
           break;
           
         case 'daily':
@@ -85,12 +104,26 @@ class _CourseButtonState extends State<CourseButton> {
           break;
           
         default:
-          // Default to 'learn' behavior
-          int totalWords = 0;
+          // Default to 'learn' behavior with the same adjustment
+          int words = 0;
+          int deleted = 0;
           for (var session in sessions) {
-            totalWords += session.wordsAdded;
+            words += session.wordsAdded;
+            deleted += session.cardsDeleted;
           }
-          goalMet = totalWords >= widget.course.totalGoal;
+          
+          int activeCompetences = 0;
+          if (widget.course.reading) activeCompetences++;
+          if (widget.course.writing) activeCompetences++;
+          if (widget.course.speaking) activeCompetences++;
+          if (widget.course.listening) activeCompetences++;
+          
+          activeCompetences = activeCompetences > 0 ? activeCompetences : 1;
+          
+          int adjustedWords = words - (deleted * (1 / activeCompetences)).floor();
+          adjustedWords = adjustedWords > 0 ? adjustedWords : 0;
+          
+          goalMet = adjustedWords >= widget.course.totalGoal;
       }
       
       setState(() {

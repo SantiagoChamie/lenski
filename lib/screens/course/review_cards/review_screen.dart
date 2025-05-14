@@ -185,6 +185,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
     if (cards.isNotEmpty) {
       final currentCard = cards.removeAt(0);
       await repository.deleteCard(currentCard.id);
+      await sessionRepository.updateSessionStats(
+        courseCode: widget.course.code,
+        cardsDeleted: 1,
+      );
       setState(() {
         isFront = true;
       });
@@ -198,6 +202,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
             onPressed: () async {
               cards.insert(0, currentCard);
               await repository.insertCard(currentCard);
+              await sessionRepository.updateSessionStats(
+                courseCode: widget.course.code,
+                cardsDeleted: -1,
+              );
               setState(() {});
             },
           ),

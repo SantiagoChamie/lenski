@@ -98,6 +98,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
     
     int minutes = 0;
     int words = 0;
+    int deleted = 0; // Add variable to track deleted cards
     int reviewed = 0;
     int lines = 0;
     final Set<int> daysWithActivity = {}; // Set to track unique days with activity
@@ -105,6 +106,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
     for (var session in sessions) {
       minutes += session.minutesStudied;
       words += session.wordsAdded;
+      deleted += session.cardsDeleted; // Track deleted cards
       reviewed += session.wordsReviewed;
       lines += session.linesRead;
       
@@ -117,9 +119,22 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
       }
     }
     
+    // Calculate number of active competences
+    int activeCompetences = 0;
+    if (widget.course.reading) activeCompetences++;
+    if (widget.course.writing) activeCompetences++;
+    if (widget.course.speaking) activeCompetences++;
+    if (widget.course.listening) activeCompetences++;
+    
+    // Ensure we don't divide by zero
+    activeCompetences = activeCompetences > 0 ? activeCompetences : 1;
+    
+    // Calculate adjusted words added
+    int adjustedWords = words - (deleted * (1 / activeCompetences)).floor();
+    
     setState(() {
       _totalMinutesStudied = minutes;
-      _totalWordsAdded = words;
+      _totalWordsAdded = adjustedWords > 0 ? adjustedWords : 0; // Ensure we don't go negative
       _totalWordsReviewed = reviewed;
       _totalLinesRead = lines;
       _daysPracticed = daysWithActivity.length; // Set days practiced count
@@ -145,19 +160,41 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
       return;
     }
 
-    // Check if total goal is less than words already added
-    if (_totalGoal < _totalWordsAdded) {
-      if (!_isMessageDisplayed) {
-        _isMessageDisplayed = true;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Total goal cannot be less than words already added ($_totalWordsAdded)'),
-            duration: const Duration(seconds: 2),
-          ),
-        ).closed.then((_) {
-          _isMessageDisplayed = false;
-        });
-      }
+    // Check if total goal is valid based on goal type
+    bool isGoalValid = true;
+    String errorMessage = '';
+
+    switch (_currentGoalType) {
+      case GoalType.learn:
+        if (_totalGoal < _totalWordsAdded) {
+          isGoalValid = false;
+          errorMessage = 'Total goal cannot be less than words already added ($_totalWordsAdded)';
+        }
+        break;
+      case GoalType.daily:
+        if (_totalGoal < _daysPracticed) {
+          isGoalValid = false;
+          errorMessage = 'Total goal cannot be less than days already practiced ($_daysPracticed)';
+        }
+        break;
+      case GoalType.time:
+        if (_totalGoal < _totalMinutesStudied) {
+          isGoalValid = false;
+          errorMessage = 'Total goal cannot be less than time already studied (${_formatTime(_totalMinutesStudied)})';
+        }
+        break;
+    }
+
+    if (!isGoalValid && !_isMessageDisplayed) {
+      _isMessageDisplayed = true;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          duration: const Duration(seconds: 2),
+        ),
+      ).closed.then((_) {
+        _isMessageDisplayed = false;
+      });
       return;
     }
 
