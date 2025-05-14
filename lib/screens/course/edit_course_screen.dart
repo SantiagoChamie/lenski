@@ -481,7 +481,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
             
             // X button in the upper right corner
             Positioned(
-              top: 30,
+              top: 10,
               right: 30,
               child: IconButton(
                 icon: const Icon(Icons.close, color: Colors.black87),

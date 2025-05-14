@@ -47,6 +47,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   
   // Add tracking variable for study time
   late DateTime _startTime;
+  bool _attemptedReload = false; // Add this field to track if we've tried reloading
 
   @override
   void initState() {
@@ -246,9 +247,27 @@ class _ReviewScreenState extends State<ReviewScreen> {
     const iconSize = 80.0;
 
     if (cards.isEmpty) {
+      // If we haven't tried reloading yet, try to load cards again
+      if (!_attemptedReload) {
+        _attemptedReload = true;
+        // Use Future.microtask to avoid setState during build
+        Future.microtask(() async {
+          await _loadCards();
+          // Reset the flag if we found new cards
+          if (cards.isNotEmpty) {
+            setState(() {
+              _attemptedReload = false;
+            });
+          }
+        });
+      }
+      
       return EmptyPile(language: widget.course.name);
     }
 
+    // Reset reload flag when we have cards
+    _attemptedReload = false;
+    
     final currentCard = cards.first;
 
     return PopScope(
