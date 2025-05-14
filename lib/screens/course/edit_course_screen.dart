@@ -144,6 +144,22 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
 
   /// Updates the course in the repository.
   void _updateCourse() async {
+    // First check if source and target languages are the same
+    if (_selectedOriginLanguageCode == widget.course.code) {
+      if (!_isMessageDisplayed) {
+        _isMessageDisplayed = true;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Source and target languages cannot be the same!'),
+            duration: Duration(seconds: 2),
+          ),
+        ).closed.then((_) {
+          _isMessageDisplayed = false;
+        });
+      }
+      return;
+    }
+
     // Check if at least one competence is selected
     if (_selectedCompetences.isEmpty) {
       if (!_isMessageDisplayed) {

@@ -78,6 +78,22 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   /// Creates a new course and adds it to the repository.
   /// If the course already exists, displays a message.
   void _createCourse() async {
+    // First check if source and target languages are the same
+    if (_selectedLanguageCode == _selectedOriginLanguageCode) {
+      if (!_isMessageDisplayed) {
+        _isMessageDisplayed = true;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Source and target languages cannot be the same!'),
+            duration: Duration(seconds: 2),
+          ),
+        ).closed.then((_) {
+          _isMessageDisplayed = false;
+        });
+      }
+      return;
+    }
+
     // Check if at least one competence is selected
     if (_selectedCompetences.isEmpty) {
       if (!_isMessageDisplayed) {
