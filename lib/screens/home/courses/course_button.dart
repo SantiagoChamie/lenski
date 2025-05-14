@@ -42,94 +42,22 @@ class _CourseButtonState extends State<CourseButton> {
     _loadStreakIndicatorSetting();
   }
 
-  // Modify this method to check goal completion based on goal type
   Future<void> _loadCourseStats() async {
     try {
-      // Get all sessions for this course
-      final sessions = await _sessionRepository.getSessionsByCourse(widget.course.code);
-      
-      // Calculate progress based on goal type
-      bool goalMet = false;
-      
-      switch (widget.course.goalType) {
-        case 'learn':
-          // Calculate total words and deleted cards
-          int words = 0;
-          int deleted = 0;
-          for (var session in sessions) {
-            words += session.wordsAdded;
-            deleted += session.cardsDeleted;
-          }
-          
-          // Calculate number of active competences
-          int activeCompetences = 0;
-          if (widget.course.reading) activeCompetences++;
-          if (widget.course.writing) activeCompetences++;
-          if (widget.course.speaking) activeCompetences++;
-          if (widget.course.listening) activeCompetences++;
-          
-          // Ensure we don't divide by zero
-          activeCompetences = activeCompetences > 0 ? activeCompetences : 1;
-          
-          // Calculate adjusted words added
-          int adjustedWords = words - (deleted * (1 / activeCompetences)).floor();
-          
-          // Ensure we don't go negative
-          adjustedWords = adjustedWords > 0 ? adjustedWords : 0;
-          
-          goalMet = adjustedWords >= widget.course.totalGoal;
-          break;
-          
-        case 'daily':
-          // Count unique days with any activity
-          final Set<int> daysWithActivity = {};
-          for (var session in sessions) {
-            if (session.wordsAdded > 0 || 
-                session.wordsReviewed > 0 || 
-                session.linesRead > 0 ||
-                session.minutesStudied > 0) {
-              daysWithActivity.add(session.date);
-            }
-          }
-          goalMet = daysWithActivity.length >= widget.course.totalGoal;
-          break;
-          
-        case 'time':
-          // Sum up all minutes studied
-          int totalMinutes = 0;
-          for (var session in sessions) {
-            totalMinutes += session.minutesStudied;
-          }
-          goalMet = totalMinutes >= widget.course.totalGoal;
-          break;
-          
-        default:
-          // Default to 'learn' behavior with the same adjustment
-          int words = 0;
-          int deleted = 0;
-          for (var session in sessions) {
-            words += session.wordsAdded;
-            deleted += session.cardsDeleted;
-          }
-          
-          int activeCompetences = 0;
-          if (widget.course.reading) activeCompetences++;
-          if (widget.course.writing) activeCompetences++;
-          if (widget.course.speaking) activeCompetences++;
-          if (widget.course.listening) activeCompetences++;
-          
-          activeCompetences = activeCompetences > 0 ? activeCompetences : 1;
-          
-          int adjustedWords = words - (deleted * (1 / activeCompetences)).floor();
-          adjustedWords = adjustedWords > 0 ? adjustedWords : 0;
-          
-          goalMet = adjustedWords >= widget.course.totalGoal;
-      }
-      
+      // Simply use the course's goalComplete attribute
       setState(() {
-        _isGoalMet = goalMet;
+        _isGoalMet = widget.course.goalComplete;
         _isLoading = false;
       });
+      
+      // Optionally: Refresh the course data to ensure we have the latest goalComplete status
+      final courseRepository = CourseRepository();
+      final updatedCourse = await courseRepository.getCourse(widget.course.code);
+      if (mounted && updatedCourse.goalComplete != _isGoalMet) {
+        setState(() {
+          _isGoalMet = updatedCourse.goalComplete;
+        });
+      }
     } catch (e) {
       setState(() {
         _isLoading = false;

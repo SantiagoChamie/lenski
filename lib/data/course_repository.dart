@@ -49,7 +49,8 @@ class CourseRepository {
           'dailyGoal INTEGER DEFAULT 100, '
           'totalGoal INTEGER DEFAULT 10000, '
           'visible INTEGER DEFAULT 1, '
-          'goalType TEXT DEFAULT "learn"'
+          'goalType TEXT DEFAULT "learn", '
+          'goalComplete INTEGER DEFAULT 0'
           ')',
         );
       },
@@ -58,8 +59,12 @@ class CourseRepository {
           // Add the goalType column if upgrading from version 1 or 2
           await db.execute('ALTER TABLE courses ADD COLUMN goalType TEXT DEFAULT "learn"');
         }
+        if (oldVersion < 4) {
+          // Add the goalComplete column if upgrading from version 3 or earlier
+          await db.execute('ALTER TABLE courses ADD COLUMN goalComplete INTEGER DEFAULT 0');
+        }
       },
-      version: 3, // Increment version to trigger onUpgrade
+      version: 4, // Increment version to trigger onUpgrade
     );
   }
 

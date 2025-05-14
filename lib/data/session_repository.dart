@@ -139,37 +139,33 @@ class SessionRepository {
     }
     
     // Get the course to check goal and potentially update streak
-    final courses = await _courseRepository.courses();
-    final course = courses.firstWhere(
-      (c) => c.code == courseCode,
-      orElse: () => throw Exception('Course not found'),
-    );
+    final course = await _courseRepository.getCourse(courseCode);
     
-    // Check if goal is met based on the course's goal type
-    bool isGoalMet = false;
+    // Check if daily goal is met based on the course's goal type
+    bool isDailyGoalMet = false;
     
     switch (course.goalType) {
       case 'learn':
-        isGoalMet = session.wordsAdded >= course.dailyGoal;
+        isDailyGoalMet = session.wordsAdded >= course.dailyGoal;
         break;
       case 'daily':
         // For daily type, any activity counts as meeting the goal
         // Explicitly EXCLUDING cardsDeleted from this check as specified
-        isGoalMet = session.wordsAdded > 0 || 
+        isDailyGoalMet = session.wordsAdded > 0 || 
                     session.wordsReviewed > 0 || 
                     session.linesRead > 0 ||
                     session.minutesStudied > 0;
         break;
       case 'time':
-        isGoalMet = session.minutesStudied >= course.dailyGoal;
+        isDailyGoalMet = session.minutesStudied >= course.dailyGoal;
         break;
       default:
         // Default to 'learn' behavior
-        isGoalMet = session.wordsAdded >= course.dailyGoal;
+        isDailyGoalMet = session.wordsAdded >= course.dailyGoal;
     }
     
-    // If goal is met, increment streak and mark as incremented
-    if (isGoalMet) {
+    // If daily goal is met, increment streak and mark as incremented
+    if (isDailyGoalMet) {
       await _courseRepository.incrementStreak(course);
       
       // Mark streak as incremented for today
@@ -179,6 +175,91 @@ class SessionRepository {
         where: 'courseCode = ? AND date = ?',
         whereArgs: [courseCode, today],
       );
+    }
+    
+    // Check if the total goal has been met (course completion)
+    final sessions = await getSessionsByCourse(courseCode);
+    bool isCourseGoalComplete = false;
+    
+    switch (course.goalType) {
+      case 'learn':
+        // Calculate total words and deleted cards
+        int words = 0;
+        int deleted = 0;
+        for (var s in sessions) {
+          words += s.wordsAdded;
+          deleted += s.cardsDeleted;
+        }
+        
+        // Calculate number of active competences
+        int activeCompetences = 0;
+        if (course.reading) activeCompetences++;
+        if (course.writing) activeCompetences++;
+        if (course.speaking) activeCompetences++;
+        if (course.listening) activeCompetences++;
+        
+        // Ensure we don't divide by zero
+        activeCompetences = activeCompetences > 0 ? activeCompetences : 1;
+        
+        // Calculate adjusted words added
+        int adjustedWords = words - (deleted * (1 / activeCompetences)).floor();
+        
+        // Ensure we don't go negative
+        adjustedWords = adjustedWords > 0 ? adjustedWords : 0;
+        
+        isCourseGoalComplete = adjustedWords >= course.totalGoal;
+        break;
+        
+      case 'daily':
+        // Count unique days with any activity
+        final Set<int> daysWithActivity = {};
+        for (var s in sessions) {
+          if (s.wordsAdded > 0 || 
+              s.wordsReviewed > 0 || 
+              s.linesRead > 0 ||
+              s.minutesStudied > 0) {
+            daysWithActivity.add(s.date);
+          }
+        }
+        isCourseGoalComplete = daysWithActivity.length >= course.totalGoal;
+        break;
+        
+      case 'time':
+        // Sum up all minutes studied
+        int totalMinutes = 0;
+        for (var s in sessions) {
+          totalMinutes += s.minutesStudied;
+        }
+        isCourseGoalComplete = totalMinutes >= course.totalGoal;
+        break;
+        
+      default:
+        // Default to 'learn' behavior
+        int words = 0;
+        int deleted = 0;
+        for (var s in sessions) {
+          words += s.wordsAdded;
+          deleted += s.cardsDeleted;
+        }
+        
+        int activeCompetences = 0;
+        if (course.reading) activeCompetences++;
+        if (course.writing) activeCompetences++;
+        if (course.speaking) activeCompetences++;
+        if (course.listening) activeCompetences++;
+        
+        activeCompetences = activeCompetences > 0 ? activeCompetences : 1;
+        
+        int adjustedWords = words - (deleted * (1 / activeCompetences)).floor();
+        adjustedWords = adjustedWords > 0 ? adjustedWords : 0;
+        
+        isCourseGoalComplete = adjustedWords >= course.totalGoal;
+    }
+    
+    // Update the course's goalComplete status if needed
+    if (isCourseGoalComplete != course.goalComplete) {
+      course.goalComplete = isCourseGoalComplete;
+      await _courseRepository.updateCourse(course);
     }
   }
 
