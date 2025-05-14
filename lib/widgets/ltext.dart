@@ -112,8 +112,22 @@ class _LTextState extends State<LText> {
     // Create a sanitized version of the full text
     String sanitizedText = fullText.replaceAll('\n', ' ');
 
+    // First try with word boundaries
+    final containsWithBoundaries = _containsWordWithBoundaries(sanitizedText, selectedText);
+    
     // Use only Approach 1 (sentence-based) with a longer max length
     final sentences = sanitizedText.split(RegExp(r'(?<=[.!?。！？？])\s*'));
+    
+    // First attempt: search with word boundaries
+    if (containsWithBoundaries) {
+      for (final sentence in sentences) {
+        if (_containsWordWithBoundaries(sentence, selectedText) && sentence.length <= 1000) {
+          return _cleanTrailingPunctuation(sentence.trim());
+        }
+      }
+    }
+    
+    // Second attempt: fall back to regular contains
     for (final sentence in sentences) {
       if (sentence.contains(selectedText) && sentence.length <= 1000) {
         return _cleanTrailingPunctuation(sentence.trim());
@@ -121,6 +135,21 @@ class _LTextState extends State<LText> {
     }
 
     // If no suitable sentence found, return a larger substring around the selected text
+    if (containsWithBoundaries) {
+      // Try to find the position with word boundaries
+      int selectedIndex = _findWordWithBoundariesIndex(sanitizedText, selectedText);
+      if (selectedIndex != -1) {
+        int contextStart = selectedIndex - 500;
+        int contextEnd = selectedIndex + selectedText.length + 500;
+        
+        if (contextStart < 0) contextStart = 0;
+        if (contextEnd > sanitizedText.length) contextEnd = sanitizedText.length;
+        
+        return sanitizedText.substring(contextStart, contextEnd).trim();
+      }
+    }
+    
+    // Fall back to the current approach
     int selectedIndex = sanitizedText.indexOf(selectedText);
     if (selectedIndex != -1) {
       int contextStart = selectedIndex - 500;
@@ -139,9 +168,23 @@ class _LTextState extends State<LText> {
   String findContext(String selectedText, String fullText, {int maxLength = 100}) {
     // First, create a sanitized version of the full text
     String sanitizedText = fullText.replaceAll('\n', ' ');
+    
+    // Check if the selected text exists with word boundaries
+    final containsWithBoundaries = _containsWordWithBoundaries(sanitizedText, selectedText);
 
     // Approach 1: Split by sentence-ending punctuation (including CJK and Arabic)
     final sentences = sanitizedText.split(RegExp(r'(?<=[.!?。！？？])\s*'));
+    
+    // First try with word boundaries
+    if (containsWithBoundaries) {
+      for (final sentence in sentences) {
+        if (_containsWordWithBoundaries(sentence, selectedText) && sentence.length <= maxLength) {
+          return _cleanTrailingPunctuation(sentence.trim());
+        }
+      }
+    }
+    
+    // Fall back to regular contains
     for (final sentence in sentences) {
       if (sentence.contains(selectedText) && sentence.length <= maxLength) {
         return _cleanTrailingPunctuation(sentence.trim());
@@ -149,7 +192,18 @@ class _LTextState extends State<LText> {
     }
 
     // Approach 2: Split by all punctuation (including CJK and Arabic)
-    final fragments = sanitizedText.split(RegExp(r'(?<=[.!?,;:()\[\]{}<>\-。！？，；：（）【】［］｛｝「」『』、،；¿¡])\s*'));
+    final fragments = sanitizedText.split(RegExp(r'(?<=[.!?,;:()\[\]{}<>\-。！？，；：（）【】［］｛｝「」『』、、；¿¡])\s*'));
+    
+    // First try with word boundaries
+    if (containsWithBoundaries) {
+      for (final fragment in fragments) {
+        if (_containsWordWithBoundaries(fragment, selectedText) && fragment.length <= maxLength) {
+          return _cleanTrailingPunctuation(fragment.trim());
+        }
+      }
+    }
+    
+    // Fall back to regular contains
     for (final fragment in fragments) {
       if (fragment.contains(selectedText) && fragment.length <= maxLength) {
         return _cleanTrailingPunctuation(fragment.trim());
@@ -158,6 +212,17 @@ class _LTextState extends State<LText> {
 
     // Approach 3: Split by original line breaks
     final lines = fullText.split('\n');
+    
+    // First try with word boundaries
+    if (containsWithBoundaries) {
+      for (final line in lines) {
+        if (_containsWordWithBoundaries(line, selectedText) && line.length <= maxLength) {
+          return _cleanTrailingPunctuation(line.trim());
+        }
+      }
+    }
+    
+    // Fall back to regular contains
     for (final line in lines) {
       if (line.contains(selectedText) && line.length <= maxLength) {
         return _cleanTrailingPunctuation(line.trim());
@@ -165,6 +230,20 @@ class _LTextState extends State<LText> {
     }
 
     // Fallback: If no suitable context found, return a substring around the selected text
+    if (containsWithBoundaries) {
+      int selectedIndex = _findWordWithBoundariesIndex(sanitizedText, selectedText);
+      if (selectedIndex != -1) {
+        int contextStart = selectedIndex - 50;
+        int contextEnd = selectedIndex + selectedText.length + 50;
+        
+        if (contextStart < 0) contextStart = 0;
+        if (contextEnd > sanitizedText.length) contextEnd = sanitizedText.length;
+        
+        return _cleanTrailingPunctuation(sanitizedText.substring(contextStart, contextEnd).trim());
+      }
+    }
+    
+    // Fall back to current approach
     int selectedIndex = sanitizedText.indexOf(selectedText);
     if (selectedIndex != -1) {
       int contextStart = selectedIndex - 50;
@@ -178,6 +257,21 @@ class _LTextState extends State<LText> {
 
     // Last resort: return the selected text itself
     return selectedText;
+  }
+
+  /// Checks if a string contains a word with proper word boundaries
+  bool _containsWordWithBoundaries(String text, String word) {
+    // Create a RegExp that matches the word with word boundaries
+    // \b represents a word boundary in RegExp
+    final RegExp wordRegExp = RegExp(r'\b' + RegExp.escape(word) + r'\b');
+    return wordRegExp.hasMatch(text);
+  }
+
+  /// Finds the index of a word with proper word boundaries
+  int _findWordWithBoundariesIndex(String text, String word) {
+    final RegExp wordRegExp = RegExp(r'\b' + RegExp.escape(word) + r'\b');
+    final match = wordRegExp.firstMatch(text);
+    return match?.start ?? -1;
   }
 
   /// Cleans trailing punctuation while preserving balanced pairs
