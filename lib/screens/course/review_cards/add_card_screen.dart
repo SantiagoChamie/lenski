@@ -4,7 +4,7 @@ import 'package:lenski/screens/home/competences/competence_icon.dart';
 import 'package:lenski/utils/fonts.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
-import 'package:lenski/data/session_repository.dart'; // Add this import
+import 'package:lenski/data/session_repository.dart';
 import 'package:lenski/models/card_model.dart' as card_model;
 import 'package:lenski/services/translation_service.dart';
 
@@ -12,13 +12,13 @@ import 'package:lenski/services/translation_service.dart';
 class AddCardScreen extends StatefulWidget {
   final VoidCallback onBackPressed;
   final Course course;
-  final VoidCallback? onCardAdded; // Add this callback
+  final VoidCallback? onCardAdded;
 
   const AddCardScreen({
     super.key, 
     required this.onBackPressed, 
     required this.course,
-    this.onCardAdded, // Add this parameter
+    this.onCardAdded,
   });
 
   @override
@@ -32,6 +32,22 @@ class _AddCardScreenState extends State<AddCardScreen> {
   
   // Use late initialization for the competences map
   late final Map<String, bool> selectedCompetences;
+  
+  // Helper method to get tooltip text for competences
+  String _getCompetenceTooltip(String type) {
+    switch (type) {
+      case 'reading':
+        return 'Reading';
+      case 'listening':
+        return 'Listening';
+      case 'writing':
+        return 'Writing';
+      case 'speaking':
+        return 'Speaking';
+      default:
+        return type;
+    }
+  }
   
   @override
   void initState() {
@@ -162,20 +178,20 @@ class _AddCardScreenState extends State<AddCardScreen> {
                                   GestureDetector(
                                     onTap: () {
                                       setState(() {
-                                        // Only toggle if it's not the last selected competence
-                                        if (selectedCompetences[type] == false || 
-                                            selectedCompetences.values.where((e) => e).length > 1) {
-                                          selectedCompetences[type] = !selectedCompetences[type]!;
-                                        }
+                                        // Allow toggling regardless of current selection
+                                        selectedCompetences[type] = !selectedCompetences[type]!;
                                       });
                                     },
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                      child: Opacity(
-                                        opacity: selectedCompetences[type]! ? 1.0 : 0.3,
-                                        child: CompetenceIcon(
-                                          size: 40,
-                                          type: type,
+                                    child: Tooltip(
+                                      message: _getCompetenceTooltip(type),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                        child: Opacity(
+                                          opacity: selectedCompetences[type]! ? 1.0 : 0.3,
+                                          child: CompetenceIcon(
+                                            size: 40,
+                                            type: type,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -200,6 +216,11 @@ class _AddCardScreenState extends State<AddCardScreen> {
                       } else if (contextController.text != '' && !contextController.text.toLowerCase().contains(frontController.text.toLowerCase())) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('The context must include the front text')),
+                        );
+                        return;
+                      } else if (!selectedCompetences.values.contains(true)) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Select at least one competence for your card')),
                         );
                         return;
                       }
