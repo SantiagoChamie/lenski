@@ -229,7 +229,7 @@ class CourseRepository {
       }
       
       // Also delete any archived books for this language
-      final archiveDb = await bookRepository.database;
+      final archiveDb = await archiveRepository.database;
       await archiveDb.delete(
         'archived_books',
         where: 'language = ?',

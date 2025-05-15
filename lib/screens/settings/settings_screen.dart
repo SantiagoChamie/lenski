@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:file_picker/file_picker.dart'; // Add this import
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
+import '../../data/migration_handler.dart'; // Add this import
 
 /// A screen that allows the user to configure settings for the app.
 class SettingsScreen extends StatefulWidget {
@@ -14,7 +16,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final TextEditingController _apiKeyController = TextEditingController();
   bool _contextualTranslationEnabled = false;
   bool _premiumApiEnabled = false;
-  bool _streakIndicatorEnabled = true; // New state variable for streak indicator
+  bool _streakIndicatorEnabled = true;
+
+  // Create an instance of MigrationHandler
+  final MigrationHandler _migrationHandler = MigrationHandler();
+  bool _isExporting = false;
+  bool _isImporting = false;
 
   @override
   void initState() {
@@ -22,7 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadApiKey();
     _loadContextualTranslationSetting();
     _loadPremiumApiSetting();
-    _loadStreakIndicatorSetting(); // Load streak indicator setting
+    _loadStreakIndicatorSetting();
   }
 
   /// Loads the saved API key from shared preferences and sets it in the text controller.
@@ -90,38 +97,131 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  /// Handles file picking for importing data
+  /// Handles file picking and importing data
   Future<void> _importFile() async {
     try {
+      setState(() {
+        _isImporting = true; // Show loading indicator
+      });
+
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['txt'],
+        allowedExtensions: ['json'],
       );
-      
+
       if (result != null) {
-        // File selected - you would process it here
         final path = result.files.single.path;
         if (path != null) {
+          // Call the importData method from MigrationHandler
+          final migrationResult = await _migrationHandler.importData(path);
+
+          // Show result to the user
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Selected file: $path'))
+            SnackBar(
+              content: Text(migrationResult.success
+                  ? 'Import successful'
+                  : 'Import failed: ${migrationResult.message}'),
+              backgroundColor: migrationResult.success ? Colors.green : Colors.red,
+            ),
           );
-          // TODO: Process the imported file
         }
-      } else {
-        // User canceled the picker
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking file: $e'))
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error during import: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isImporting = false; // Hide loading indicator
+        });
+      }
     }
   }
-  
-  /// Placeholder method for export functionality
-  void _exportFile() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Export functionality not implemented yet'))
-    );
+
+  /// Exports app data to a file at user-selected location
+  Future<void> _exportFile() async {
+    try {
+      setState(() {
+        _isExporting = true; // Show loading indicator
+      });
+
+      // First generate the export data
+      final migrationResult = await _migrationHandler.exportData();
+
+      if (!migrationResult.success || migrationResult.filePath == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export failed: ${migrationResult.message}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      
+      // Now let the user pick where to save the file
+      String? outputPath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save your Lenski data file',
+        fileName: 'lenski_export_${DateTime.now().day.toString() +
+          DateTime.now().month.toString() +
+          DateTime.now().year.toString()}.json',
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (outputPath != null) {
+        // Copy the generated file to user's chosen location
+        final sourceFile = File(migrationResult.filePath!);
+        final destinationFile = File(outputPath);
+        await sourceFile.copy(outputPath);
+        
+        // Delete the temporary file
+        await sourceFile.delete();
+
+        // Show success message with chosen path
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export successful. File saved to: $outputPath'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        // User cancelled, delete the temporary file
+        final sourceFile = File(migrationResult.filePath!);
+        await sourceFile.delete();
+        
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export cancelled by user'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error during export: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isExporting = false; // Hide loading indicator
+        });
+      }
+    }
   }
 
   @override
@@ -134,11 +234,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             textSelectionTheme: const TextSelectionThemeData(
               selectionColor: Color(0xFFFFD38D),
             ),
-          ),   
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SingleChildScrollView( //if settings are too long, scroll
+              SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -158,7 +258,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               labelText: 'DeepL API Key',
                               labelStyle: TextStyle(fontFamily: 'Sansation', color: Colors.black),
                               focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),     
+                                borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
                               ),
                             ),
                           ),
@@ -176,7 +276,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        
                         const Text(
                           'Use Premium DeepL API',
                           style: TextStyle(fontFamily: 'Sansation'),
@@ -187,7 +286,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           onChanged: _savePremiumApiSetting,
                           activeColor: const Color(0xFF2C73DE),
                         ),
-                        
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -238,29 +336,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                    onPressed: _exportFile,
+                    onPressed: _isExporting ? null : _exportFile,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFE8E8E8),
                       foregroundColor: Colors.black,
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                     ),
-                    child: const Text(
-                      'Export',
-                      style: TextStyle(fontFamily: 'Sansation'),
-                    ),
+                    child: _isExporting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text(
+                            'Export',
+                            style: TextStyle(fontFamily: 'Sansation'),
+                          ),
                   ),
                   const SizedBox(width: 20),
                   ElevatedButton(
-                    onPressed: _importFile,
+                    onPressed: _isImporting ? null : _importFile,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2C73DE),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                     ),
-                    child: const Text(
-                      'Import',
-                      style: TextStyle(fontFamily: 'Sansation'),
-                    ),
+                    child: _isImporting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'Import',
+                            style: TextStyle(fontFamily: 'Sansation'),
+                          ),
                   ),
                 ],
               ),

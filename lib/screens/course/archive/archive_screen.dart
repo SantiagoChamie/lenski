@@ -4,7 +4,6 @@ import 'package:lenski/models/course_model.dart';
 import 'package:lenski/models/archived_book_model.dart';
 import 'package:lenski/utils/fonts.dart';
 import 'package:lenski/utils/proportions.dart';
-import 'package:lenski/data/book_repository.dart';
 
 class ArchiveScreen extends StatefulWidget {
   final Course course;
