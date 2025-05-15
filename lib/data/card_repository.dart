@@ -1,5 +1,4 @@
 import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import '../../models/card_model.dart';
 
@@ -36,11 +35,16 @@ class CardRepository {
 
   /// Initializes the database and creates the cards table if it does not exist.
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'cards.db');
-    return openDatabase(
+    // Path for the unified database
+    String path = join(await getDatabasesPath(), 'lenski.db');
+    
+    // Open the unified database
+    Database db = await openDatabase(
       path,
-      onCreate: (db, version) {
-        return db.execute(
+      version: 4, // Match version with other repositories
+      onCreate: (db, version) async {
+        // Create cards table
+        await db.execute(
           'CREATE TABLE cards('
           'id INTEGER PRIMARY KEY, '
           'front TEXT, '
@@ -51,12 +55,37 @@ class CardRepository {
           'prevInterval INTEGER, '
           'eFactor REAL, '
           'repetition INTEGER, '
-          'type TEXT' // Add type column
+          'type TEXT'
           ')',
         );
       },
-      version: 2, // Increment version number
+      onOpen: (db) async {
+        // Check if cards table exists and create if needed
+        final tables = await db.query('sqlite_master',
+            where: 'type = ? AND name = ?',
+            whereArgs: ['table', 'cards']);
+            
+        if (tables.isEmpty) {
+          // Create the cards table if it doesn't exist
+          await db.execute(
+            'CREATE TABLE cards('
+            'id INTEGER PRIMARY KEY, '
+            'front TEXT, '
+            'back TEXT, '
+            'context TEXT, '
+            'dueDate INTEGER, '
+            'language TEXT, '
+            'prevInterval INTEGER, '
+            'eFactor REAL, '
+            'repetition INTEGER, '
+            'type TEXT'
+            ')',
+          );
+        }
+      },
     );
+    
+    return db;
   }
 
   /// Inserts a new card into the database.

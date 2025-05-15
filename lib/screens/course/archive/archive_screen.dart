@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lenski/data/archive_repository.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/models/archived_book_model.dart';
 import 'package:lenski/utils/fonts.dart';
@@ -16,7 +17,7 @@ class ArchiveScreen extends StatefulWidget {
 
 class _ArchiveScreenState extends State<ArchiveScreen> {
   final bookWidth = 120.0;
-  final BookRepository _bookRepository = BookRepository();
+  final ArchiveRepository _archiveRepository = ArchiveRepository();
   List<ArchivedBook> _books = [];
   bool _isLoading = true;
 
@@ -28,7 +29,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
 
   Future<void> _loadBooks() async {
     try {
-      final books = await _bookRepository.getArchivedBooks(widget.course.code);
+      final books = await _archiveRepository.getArchivedBooks(widget.course.code);
       if (mounted) {
         setState(() {
           _books = books;
@@ -53,7 +54,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
           builder: (context) => EditArchivedBookOverlay(
             book: book,
             onSave: (updatedBook) async {
-              await _bookRepository.updateArchivedBook(updatedBook);
+              await _archiveRepository.updateArchivedBook(updatedBook);
               if (mounted) {
                 setState(() {
                   final index = _books.indexWhere((b) => b.id == updatedBook.id);
@@ -345,7 +346,7 @@ class EditArchivedBookOverlay extends StatefulWidget {
 }
 
 class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
-  final BookRepository _bookRepository = BookRepository();
+  final ArchiveRepository _archiveRepository = ArchiveRepository();
 
   late TextEditingController _nameController;
   late TextEditingController _imageUrlController;
@@ -413,7 +414,7 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
     );
 
     if (confirmed == true && mounted) {
-      await _bookRepository.deleteArchivedBook(widget.book.id!);
+      await _archiveRepository.deleteArchivedBook(widget.book.id!);
       if (mounted) {
         Navigator.pop(context, 'deleted'); // Special return value to indicate deletion
       }

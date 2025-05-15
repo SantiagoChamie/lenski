@@ -26,33 +26,40 @@ class SessionRepository {
 
   /// Initializes the database and creates the sessions table if it doesn't exist.
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'sessions.db');
-    return openDatabase(
+    // Path for the unified database
+    String path = join(await getDatabasesPath(), 'lenski.db');
+    
+    // Open or create the unified database
+    Database db = await openDatabase(
       path,
-      onCreate: (db, version) {
-        return db.execute(
-          'CREATE TABLE sessions('
-          'id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'courseCode TEXT NOT NULL, '
-          'date INTEGER NOT NULL, '
-          'wordsAdded INTEGER DEFAULT 0, '
-          'wordsReviewed INTEGER DEFAULT 0, '
-          'linesRead INTEGER DEFAULT 0, '
-          'minutesStudied INTEGER DEFAULT 0, '
-          'cardsDeleted INTEGER DEFAULT 0, '
-          'streakIncremented INTEGER DEFAULT 0, '
-          'UNIQUE(courseCode, date)'
-          ')',
-        );
-      },
-      onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 2) {
-          // Add cardsDeleted column if upgrading from version 1
-          await db.execute('ALTER TABLE sessions ADD COLUMN cardsDeleted INTEGER DEFAULT 0');
+      version: 4,
+      onOpen: (db) async {
+        // Check if sessions table exists
+        final tables = await db.query('sqlite_master',
+            where: 'type = ? AND name = ?',
+            whereArgs: ['table', 'sessions']);
+            
+        if (tables.isEmpty) {
+          // Create the sessions table if it doesn't exist
+          await db.execute(
+            'CREATE TABLE sessions('
+            'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'courseCode TEXT NOT NULL, '
+            'date INTEGER NOT NULL, '
+            'wordsAdded INTEGER DEFAULT 0, '
+            'wordsReviewed INTEGER DEFAULT 0, '
+            'linesRead INTEGER DEFAULT 0, '
+            'minutesStudied INTEGER DEFAULT 0, '
+            'cardsDeleted INTEGER DEFAULT 0, '
+            'streakIncremented INTEGER DEFAULT 0, '
+            'UNIQUE(courseCode, date)'
+            ')',
+          );
         }
       },
-      version: 2, // Increment the version number
     );
+    
+    return db;
   }
 
   /// Converts a DateTime object to an integer representing the number of days since Unix epoch.

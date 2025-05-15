@@ -1,3 +1,4 @@
+import 'package:lenski/data/archive_repository.dart';
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/data/card_repository.dart';
 import 'package:lenski/data/session_repository.dart';
@@ -27,8 +28,11 @@ class CourseRepository {
 
   /// Initializes the database and creates the courses table if it does not exist.
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'courses.db');
-    return openDatabase(
+    // Path for the database
+    String path = join(await getDatabasesPath(), 'lenski.db');
+    
+    // Create or open the database
+    return await openDatabase(
       path,
       onCreate: (db, version) {
         return db.execute(
@@ -54,17 +58,7 @@ class CourseRepository {
           ')',
         );
       },
-      onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 3) {
-          // Add the goalType column if upgrading from version 1 or 2
-          await db.execute('ALTER TABLE courses ADD COLUMN goalType TEXT DEFAULT "learn"');
-        }
-        if (oldVersion < 4) {
-          // Add the goalComplete column if upgrading from version 3 or earlier
-          await db.execute('ALTER TABLE courses ADD COLUMN goalComplete INTEGER DEFAULT 0');
-        }
-      },
-      version: 4, // Increment version to trigger onUpgrade
+      version: 4,
     );
   }
 
@@ -208,6 +202,7 @@ class CourseRepository {
     // Get references to other repositories
     final cardRepository = CardRepository();
     final bookRepository = BookRepository();
+    final archiveRepository = ArchiveRepository();
     final sessionRepository = SessionRepository();
     
     try {
@@ -234,7 +229,7 @@ class CourseRepository {
       }
       
       // Also delete any archived books for this language
-      final archiveDb = await bookRepository.archiveDatabase;
+      final archiveDb = await bookRepository.database;
       await archiveDb.delete(
         'archived_books',
         where: 'language = ?',
