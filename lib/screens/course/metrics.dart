@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lenski/data/metrics_repository.dart';
 import 'package:lenski/data/session_repository.dart';
-import 'package:lenski/models/course_metrics_model.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/models/session_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,24 +21,20 @@ class Metrics extends StatefulWidget {
 }
 
 class _MetricsState extends State<Metrics> {
-  late final MetricsRepository _repository;
   late final SessionRepository _sessionRepository;
-  late Future<CourseMetrics> _metricsFuture;
   late Future<Session> _sessionFuture;
   late Future<void> _initPrefs;
-  int _currentIndex = 0;
+  int _currentIndex = 1;
   
   @override
   void initState() {
     super.initState();
-    _repository = MetricsRepository();
     _sessionRepository = SessionRepository();
     _refreshData();
     _initPrefs = _loadLastMetric();
   }
 
   void _refreshData() {
-    _metricsFuture = _repository.getCourseMetrics(widget.course);
     _sessionFuture = _sessionRepository.getOrCreateTodaySession(widget.course.code);
   }
 
@@ -56,7 +50,7 @@ class _MetricsState extends State<Metrics> {
 
   Future<void> _loadLastMetric() async {
     final prefs = await SharedPreferences.getInstance();
-    final lastMetric = prefs.getInt('last_metric_${widget.course.code}') ?? 1;
+    final lastMetric = prefs.getInt('last_metric_${widget.course.code}') ?? 0;
     setState(() {
       _currentIndex = lastMetric;
     });
@@ -69,7 +63,7 @@ class _MetricsState extends State<Metrics> {
 
   void _cycleMetric() {
     setState(() {
-      _currentIndex = (_currentIndex + 1) % 4;
+      _currentIndex = (_currentIndex + 1) % 2;
       _saveLastMetric(_currentIndex);
     });
   }
@@ -151,44 +145,13 @@ class _MetricsState extends State<Metrics> {
 
         return GestureDetector(
           onTap: _cycleMetric,
-          child: FutureBuilder<List<dynamic>>(
-            future: Future.wait([_metricsFuture, _sessionFuture]),
+          child: FutureBuilder<Session>(
+            future: _sessionFuture,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                final courseMetrics = snapshot.data![0] as CourseMetrics;
-                final todaySession = snapshot.data![1] as Session;
+                final todaySession = snapshot.data!;
                 
                 final metrics = [
-                  SizedBox(
-                    height: widget.height,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        const Icon(
-                          Icons.psychology,
-                          size: 28,
-                          color: Colors.blue,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${courseMetrics.totalCards}',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          ),
-                        ),
-                        const Text(
-                          ' Words Learned',
-                          style: TextStyle(
-                            fontSize: 24,
-                            color: Colors.blue,
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                      ],
-                    ),
-                  ),
                   SizedBox(
                     height: widget.height,
                     child: Row(
@@ -231,39 +194,9 @@ class _MetricsState extends State<Metrics> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         const Icon(
-                          Icons.menu_book,
-                          size: 28,
-                          color: Colors.green,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${courseMetrics.completedBooks}',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
-                        ),
-                        const Text(
-                          ' Books Finished',
-                          style: TextStyle(
-                            fontSize: 24,
-                            color: Colors.green,
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: widget.height,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        const Icon(
                           Icons.local_fire_department,
                           size: 28,
-                          color: Colors.orange,
+                          color: Color(0xFFEE9A1D),
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -271,14 +204,14 @@ class _MetricsState extends State<Metrics> {
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Colors.orange,
+                            color: Color(0xFFEE9A1D),
                           ),
                         ),
                         const Text(
                           ' Day Streak',
                           style: TextStyle(
                             fontSize: 24,
-                            color: Colors.orange,
+                            color: Color(0xFFEE9A1D),
                           ),
                         ),
                         const SizedBox(width: 20),
