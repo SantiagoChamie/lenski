@@ -3,6 +3,7 @@ import 'package:path/path.dart';
 import '../models/archived_book_model.dart';
 import '../models/book_model.dart';
 import 'book_repository.dart';
+import 'dart:io';
 
 /// A repository class for managing archived books in the database.
 class ArchiveRepository {
@@ -30,24 +31,27 @@ class ArchiveRepository {
     // Path for the unified database
     String path = join(await getDatabasesPath(), 'lenski.db');
     
-    // Use the unified database
-    Database db = await openDatabase(
-      path, 
-      version: 4,
-      onOpen: (db) async {
-        // Check if archived_books table exists
-        final tables = await db.query('sqlite_master',
-            where: 'type = ? AND name = ?',
-            whereArgs: ['table', 'archived_books']);
-            
-        if (tables.isEmpty) {
-          // Create the archived_books table if it doesn't exist
-          await db.execute(
-            'CREATE TABLE archived_books(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, language TEXT, category TEXT, subcategory TEXT, imageUrl TEXT, finishedDate INTEGER)',
-          );
-        }
-      }
-    );
+    // Ensure directory exists
+    Directory dbDirectory = Directory(dirname(path));
+    if (!await dbDirectory.exists()) {
+      await dbDirectory.create(recursive: true);
+    }
+    
+    // Open database without depending on callbacks
+    Database db = await openDatabase(path, version: 4);
+    
+    // Always check if archived_books table exists
+    final tables = await db.query('sqlite_master',
+        where: 'type = ? AND name = ?',
+        whereArgs: ['table', 'archived_books']);
+        
+    if (tables.isEmpty) {
+      print('Creating archived_books table in unified database');
+      // Create the archived_books table if it doesn't exist
+      await db.execute(
+        'CREATE TABLE archived_books(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, language TEXT, category TEXT, subcategory TEXT, imageUrl TEXT, finishedDate INTEGER)',
+      );
+    }
     
     return db;
   }

@@ -1,3 +1,4 @@
+import 'dart:io'; // Add this import for File class
 import 'package:lenski/data/archive_repository.dart';
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/data/card_repository.dart';
@@ -31,11 +32,18 @@ class CourseRepository {
     // Path for the database
     String path = join(await getDatabasesPath(), 'lenski.db');
     
+    // Ensure the database directory exists
+    Directory dbDirectory = Directory(dirname(path));
+    if (!await dbDirectory.exists()) {
+      await dbDirectory.create(recursive: true);
+    }
+    
     // Create or open the database
-    return await openDatabase(
+    Database db = await openDatabase(
       path,
-      onCreate: (db, version) {
-        return db.execute(
+      version: 4,
+      onCreate: (db, version) async {
+        await db.execute(
           'CREATE TABLE courses('
           'id INTEGER PRIMARY KEY, '
           'name TEXT, '
@@ -58,8 +66,40 @@ class CourseRepository {
           ')',
         );
       },
-      version: 4,
+      onOpen: (db) async {
+        // Always check if courses table exists
+        final tables = await db.query('sqlite_master', 
+            where: 'type = ? AND name = ?', 
+            whereArgs: ['table', 'courses']);
+            
+        if (tables.isEmpty) {
+          await db.execute(
+            'CREATE TABLE courses('
+            'id INTEGER PRIMARY KEY, '
+            'name TEXT, '
+            'level TEXT, '
+            'code TEXT, '
+            'fromCode TEXT, '
+            'listening INTEGER, '
+            'speaking INTEGER, '
+            'reading INTEGER, '
+            'writing INTEGER, '
+            'color INTEGER, '
+            'imageUrl TEXT, '
+            'streak INTEGER DEFAULT 0, '
+            'lastAccess INTEGER DEFAULT 0, '
+            'dailyGoal INTEGER DEFAULT 100, '
+            'totalGoal INTEGER DEFAULT 10000, '
+            'visible INTEGER DEFAULT 1, '
+            'goalType TEXT DEFAULT "learn", '
+            'goalComplete INTEGER DEFAULT 0'
+            ')',
+          );
+        }
+      },
     );
+    
+    return db;
   }
 
   /// Inserts a new course into the database.

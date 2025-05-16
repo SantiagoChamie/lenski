@@ -2,6 +2,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import '../models/session_model.dart';
 import '../data/course_repository.dart';
+import 'dart:io';
 
 /// A repository class for managing user session data in the database.
 class SessionRepository {
@@ -29,35 +30,38 @@ class SessionRepository {
     // Path for the unified database
     String path = join(await getDatabasesPath(), 'lenski.db');
     
-    // Open or create the unified database
-    Database db = await openDatabase(
-      path,
-      version: 4,
-      onOpen: (db) async {
-        // Check if sessions table exists
-        final tables = await db.query('sqlite_master',
-            where: 'type = ? AND name = ?',
-            whereArgs: ['table', 'sessions']);
-            
-        if (tables.isEmpty) {
-          // Create the sessions table if it doesn't exist
-          await db.execute(
-            'CREATE TABLE sessions('
-            'id INTEGER PRIMARY KEY AUTOINCREMENT, '
-            'courseCode TEXT NOT NULL, '
-            'date INTEGER NOT NULL, '
-            'wordsAdded INTEGER DEFAULT 0, '
-            'wordsReviewed INTEGER DEFAULT 0, '
-            'linesRead INTEGER DEFAULT 0, '
-            'minutesStudied INTEGER DEFAULT 0, '
-            'cardsDeleted INTEGER DEFAULT 0, '
-            'streakIncremented INTEGER DEFAULT 0, '
-            'UNIQUE(courseCode, date)'
-            ')',
-          );
-        }
-      },
-    );
+    // Ensure directory exists
+    Directory dbDirectory = Directory(dirname(path));
+    if (!await dbDirectory.exists()) {
+      await dbDirectory.create(recursive: true);
+    }
+    
+    // Open database without depending on callbacks
+    Database db = await openDatabase(path, version: 4);
+    
+    // Always check if sessions table exists
+    final tables = await db.query('sqlite_master',
+        where: 'type = ? AND name = ?',
+        whereArgs: ['table', 'sessions']);
+        
+    if (tables.isEmpty) {
+      print('Creating sessions table in unified database');
+      // Create the sessions table if it doesn't exist
+      await db.execute(
+        'CREATE TABLE sessions('
+        'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+        'courseCode TEXT NOT NULL, '
+        'date INTEGER NOT NULL, '
+        'wordsAdded INTEGER DEFAULT 0, '
+        'wordsReviewed INTEGER DEFAULT 0, '
+        'linesRead INTEGER DEFAULT 0, '
+        'minutesStudied INTEGER DEFAULT 0, '
+        'cardsDeleted INTEGER DEFAULT 0, '
+        'streakIncremented INTEGER DEFAULT 0, '
+        'UNIQUE(courseCode, date)'
+        ')',
+      );
+    }
     
     return db;
   }

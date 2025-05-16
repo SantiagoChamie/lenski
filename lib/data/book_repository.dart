@@ -3,6 +3,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import '../../models/book_model.dart';
 import 'archive_repository.dart';
+import 'dart:io';
 
 /// A repository class for managing books in the database.
 class BookRepository {
@@ -35,20 +36,27 @@ class BookRepository {
     // Path for the unified database
     String path = join(await getDatabasesPath(), 'lenski.db');
     
-    // Open or create the unified database
-    Database db = await openDatabase(
-      path,
-      version: 4,
-      onCreate: (db, version) async {
-        // Create books table
-        await db.execute(
-          'CREATE TABLE books(id INTEGER PRIMARY KEY, name TEXT, imageUrl TEXT, totalLines INTEGER, currentLine INTEGER, language TEXT, finished INTEGER DEFAULT 0)',
-        );
-      },
-      onUpgrade: (db, oldVersion, newVersion) async {
-        // Handle future schema upgrades here if needed
-      }
-    );
+    // Ensure directory exists
+    Directory dbDirectory = Directory(dirname(path));
+    if (!await dbDirectory.exists()) {
+      await dbDirectory.create(recursive: true);
+    }
+    
+    // Open database without depending on callbacks
+    Database db = await openDatabase(path, version: 4);
+    
+    // Always check if books table exists
+    final tables = await db.query('sqlite_master',
+        where: 'type = ? AND name = ?',
+        whereArgs: ['table', 'books']);
+        
+    if (tables.isEmpty) {
+      print('Creating books table in unified database');
+      // Create the books table if it doesn't exist
+      await db.execute(
+        'CREATE TABLE books(id INTEGER PRIMARY KEY, name TEXT, imageUrl TEXT, totalLines INTEGER, currentLine INTEGER, language TEXT, finished INTEGER DEFAULT 0)',
+      );
+    }
     
     return db;
   }

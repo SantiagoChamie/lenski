@@ -99,6 +99,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   /// Handles file picking and importing data
   Future<void> _importFile() async {
+    // Show confirmation dialog first
+    final String? confirmation = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Warning: Data Import',
+            style: TextStyle(
+              fontSize: 24,
+              fontFamily: "Unbounded",
+            ),
+          ),
+          content: const Text(
+            'Importing data will replace all your current courses, books, cards, and progress. This action cannot be undone. Do you want to continue?',
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('cancel'),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF2C73DE),
+                textStyle: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+                textStyle: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              onPressed: () => Navigator.of(context).pop('import'),
+              child: const Text('Import and Replace'),
+            ),
+          ],
+        );
+      },
+    );
+
+    // If user didn't confirm, exit early
+    if (confirmation != 'import') {
+      return;
+    }
+
     try {
       setState(() {
         _isImporting = true; // Show loading indicator
@@ -120,7 +169,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(migrationResult.success
-                  ? 'Import successful'
+                  ? 'Import successful. Please restart the app to see changes.'
                   : 'Import failed: ${migrationResult.message}'),
               backgroundColor: migrationResult.success ? Colors.green : Colors.red,
             ),
@@ -227,6 +276,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Theme(

@@ -66,7 +66,8 @@ class _CoursesState extends State<Courses> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator(color: Color(0xFF2C73DE)));
                   } else if (snapshot.hasError) {
-                    return const Center(child: Text('Error loading courses'));
+                    return const Center(child: Text('Error loading courses \n Please refresh the app or contact support.',
+                      style: TextStyle(fontFamily: 'Sansation')));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return const CourseList(courses: []);
                   } else {

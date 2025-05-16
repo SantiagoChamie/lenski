@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'dart:io';
 import '../../models/card_model.dart';
 
 /// A repository class for managing flashcards in the database.
@@ -38,52 +39,37 @@ class CardRepository {
     // Path for the unified database
     String path = join(await getDatabasesPath(), 'lenski.db');
     
-    // Open the unified database
-    Database db = await openDatabase(
-      path,
-      version: 4, // Match version with other repositories
-      onCreate: (db, version) async {
-        // Create cards table
-        await db.execute(
-          'CREATE TABLE cards('
-          'id INTEGER PRIMARY KEY, '
-          'front TEXT, '
-          'back TEXT, '
-          'context TEXT, '
-          'dueDate INTEGER, '
-          'language TEXT, '
-          'prevInterval INTEGER, '
-          'eFactor REAL, '
-          'repetition INTEGER, '
-          'type TEXT'
-          ')',
-        );
-      },
-      onOpen: (db) async {
-        // Check if cards table exists and create if needed
-        final tables = await db.query('sqlite_master',
-            where: 'type = ? AND name = ?',
-            whereArgs: ['table', 'cards']);
-            
-        if (tables.isEmpty) {
-          // Create the cards table if it doesn't exist
-          await db.execute(
-            'CREATE TABLE cards('
-            'id INTEGER PRIMARY KEY, '
-            'front TEXT, '
-            'back TEXT, '
-            'context TEXT, '
-            'dueDate INTEGER, '
-            'language TEXT, '
-            'prevInterval INTEGER, '
-            'eFactor REAL, '
-            'repetition INTEGER, '
-            'type TEXT'
-            ')',
-          );
-        }
-      },
-    );
+    // Ensure directory exists
+    Directory dbDirectory = Directory(dirname(path));
+    if (!await dbDirectory.exists()) {
+      await dbDirectory.create(recursive: true);
+    }
+    
+    // Open the database without depending on callbacks
+    Database db = await openDatabase(path, version: 4);
+    
+    // Always explicitly check if cards table exists
+    final tables = await db.query('sqlite_master',
+        where: 'type = ? AND name = ?',
+        whereArgs: ['table', 'cards']);
+        
+    if (tables.isEmpty) {
+      // Create the cards table if it doesn't exist
+      await db.execute(
+        'CREATE TABLE cards('
+        'id INTEGER PRIMARY KEY, '
+        'front TEXT, '
+        'back TEXT, '
+        'context TEXT, '
+        'dueDate INTEGER, '
+        'language TEXT, '
+        'prevInterval INTEGER, '
+        'eFactor REAL, '
+        'repetition INTEGER, '
+        'type TEXT'
+        ')',
+      );
+    }
     
     return db;
   }
