@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lenski/models/card_model.dart' as lenski_card;
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/course/review_cards/back_card.dart';
@@ -50,6 +51,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
   late DateTime _startTime;
   bool _attemptedReload = false; // Add this field to track if we've tried reloading
 
+  // Add focus node for keyboard events
+  final FocusNode _focusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -60,12 +64,18 @@ class _ReviewScreenState extends State<ReviewScreen> {
     
     // Initialize start time for tracking study duration
     _startTime = DateTime.now();
+    
+    // Request focus when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
   }
   
   @override
   void dispose() {
     // Save study time when leaving screen
     _saveStudyTime();
+    _focusNode.dispose(); // Dispose focus node
     super.dispose();
   }
   
@@ -285,150 +295,192 @@ class _ReviewScreenState extends State<ReviewScreen> {
         await _saveStudyTime();
         return;
       },
-      child: Stack(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(boxPadding),
-            child: Center(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isFront ? const Color(0xFFF5F0F6) : const Color(0xFFFFFFFF),
-                  borderRadius: BorderRadius.circular(5.0),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 4.0,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(p.standardPadding()),
-                  child: isFront
-                      ? currentCard.type == 'reading' 
-                          ? ReadingCard(
-                              card: currentCard,
-                              courseCode: widget.course.code,
-                              onShowAnswer: toggleCard,
-                              showColors: _showColors,
-                            )
-                          :
-                        currentCard.type == 'listening'
-                          ? ListeningCard(
-                              card: currentCard,
-                              courseCode: widget.course.code,
-                              onShowAnswer: toggleCard,
-                              showColors: _showColors,
-                            )
-                          :
-                        currentCard.type == 'speaking'
-                          ? SpeakingCard(
-                              card: currentCard,
-                              courseCode: widget.course.code,
-                              onShowAnswer: toggleCard,
-                              showColors: _showColors,
-                            )
-                          :
-                        currentCard.type == 'writing'
-                          ? WritingCard(
-                              card: currentCard,
-                              courseCode: widget.course.code,
-                              onShowAnswer: toggleCard,
-                              showColors: _showColors,
-                            )
-                          :
-                        ReadingCard(
-                          card: currentCard,
-                          courseCode: widget.course.code,
-                          onShowAnswer: toggleCard,
-                          showColors: _showColors,
-                        )
-                      : BackCard(
-                          card: currentCard,
-                          courseFromCode: widget.course.fromCode,
-                          onDifficultySelected: handleDifficulty,
-                        ),
+      child: KeyboardListener(
+        focusNode: _focusNode,
+        onKeyEvent: (KeyEvent event) {
+          // Only handle key down events
+          if (event is! KeyDownEvent) {
+            return;
+          }
+          
+          // Get the logical key
+          final logicalKey = event.logicalKey;
+          
+          // Space key - flip card from front to back only
+          if (logicalKey == LogicalKeyboardKey.space && isFront) {
+            toggleCard();
+          }
+          // Number keys (when viewing the back of card)
+          else if (!isFront) {
+            // '1' key for difficult
+            if (logicalKey == LogicalKeyboardKey.digit1 || 
+                logicalKey == LogicalKeyboardKey.numpad1) {
+              handleDifficulty(1);
+            }
+            // '2' key for easy
+            else if (logicalKey == LogicalKeyboardKey.digit2 || 
+                    logicalKey == LogicalKeyboardKey.numpad2) {
+              handleDifficulty(4);
+            }
+          }
+
+          if(logicalKey == LogicalKeyboardKey.keyE) {
+            _showEditCardDialog(currentCard);
+          }
+
+          if(logicalKey == LogicalKeyboardKey.keyD) {
+            handleDelete();
+          }
+
+          if(logicalKey == LogicalKeyboardKey.escape) {
+            Navigator.of(context).pop();
+          }
+        },
+        child: Stack(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(boxPadding),
+              child: Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isFront ? const Color(0xFFF5F0F6) : const Color(0xFFFFFFFF),
+                    borderRadius: BorderRadius.circular(5.0),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 4.0,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(p.standardPadding()),
+                    child: isFront
+                        ? currentCard.type == 'reading' 
+                            ? ReadingCard(
+                                card: currentCard,
+                                courseCode: widget.course.code,
+                                onShowAnswer: toggleCard,
+                                showColors: _showColors,
+                              )
+                            :
+                          currentCard.type == 'listening'
+                            ? ListeningCard(
+                                card: currentCard,
+                                courseCode: widget.course.code,
+                                onShowAnswer: toggleCard,
+                                showColors: _showColors,
+                              )
+                            :
+                          currentCard.type == 'speaking'
+                            ? SpeakingCard(
+                                card: currentCard,
+                                courseCode: widget.course.code,
+                                onShowAnswer: toggleCard,
+                                showColors: _showColors,
+                              )
+                            :
+                          currentCard.type == 'writing'
+                            ? WritingCard(
+                                card: currentCard,
+                                courseCode: widget.course.code,
+                                onShowAnswer: toggleCard,
+                                showColors: _showColors,
+                              )
+                            :
+                          ReadingCard(
+                            card: currentCard,
+                            courseCode: widget.course.code,
+                            onShowAnswer: toggleCard,
+                            showColors: _showColors,
+                          )
+                        : BackCard(
+                            card: currentCard,
+                            courseFromCode: widget.course.fromCode,
+                            onDifficultySelected: handleDifficulty,
+                          ),
+                  ),
                 ),
               ),
             ),
-          ),
-
-          /// Icons and decor
-          Positioned(
-            top: boxPadding - iconSize / 3,
-            left: boxPadding - iconSize / 3,
-            child: FlagIcon(
-              size: iconSize,
-              borderWidth: 5.0,
-              borderColor: const Color(0xFFD9D0DB),
-              language: widget.course.name,
+            
+            /// Icons and decor
+            Positioned(
+              top: boxPadding - iconSize / 3,
+              left: boxPadding - iconSize / 3,
+              child: FlagIcon(
+                size: iconSize,
+                borderWidth: 5.0,
+                borderColor: const Color(0xFFD9D0DB),
+                language: widget.course.name,
+              ),
             ),
-          ),
-          Positioned(
-            top: boxPadding + 10,
-            right: boxPadding + 10,
-            child: IconButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              icon: const Icon(Icons.close_rounded),
+            Positioned(
+              top: boxPadding + 10,
+              right: boxPadding + 10,
+              child: IconButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                icon: const Icon(Icons.close_rounded),
+              ),
             ),
-          ),
-          
-          Positioned(
-            bottom: boxPadding + 10,
-            left: boxPadding + 10,
-            child: Column(
-              children: [
-                Text(cards.length.toString(),
-                  style: TextStyle(
-                    fontFamily: appFonts['Paragraph'], 
-                    fontWeight: FontWeight.bold, 
-                    color: Colors.grey,
+            
+            Positioned(
+              bottom: boxPadding + 10,
+              left: boxPadding + 10,
+              child: Column(
+                children: [
+                  Text(cards.length.toString(),
+                    style: TextStyle(
+                      fontFamily: appFonts['Paragraph'], 
+                      fontWeight: FontWeight.bold, 
+                      color: Colors.grey,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                Tooltip(
-                  message: 
-                    currentCard.type == 'writing' ? "How do you write this word?"
-                    : currentCard.type == 'speaking' ? "How do you pronounce this word?" 
-                    : "What does this word mean?",
-                  child: CompetenceIcon(
-                    type: currentCard.type,
-                    size: iconSize/2,
-                    gray: !_showColors,
+                  const SizedBox(height: 10),
+                  Tooltip(
+                    message: 
+                      currentCard.type == 'writing' ? "How do you write this word?"
+                      : currentCard.type == 'speaking' ? "How do you pronounce this word?" 
+                      : "What does this word mean?",
+                    child: CompetenceIcon(
+                      type: currentCard.type,
+                      size: iconSize/2,
+                      gray: !_showColors,
+                    ),
                   ),
-                ),
-              ],
-            )
-          ),
-          Positioned(
-            bottom: boxPadding + 20,
-            right: boxPadding + 20,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Edit button
-                FloatingActionButton.small(
-                  onPressed: () => _showEditCardDialog(currentCard),
-                  hoverElevation: 0,
-                  elevation: 0,
-                  backgroundColor: const Color(0xFFFFD38D),
-                  child: const Icon(Icons.edit, color: Colors.black, size: 20),
-                ),
-                const SizedBox(height: 16),
-                // Delete button (now smaller)
-                FloatingActionButton.small(
-                  onPressed: handleDelete,
-                  hoverElevation: 0,
-                  elevation: 0,
-                  backgroundColor: const Color(0xFFFFD38D),
-                  child: const Icon(Icons.delete, color: Colors.black, size: 20),
-                ),
-              ],
+                ],
+              )
             ),
-          ),
-        ],
+            Positioned(
+              bottom: boxPadding + 20,
+              right: boxPadding + 20,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Edit button
+                  FloatingActionButton.small(
+                    onPressed: () => _showEditCardDialog(currentCard),
+                    hoverElevation: 0,
+                    elevation: 0,
+                    backgroundColor: const Color(0xFFFFD38D),
+                    child: const Icon(Icons.edit, color: Colors.black, size: 20),
+                  ),
+                  const SizedBox(height: 16),
+                  // Delete button (now smaller)
+                  FloatingActionButton.small(
+                    onPressed: handleDelete,
+                    hoverElevation: 0,
+                    elevation: 0,
+                    backgroundColor: const Color(0xFFFFD38D),
+                    child: const Icon(Icons.delete, color: Colors.black, size: 20),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
