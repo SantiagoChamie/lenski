@@ -1,33 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/card_model.dart' as lenski_card;
 
-class SpeakingCard extends StatefulWidget {
+class SpeakingCard extends StatelessWidget {
   final lenski_card.Card card;
   final String courseCode;
   final VoidCallback onShowAnswer;
+  final bool showColors;
 
   const SpeakingCard({
     super.key,
     required this.card,
     required this.courseCode,
     required this.onShowAnswer,
+    this.showColors = true,
   });
 
   @override
-  State<SpeakingCard> createState() => _SpeakingCardState();
-}
-
-class _SpeakingCardState extends State<SpeakingCard> {
-  @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: double.infinity,
+      width: double.infinity, // Make container take full width
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center, // Align text to the left
         children: [
           Text(
-            '${widget.courseCode.toLowerCase()}.',
+            '${courseCode.toLowerCase()}.',
             style: const TextStyle(
               fontSize: 18.0,
               color: Color(0xFF99909B),
@@ -35,51 +32,29 @@ class _SpeakingCardState extends State<SpeakingCard> {
             ),
           ),
           Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center, // Align text to the left
             children: [
-              Text.rich(
-                TextSpan(
-                  text: widget.card.context.contains(widget.card.front)
-                      ? widget.card.context.substring(0, widget.card.context.indexOf(widget.card.front))
-                      : widget.card.context,
-                  style: const TextStyle(
-                    fontSize: 24.0,
-                    color: Color.fromARGB(255, 0, 0, 0),
-                    fontFamily: "Varela Round",
-                  ),
-                  children: widget.card.context.contains(widget.card.front)
-                      ? [
-                          const TextSpan(
-                            text: '_______',
-                            style: TextStyle(
-                              fontSize: 24.0,
-                              color: Color(0xFFDE2C50), // Speaking competence color
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextSpan(
-                            text: widget.card.context.substring(
-                              widget.card.context.indexOf(widget.card.front) + widget.card.front.length,
-                            ),
-                          ),
-                        ]
-                      : [],
-                ),
-              ),
-              const SizedBox(height: 16.0),
               Text(
-                '~${widget.card.back}~',
+                card.front,
                 style: const TextStyle(
-                  fontSize: 18.0,
-                  color: Color(0xFF99909B),
+                  fontSize: 24.0,
+                  color: Color.fromARGB(255, 0, 0, 0),
                   fontFamily: "Varela Round",
-                  fontStyle: FontStyle.italic,
                 ),
               ),
+              if (card.context != card.front)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text.rich(
+                    TextSpan(
+                      children: _buildContextTextSpans(),
+                    ),
+                  ),
+                ),
             ],
           ),
           ElevatedButton(
-            onPressed: widget.onShowAnswer,
+            onPressed: onShowAnswer,
             child: const Text(
               'Show answer',
               style: TextStyle(
@@ -92,5 +67,56 @@ class _SpeakingCardState extends State<SpeakingCard> {
         ],
       ),
     );
+  }
+
+  List<TextSpan> _buildContextTextSpans() {
+    // Check if the front text is contained in the context
+    final int index = card.context.indexOf(card.front);
+    
+    // If front text isn't in context, just show the context as plain text
+    if (index == -1) {
+      return [
+        TextSpan(
+          text: card.context,
+          style: const TextStyle(
+            fontSize: 18.0,
+            color: Color(0xFF99909B),
+            fontFamily: "Varela Round",
+          ),
+        ),
+      ];
+    }
+    
+    // If front text is in context, split into three parts
+    return [
+      // Text before the highlighted word
+      TextSpan(
+        text: card.context.substring(0, index),
+        style: const TextStyle(
+          fontSize: 18.0,
+          color: Color(0xFF99909B),
+          fontFamily: "Varela Round",
+        ),
+      ),
+      // The highlighted word
+      TextSpan(
+        text: card.front,
+        style: TextStyle(
+          fontSize: 18.0,
+          color: showColors ? const Color(0xFFDE2C50) : const Color(0xFF808080),
+          fontFamily: "Varela Round",
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      // Text after the highlighted word
+      TextSpan(
+        text: card.context.substring(index + card.front.length),
+        style: const TextStyle(
+          fontSize: 18.0,
+          color: Color(0xFF99909B),
+          fontFamily: "Varela Round",
+        ),
+      ),
+    ];
   }
 }

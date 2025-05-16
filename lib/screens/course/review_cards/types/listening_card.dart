@@ -6,12 +6,14 @@ class ListeningCard extends StatelessWidget {
   final lenski_card.Card card;
   final String courseCode;
   final VoidCallback onShowAnswer;
+  final bool showColors;
 
   const ListeningCard({
     super.key,
     required this.card,
     required this.courseCode,
     required this.onShowAnswer,
+    this.showColors = true,
   });
 
   @override
@@ -33,8 +35,8 @@ class ListeningCard extends StatelessWidget {
           Column(
             children: [
               Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFD52CDE), // Listening competence color
+                decoration: BoxDecoration(
+                  color: showColors ? const Color(0xFFD52CDE) : const Color(0xFF808080), // Listening competence color
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(

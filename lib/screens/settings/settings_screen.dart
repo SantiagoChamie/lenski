@@ -17,6 +17,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _contextualTranslationEnabled = false;
   bool _premiumApiEnabled = false;
   bool _streakIndicatorEnabled = true;
+  bool _coloredCompetenceCards = true; // New setting
 
   // Create an instance of MigrationHandler
   final MigrationHandler _migrationHandler = MigrationHandler();
@@ -30,6 +31,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadContextualTranslationSetting();
     _loadPremiumApiSetting();
     _loadStreakIndicatorSetting();
+    _loadColoredCompetenceCardsSetting(); // Add this line
   }
 
   /// Loads the saved API key from shared preferences and sets it in the text controller.
@@ -94,6 +96,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await prefs.setBool('streak_indicator_enabled', value);
     setState(() {
       _streakIndicatorEnabled = value;
+    });
+  }
+
+  /// Loads the colored competence cards setting from shared preferences
+  Future<void> _loadColoredCompetenceCardsSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _coloredCompetenceCards = prefs.getBool('colored_competence_cards') ?? true;
+    });
+  }
+
+  /// Saves the colored competence cards setting to shared preferences
+  Future<void> _saveColoredCompetenceCardsSetting(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('colored_competence_cards', value);
+    setState(() {
+      _coloredCompetenceCards = value;
     });
   }
 
@@ -374,6 +393,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Switch(
                           value: _streakIndicatorEnabled,
                           onChanged: _saveStreakIndicatorSetting,
+                          activeColor: const Color(0xFF2C73DE),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Use colored competence cards',
+                          style: TextStyle(fontFamily: 'Sansation'),
+                        ),
+                        Switch(
+                          value: _coloredCompetenceCards,
+                          onChanged: _saveColoredCompetenceCardsSetting,
                           activeColor: const Color(0xFF2C73DE),
                         ),
                       ],

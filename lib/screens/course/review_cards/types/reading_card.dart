@@ -5,12 +5,14 @@ class ReadingCard extends StatelessWidget {
   final lenski_card.Card card;
   final String courseCode;
   final VoidCallback onShowAnswer;
+  final bool showColors;
 
   const ReadingCard({
     super.key,
     required this.card,
     required this.courseCode,
     required this.onShowAnswer,
+    this.showColors = true,
   });
 
   @override
@@ -99,9 +101,9 @@ class ReadingCard extends StatelessWidget {
       // The highlighted word
       TextSpan(
         text: card.front,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 18.0,
-          color: Color(0xFFEDA42E),
+          color: showColors ? const Color(0xFFEDA42E) : const Color(0xFF808080),
           fontFamily: "Varela Round",
           fontWeight: FontWeight.bold,
         ),

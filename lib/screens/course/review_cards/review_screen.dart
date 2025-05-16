@@ -40,6 +40,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   bool isFront = true;
   bool isAudioEnabled = true; // Default value
   bool isTtsAvailable = false; // New state variable
+  bool _showColors = true; 
   List<lenski_card.Card> cards = [];
   final CardRepository repository = CardRepository();
   final CourseRepository courseRepository = CourseRepository();
@@ -55,6 +56,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
     _loadAudioPreference();
     _loadCards();
     _checkTtsAvailability();
+    _loadColors();
     
     // Initialize start time for tracking study duration
     _startTime = DateTime.now();
@@ -67,6 +69,13 @@ class _ReviewScreenState extends State<ReviewScreen> {
     super.dispose();
   }
   
+  Future<void> _loadColors() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _showColors = prefs.getBool('colored_competence_cards') ?? true;
+    });
+  }
+
   /// Saves the time spent studying to session repository
   Future<void> _saveStudyTime() async {
     final now = DateTime.now();
@@ -301,6 +310,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                               card: currentCard,
                               courseCode: widget.course.code,
                               onShowAnswer: toggleCard,
+                              showColors: _showColors,
                             )
                           :
                         currentCard.type == 'listening'
@@ -308,6 +318,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                               card: currentCard,
                               courseCode: widget.course.code,
                               onShowAnswer: toggleCard,
+                              showColors: _showColors,
                             )
                           :
                         currentCard.type == 'speaking'
@@ -315,6 +326,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                               card: currentCard,
                               courseCode: widget.course.code,
                               onShowAnswer: toggleCard,
+                              showColors: _showColors,
                             )
                           :
                         currentCard.type == 'writing'
@@ -322,12 +334,14 @@ class _ReviewScreenState extends State<ReviewScreen> {
                               card: currentCard,
                               courseCode: widget.course.code,
                               onShowAnswer: toggleCard,
+                              showColors: _showColors,
                             )
                           :
                         ReadingCard(
                           card: currentCard,
                           courseCode: widget.course.code,
                           onShowAnswer: toggleCard,
+                          showColors: _showColors,
                         )
                       : BackCard(
                           card: currentCard,
@@ -382,6 +396,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   child: CompetenceIcon(
                     type: currentCard.type,
                     size: iconSize/2,
+                    gray: !_showColors,
                   ),
                 ),
               ],

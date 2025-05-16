@@ -5,17 +5,18 @@ import 'package:flutter/material.dart';
 class CompetenceIcon extends StatelessWidget {
   final double size;
   final String type;
+  final bool gray;
 
   /// Creates a CompetenceIcon widget.
   /// 
   /// [size] is the size of the icon.
   /// [type] is the type of competence (e.g., listening, speaking, reading, writing).
-  const CompetenceIcon({super.key, required this.size, required this.type});
+  const CompetenceIcon({super.key, required this.size, required this.type, this.gray = false});
 
   @override
   Widget build(BuildContext context) {
     final iconData = _getIconData(type);
-    final color = _getColor(type);
+    final color = _getColor(gray ? 'null' : type);
 
     return Container(
       height: size,
@@ -57,7 +58,7 @@ class CompetenceIcon extends StatelessWidget {
       case 'writing':
         return const Color(0xFFEDE72D);
       default:
-        return Colors.grey;
+        return const Color(0xFF808080);
     }
   }
 }

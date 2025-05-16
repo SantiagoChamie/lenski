@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/models/card_model.dart' as lenski_card;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WritingCard extends StatefulWidget {
   final lenski_card.Card card;
   final String courseCode;
   final VoidCallback onShowAnswer;
+  final bool showColors;
 
   const WritingCard({
     super.key,
     required this.card,
     required this.courseCode,
     required this.onShowAnswer,
+    this.showColors = true,
   });
 
   @override
@@ -19,7 +22,7 @@ class WritingCard extends StatefulWidget {
 
 class _WritingCardState extends State<WritingCard> {
   final TextEditingController _controller = TextEditingController();
-
+  
   @override
   void dispose() {
     _controller.dispose();
@@ -60,21 +63,28 @@ class _WritingCardState extends State<WritingCard> {
                           WidgetSpan(
                             child: SizedBox(
                               width: 120,
-                              child: TextField(
-                                controller: _controller,
-                                cursorColor: const Color(0xFFEDE72D),
-                                decoration: const InputDecoration(
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                                  focusedBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
+                              child: Theme(
+                                data: Theme.of(context).copyWith(
+                                  textSelectionTheme: TextSelectionThemeData(
+                                    selectionColor: widget.showColors ? const Color(0xFFEDE72D) : const Color.fromARGB(255, 176, 176, 176), // Writing competence color
                                   ),
-                                  border: UnderlineInputBorder(),
-                                  isDense: true,
                                 ),
-                                style: const TextStyle(
-                                  fontSize: 24.0,
-                                  color: Color.fromARGB(255, 0, 0, 0),
-                                  fontFamily: "Varela Round",
+                                child: TextField(
+                                  controller: _controller,
+                                  cursorColor: widget.showColors ? const Color(0xFFEDE72D) : const Color(0xFF808080), // Writing competence color
+                                  decoration: const InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                                    focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
+                                    ),
+                                    border: UnderlineInputBorder(),
+                                    isDense: true,
+                                  ),
+                                  style: const TextStyle(
+                                    fontSize: 24.0,
+                                    color: Color.fromARGB(255, 0, 0, 0),
+                                    fontFamily: "Varela Round",
+                                  ),
                                 ),
                               ),
                             ),
