@@ -115,31 +115,22 @@ class _LTextState extends State<LText> {
     // Create a sanitized version of the full text
     String sanitizedText = fullText.replaceAll('\n', ' ');
 
-    // First try with word boundaries
+    // Check if the text contains the selected text with word boundaries
     final containsWithBoundaries = _containsWordWithBoundaries(sanitizedText, selectedText);
     
-    // Use only Approach 1 (sentence-based) with a longer max length
+    // Split the text into sentences
     final sentences = sanitizedText.split(RegExp(r'(?<=[.!?。！？？])\s*'));
     
-    // First attempt: search with word boundaries
+    // FIRST: Try all approaches WITH word boundaries
     if (containsWithBoundaries) {
+      // Try sentences with word boundaries
       for (final sentence in sentences) {
         if (_containsWordWithBoundaries(sentence, selectedText) && sentence.length <= 1000) {
           return _cleanTrailingPunctuation(sentence.trim());
         }
       }
-    }
-    
-    // Second attempt: fall back to regular contains
-    for (final sentence in sentences) {
-      if (sentence.contains(selectedText) && sentence.length <= 1000) {
-        return _cleanTrailingPunctuation(sentence.trim());
-      }
-    }
-
-    // If no suitable sentence found, return a larger substring around the selected text
-    if (containsWithBoundaries) {
-      // Try to find the position with word boundaries
+      
+      // If no suitable sentence found with boundaries, try a larger substring around the selected text
       int selectedIndex = _findWordWithBoundariesIndex(sanitizedText, selectedText);
       if (selectedIndex != -1) {
         int contextStart = selectedIndex - 500;
@@ -152,7 +143,15 @@ class _LTextState extends State<LText> {
       }
     }
     
-    // Fall back to the current approach
+    // SECOND: Fall back to approaches WITHOUT word boundaries
+    // Try sentences without requiring word boundaries
+    for (final sentence in sentences) {
+      if (sentence.contains(selectedText) && sentence.length <= 1000) {
+        return _cleanTrailingPunctuation(sentence.trim());
+      }
+    }
+    
+    // Fall back to substring approach without boundaries
     int selectedIndex = sanitizedText.indexOf(selectedText);
     if (selectedIndex != -1) {
       int contextStart = selectedIndex - 500;
@@ -169,71 +168,41 @@ class _LTextState extends State<LText> {
   }
 
   String findContext(String selectedText, String fullText, {int maxLength = 100}) {
-    // First, create a sanitized version of the full text
+    // Create a sanitized version of the full text
     String sanitizedText = fullText.replaceAll('\n', ' ');
     
     // Check if the selected text exists with word boundaries
     final containsWithBoundaries = _containsWordWithBoundaries(sanitizedText, selectedText);
 
-    // Approach 1: Split by sentence-ending punctuation (including CJK and Arabic)
+    // Split using different approaches
     final sentences = sanitizedText.split(RegExp(r'(?<=[.!?。！？？])\s*'));
+    final fragments = sanitizedText.split(RegExp(r'(?<=[.!?,;:()\[\]{}<>\-。！？，；：（）【】［］｛｝「」『』、、；¿¡])\s*'));
+    final lines = fullText.split('\n');
     
-    // First try with word boundaries
+    // FIRST: Try all approaches WITH word boundaries
     if (containsWithBoundaries) {
+      // Approach 1: Try sentences with word boundaries
       for (final sentence in sentences) {
         if (_containsWordWithBoundaries(sentence, selectedText) && sentence.length <= maxLength) {
           return _cleanTrailingPunctuation(sentence.trim());
         }
       }
-    }
-    
-    // Fall back to regular contains
-    for (final sentence in sentences) {
-      if (sentence.contains(selectedText) && sentence.length <= maxLength) {
-        return _cleanTrailingPunctuation(sentence.trim());
-      }
-    }
-
-    // Approach 2: Split by all punctuation (including CJK and Arabic)
-    final fragments = sanitizedText.split(RegExp(r'(?<=[.!?,;:()\[\]{}<>\-。！？，；：（）【】［］｛｝「」『』、、；¿¡])\s*'));
-    
-    // First try with word boundaries
-    if (containsWithBoundaries) {
+      
+      // Approach 2: Try fragments with word boundaries
       for (final fragment in fragments) {
         if (_containsWordWithBoundaries(fragment, selectedText) && fragment.length <= maxLength) {
           return _cleanTrailingPunctuation(fragment.trim());
         }
       }
-    }
-    
-    // Fall back to regular contains
-    for (final fragment in fragments) {
-      if (fragment.contains(selectedText) && fragment.length <= maxLength) {
-        return _cleanTrailingPunctuation(fragment.trim());
-      }
-    }
-
-    // Approach 3: Split by original line breaks
-    final lines = fullText.split('\n');
-    
-    // First try with word boundaries
-    if (containsWithBoundaries) {
+      
+      // Approach 3: Try lines with word boundaries
       for (final line in lines) {
         if (_containsWordWithBoundaries(line, selectedText) && line.length <= maxLength) {
           return _cleanTrailingPunctuation(line.trim());
         }
       }
-    }
-    
-    // Fall back to regular contains
-    for (final line in lines) {
-      if (line.contains(selectedText) && line.length <= maxLength) {
-        return _cleanTrailingPunctuation(line.trim());
-      }
-    }
-
-    // Fallback: If no suitable context found, return a substring around the selected text
-    if (containsWithBoundaries) {
+      
+      // If no suitable context found with boundaries, try a substring with boundaries
       int selectedIndex = _findWordWithBoundariesIndex(sanitizedText, selectedText);
       if (selectedIndex != -1) {
         int contextStart = selectedIndex - 50;
@@ -246,7 +215,30 @@ class _LTextState extends State<LText> {
       }
     }
     
-    // Fall back to current approach
+    // SECOND: Fall back to approaches WITHOUT word boundaries
+    
+    // Try sentences without word boundaries
+    for (final sentence in sentences) {
+      if (sentence.contains(selectedText) && sentence.length <= maxLength) {
+        return _cleanTrailingPunctuation(sentence.trim());
+      }
+    }
+    
+    // Try fragments without word boundaries
+    for (final fragment in fragments) {
+      if (fragment.contains(selectedText) && fragment.length <= maxLength) {
+        return _cleanTrailingPunctuation(fragment.trim());
+      }
+    }
+    
+    // Try lines without word boundaries
+    for (final line in lines) {
+      if (line.contains(selectedText) && line.length <= maxLength) {
+        return _cleanTrailingPunctuation(line.trim());
+      }
+    }
+
+    // Last resort: try substring approach without boundaries
     int selectedIndex = sanitizedText.indexOf(selectedText);
     if (selectedIndex != -1) {
       int contextStart = selectedIndex - 50;
@@ -258,7 +250,7 @@ class _LTextState extends State<LText> {
       return _cleanTrailingPunctuation(sanitizedText.substring(contextStart, contextEnd).trim());
     }
 
-    // Last resort: return the selected text itself
+    // If all else fails, return the selected text itself
     return selectedText;
   }
 

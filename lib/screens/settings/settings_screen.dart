@@ -200,7 +200,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Export cancelled by user'),
             backgroundColor: Colors.orange,
           ),

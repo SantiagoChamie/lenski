@@ -90,9 +90,6 @@ class MigrationHandler {
       final sessionsList = await db.query('sessions');
       exportData["data"]["sessions"] = sessionsList;
 
-      // 8. Close the database connection used for export
-      await db.close();
-
       // 9. Create a JSON string from the data
       final jsonString = jsonEncode(exportData);
 
