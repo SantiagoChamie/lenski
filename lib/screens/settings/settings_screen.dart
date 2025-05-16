@@ -112,7 +112,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           content: const Text(
-            'Importing data will replace all your current courses, books, cards, and progress. This action cannot be undone. Do you want to continue?',
+            'Importing data will replace all your current courses, books, cards, and progress \nThis action cannot be undone. Do you want to continue?',
             style: TextStyle(
               fontSize: 16,
             ),

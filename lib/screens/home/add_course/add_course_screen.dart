@@ -48,7 +48,6 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   //TODO: make this elegant
   String _selectedLanguage = 'English';
   String _selectedLanguageCode = languageCodes['English']!;
-  String _selectedFlagUrl = languageFlags['English']![0];
   
   String _selectedOriginLanguage = 'Español';
   String _selectedOriginLanguageCode = languageCodes['Español']!;
@@ -136,7 +135,6 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       reading: _selectedCompetences.contains('reading'),
       writing: _selectedCompetences.contains('writing'),
       color: randomColor,
-      imageUrl: _selectedFlagUrl,
       dailyGoal: _dailyGoal,
       totalGoal: _totalGoal,
       goalType: goalTypeStr, // Add this line to set the goalType
@@ -168,7 +166,6 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   void _updateSelectedLanguage(String language, String flagUrl, String code) {
     setState(() {
       _selectedLanguage = language;
-      _selectedFlagUrl = flagUrl;
       _selectedLanguageCode = code;
     });
   }

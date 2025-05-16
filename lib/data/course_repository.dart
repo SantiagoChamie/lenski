@@ -41,7 +41,7 @@ class CourseRepository {
     // Create or open the database
     Database db = await openDatabase(
       path,
-      version: 4,
+      version: 5, // Increasing version due to schema change
       onCreate: (db, version) async {
         await db.execute(
           'CREATE TABLE courses('
@@ -55,7 +55,6 @@ class CourseRepository {
           'reading INTEGER, '
           'writing INTEGER, '
           'color INTEGER, '
-          'imageUrl TEXT, '
           'streak INTEGER DEFAULT 0, '
           'lastAccess INTEGER DEFAULT 0, '
           'dailyGoal INTEGER DEFAULT 100, '
@@ -65,6 +64,54 @@ class CourseRepository {
           'goalComplete INTEGER DEFAULT 0'
           ')',
         );
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        // Handle database schema changes when upgrading
+        if (oldVersion < 5) {
+          // If upgrading from version 4 to 5, remove the imageUrl column
+          try {
+            // Creating a new table without the imageUrl column
+            await db.execute(
+              'CREATE TABLE courses_new('
+              'id INTEGER PRIMARY KEY, '
+              'name TEXT, '
+              'level TEXT, '
+              'code TEXT, '
+              'fromCode TEXT, '
+              'listening INTEGER, '
+              'speaking INTEGER, '
+              'reading INTEGER, '
+              'writing INTEGER, '
+              'color INTEGER, '
+              'streak INTEGER DEFAULT 0, '
+              'lastAccess INTEGER DEFAULT 0, '
+              'dailyGoal INTEGER DEFAULT 100, '
+              'totalGoal INTEGER DEFAULT 10000, '
+              'visible INTEGER DEFAULT 1, '
+              'goalType TEXT DEFAULT "learn", '
+              'goalComplete INTEGER DEFAULT 0'
+              ')',
+            );
+            
+            // Copy data from the old table to the new one
+            await db.execute(
+              'INSERT INTO courses_new '
+              'SELECT id, name, level, code, fromCode, listening, speaking, '
+              'reading, writing, color, streak, lastAccess, dailyGoal, '
+              'totalGoal, visible, goalType, goalComplete FROM courses'
+            );
+            
+            // Drop the old table
+            await db.execute('DROP TABLE courses');
+            
+            // Rename the new table to the original name
+            await db.execute('ALTER TABLE courses_new RENAME TO courses');
+            
+            print('Database schema updated: removed imageUrl column from courses table');
+          } catch (e) {
+            print('Error updating database schema: $e');
+          }
+        }
       },
       onOpen: (db) async {
         // Always check if courses table exists
@@ -85,7 +132,6 @@ class CourseRepository {
             'reading INTEGER, '
             'writing INTEGER, '
             'color INTEGER, '
-            'imageUrl TEXT, '
             'streak INTEGER DEFAULT 0, '
             'lastAccess INTEGER DEFAULT 0, '
             'dailyGoal INTEGER DEFAULT 100, '

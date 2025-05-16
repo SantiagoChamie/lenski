@@ -66,8 +66,9 @@ class _CoursesState extends State<Courses> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator(color: Color(0xFF2C73DE)));
                   } else if (snapshot.hasError) {
-                    return const Center(child: Text('Error loading courses \n Please refresh the app or contact support.',
-                      style: TextStyle(fontFamily: 'Sansation')));
+                    return const Center(child: Text('Error loading courses\nPlease restart the app or contact support if the issue persists.',
+                      style: TextStyle(fontFamily: 'Sansation'),
+                      textAlign: TextAlign.center,));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return const CourseList(courses: []);
                   } else {

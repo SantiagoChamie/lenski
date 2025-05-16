@@ -43,7 +43,7 @@ class BookRepository {
     }
     
     // Open database without depending on callbacks
-    Database db = await openDatabase(path, version: 4);
+    Database db = await openDatabase(path, version: 5);
     
     // Always check if books table exists
     final tables = await db.query('sqlite_master',

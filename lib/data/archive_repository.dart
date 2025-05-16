@@ -38,7 +38,7 @@ class ArchiveRepository {
     }
     
     // Open database without depending on callbacks
-    Database db = await openDatabase(path, version: 4);
+    Database db = await openDatabase(path, version: 5);
     
     // Always check if archived_books table exists
     final tables = await db.query('sqlite_master',
@@ -46,7 +46,6 @@ class ArchiveRepository {
         whereArgs: ['table', 'archived_books']);
         
     if (tables.isEmpty) {
-      print('Creating archived_books table in unified database');
       // Create the archived_books table if it doesn't exist
       await db.execute(
         'CREATE TABLE archived_books(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, language TEXT, category TEXT, subcategory TEXT, imageUrl TEXT, finishedDate INTEGER)',

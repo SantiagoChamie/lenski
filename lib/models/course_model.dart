@@ -11,7 +11,6 @@ class Course {
   bool reading;
   bool writing;
   Color color;
-  String imageUrl;
   int streak;
   int lastAccess;
   int dailyGoal; // Daily word reading goal
@@ -49,7 +48,6 @@ class Course {
     required this.reading,
     required this.writing,
     required this.color,
-    required this.imageUrl,
     this.streak = 0,
     DateTime? lastAccess,
     required this.dailyGoal,
@@ -74,7 +72,6 @@ class Course {
       'reading': reading ? 1 : 0,
       'writing': writing ? 1 : 0,
       'color': color.toARGB32(),
-      'imageUrl': imageUrl,
       'streak': streak,
       'lastAccess': lastAccess,
       'dailyGoal': dailyGoal,
@@ -97,7 +94,6 @@ class Course {
       reading: map['reading'] == 1,
       writing: map['writing'] == 1,
       color: Color(map['color']),
-      imageUrl: map['imageUrl'],
       streak: map['streak'] ?? 0,
       lastAccess: _intToDateTime(map['lastAccess'] ?? _dateTimeToInt(DateTime.now().subtract(const Duration(days: 1)))),
       dailyGoal: map['dailyGoal'],
@@ -138,7 +134,6 @@ class Course {
       reading: reading ?? this.reading,
       writing: writing ?? this.writing,
       color: color ?? this.color,
-      imageUrl: imageUrl ?? this.imageUrl,
       streak: streak ?? this.streak,
       lastAccess: lastAccess ?? _intToDateTime(this.lastAccess),
       dailyGoal: dailyGoal ?? this.dailyGoal,

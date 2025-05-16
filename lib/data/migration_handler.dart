@@ -30,7 +30,7 @@ class MigrationHandler {
       // 1. Create data structure with metadata
       final Map<String, dynamic> exportData = {
         "metadata": {
-          "version": "1.0",
+          "version": "3.0",
           "exportDate": DateTime.now().toIso8601String(),
           "appVersion": "1.0.0", // You might want to get this dynamically
         },
@@ -300,7 +300,6 @@ class MigrationHandler {
         reading INTEGER, 
         writing INTEGER, 
         color INTEGER, 
-        imageUrl TEXT, 
         streak INTEGER DEFAULT 0, 
         lastAccess INTEGER DEFAULT 0, 
         dailyGoal INTEGER DEFAULT 100, 
@@ -390,7 +389,6 @@ class MigrationHandler {
         whereArgs: ['table', tableName]);
         
     if (tables.isEmpty) {
-      print('Creating $tableName table for import');
       await txn.execute(createTableSql);
     }
   }
@@ -400,21 +398,18 @@ class MigrationHandler {
     try {
       // Check for required metadata
       if (!data.containsKey('metadata') || !data.containsKey('data')) {
-        print('Missing required top-level keys');
         return false;
       }
       
       // Check metadata format
       final metadata = data['metadata'] as Map<String, dynamic>?;
       if (metadata == null || !metadata.containsKey('version')) {
-        print('Invalid or missing metadata');
         return false;
       }
       
       // Check data structure
       final appData = data['data'] as Map<String, dynamic>?;
       if (appData == null) {
-        print('Missing data section');
         return false;
       }
       
@@ -422,21 +417,18 @@ class MigrationHandler {
       final expectedSections = ['courses', 'cards', 'books', 'bookSentences', 'archivedBooks', 'sessions'];
       for (final section in expectedSections) {
         if (!appData.containsKey(section)) {
-          print('Missing data section: $section');
           return false;
         }
       }
       
       // Validate version compatibility
       final version = metadata['version'];
-      if (version != '1.0') {
-        print('Incompatible version: $version');
+      if (version != '3.0') {
         return false;
       }
       
       return true;
     } catch (e) {
-      print('Error validating export format: $e');
       return false;
     }
   }
@@ -455,18 +447,18 @@ class MigrationHandler {
       // Check if database exists
       if (!await dbFile.exists()) {
         // No database to backup, likely a new installation
-        return dbPath + '_empty';
+        return '${dbPath}_empty';
       }
       
-      final backupPath = '${dbPath}_backup_${DateTime.now().millisecondsSinceEpoch}';
+      final backupPath = '${dbPath}_backup_${DateTime.now().day.toString() +
+          DateTime.now().month.toString() +
+          DateTime.now().year.toString()}';
       
       // Copy the database file to backup location
       await dbFile.copy(backupPath);
       
-      print('Database backed up to: $backupPath');
       return backupPath;
     } catch (e) {
-      print('Error creating database backup: $e');
       return null;
     }
   }
@@ -486,14 +478,11 @@ class MigrationHandler {
         
         // Restore from backup
         await backupFile.copy(currentDbPath);
-        print('Database restored from backup: $backupPath');
         return true;
       } else {
-        print('Backup file not found: $backupPath');
         return false;
       }
     } catch (e) {
-      print('Error restoring database from backup: $e');
       return false;
     }
   }
