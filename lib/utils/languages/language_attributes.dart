@@ -1,4 +1,5 @@
 // Language attributes for each language
+// used to calculate the difficulty of a course
 final Map<String, Map<String, dynamic>> languageAttributes = {
   'AR': {
     'languageFamily': 'Afro-Asiatic',

@@ -1,4 +1,6 @@
 // Flags for each language
+// used to display the language in the app
+// and to cycle through different flag options
 const Map<String, List<String>> languageFlags = {
   'العربية': [
     'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Flag_of_the_Arab_League.svg/1200px-Flag_of_the_Arab_League.svg.png',
