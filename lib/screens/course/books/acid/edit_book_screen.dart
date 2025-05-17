@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lenski/models/book_model.dart';
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/utils/fonts.dart';
@@ -22,18 +23,27 @@ class _EditBookScreenState extends State<EditBookScreen> {
   late TextEditingController _titleController;
   late TextEditingController _imageUrlController;
   final BookRepository _bookRepository = BookRepository();
+  
+  // Add focus node for keyboard events
+  final FocusNode _keyboardFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.book.name);
     _imageUrlController = TextEditingController(text: widget.book.imageUrl ?? '');
+    
+    // Request focus when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _keyboardFocusNode.requestFocus();
+    });
   }
 
   @override
   void dispose() {
     _titleController.dispose();
     _imageUrlController.dispose();
+    _keyboardFocusNode.dispose(); // Dispose the focus node
     super.dispose();
   }
 
@@ -102,6 +112,51 @@ class _EditBookScreenState extends State<EditBookScreen> {
     }
   }
 
+    /// Shows a confirmation dialog for archiving the book.
+  Future<void> _showArchiveConfirmation() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Archive Book',
+          style: TextStyle(
+            fontSize: 24, 
+            fontFamily: appFonts['Subtitle'],
+          ),
+        ),
+        content: Text('Are you sure you want to archive this book? Archiving will remove all of this book\'s contents.',
+          style: TextStyle(
+            fontSize: 16, 
+            fontFamily: appFonts['Paragraph'],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancel',
+              style: TextStyle(color: Colors.red, fontSize: 14, fontFamily: appFonts['Detail']),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFF2C73DE),
+              textStyle: TextStyle(fontSize: 14, fontFamily: appFonts['Detail']),
+            ),
+            child: const Text('Archive'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      final bookRepository = BookRepository();
+      await bookRepository.archiveBook(widget.book);
+      if (mounted) {
+        Navigator.pop(context); // Close book screen after archiving
+      }
+    }
+  }
+
   Widget _buildDetailsSection() {
     return SingleChildScrollView(
       child: Theme(
@@ -156,10 +211,7 @@ class _EditBookScreenState extends State<EditBookScreen> {
               SizedBox(
                 child: TextButton(
                   onPressed: () async {
-                    await _bookRepository.archiveBook(widget.book);
-                    if (mounted) {
-                      widget.onBackPressed();
-                    }
+                    await _showArchiveConfirmation();
                   },
                   style: TextButton.styleFrom(
                     foregroundColor: const Color(0xFF2C73DE),
@@ -228,87 +280,114 @@ class _EditBookScreenState extends State<EditBookScreen> {
   Widget build(BuildContext context) {
     final p = Proportions(context);
 
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.only(bottom: p.standardPadding()),
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: p.createCourseWidth(),
-              maxHeight: p.createCourseHeight(),
-            ),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F0F6),
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 2,
-                  offset: Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Stack(
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(p.standardPadding() * 2),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Edit Book',
-                        style: TextStyle(fontSize: 24, fontFamily: appFonts['Title']!),
-                      ),
-                      const SizedBox(height: 24),
-                      Expanded(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 300,
-                              height: double.infinity,
-                              padding: const EdgeInsets.only(bottom: 24), // Space for the button
-                              child: _buildImageSection(),
-                            ),
-                            const SizedBox(width: 32),
-                            Expanded(
-                              child: _buildDetailsSection(),
-                            ),
-                          ],
+    return KeyboardListener(
+      focusNode: _keyboardFocusNode,
+      onKeyEvent: (KeyEvent event) {
+        // Only process KeyDownEvent
+        if (event is KeyDownEvent) {
+          // Check for Escape key
+          if (event.logicalKey == LogicalKeyboardKey.escape) {
+            widget.onBackPressed();
+          }
+          // Check for Enter key
+          else if (event.logicalKey == LogicalKeyboardKey.enter) {
+            _saveChanges();
+          }
+          // Check for Delete key
+          else if (event.logicalKey == LogicalKeyboardKey.delete || event.logicalKey == LogicalKeyboardKey.keyD) {
+            _deleteBook(context);
+          }
+
+          // Check for 'A' key
+          else if (event.logicalKey == LogicalKeyboardKey.keyA) {
+            if(widget.book.finished) {
+              _showArchiveConfirmation();
+            }
+          }
+        }
+      },
+      child: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: p.standardPadding()),
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: p.createCourseWidth(),
+                maxHeight: p.createCourseHeight(),
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F0F6),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 2,
+                    offset: Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(p.standardPadding() * 2),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Edit Book',
+                          style: TextStyle(fontSize: 24, fontFamily: appFonts['Title']!),
                         ),
-                      ),
-                      SizedBox(
-                        height: p.sidebarButtonWidth(),
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _saveChanges,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2C73DE),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                        const SizedBox(height: 24),
+                        Expanded(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 300,
+                                height: double.infinity,
+                                padding: const EdgeInsets.only(bottom: 24), // Space for the button
+                                child: _buildImageSection(),
+                              ),
+                              const SizedBox(width: 32),
+                              Expanded(
+                                child: _buildDetailsSection(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: p.sidebarButtonWidth(),
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _saveChanges,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2C73DE),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: Text(
+                              "Save Changes",
+                              style: TextStyle(
+                                fontFamily: appFonts['Detail']!,
+                                fontSize: 30,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
-                          child: Text(
-                            "Save Changes",
-                            style: TextStyle(
-                              fontFamily: appFonts['Detail']!,
-                              fontSize: 30,
-                              color: Colors.white,
-                            ),
-                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                Positioned(
-                  top: 10,
-                  left: 10,
-                  child: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: widget.onBackPressed,
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: widget.onBackPressed,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

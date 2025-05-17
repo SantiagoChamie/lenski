@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lenski/data/archive_repository.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/models/archived_book_model.dart';
@@ -19,11 +20,25 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
   final ArchiveRepository _archiveRepository = ArchiveRepository();
   List<ArchivedBook> _books = [];
   bool _isLoading = true;
+  
+  // Add focus node for keyboard events
+  final FocusNode _keyboardFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _loadBooks();
+    
+    // Request focus when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _keyboardFocusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _keyboardFocusNode.dispose(); // Dispose the focus node
+    super.dispose();
   }
 
   Future<void> _loadBooks() async {
@@ -270,62 +285,74 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     final p = Proportions(context);
     final boxPadding = p.standardPadding() * 4;
 
-    return Stack(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(boxPadding),
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F0F6),
-              borderRadius: BorderRadius.circular(5.0),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 4.0,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.only(top: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(24, 8, 24, 24),
-                    child: Text(
-                      'The Archive',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontFamily: 'Unbounded',
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: _isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : _buildArchiveContent(_books),
-                    ),
+    return KeyboardListener(
+      focusNode: _keyboardFocusNode,
+      onKeyEvent: (KeyEvent event) {
+        // Only process KeyDownEvent
+        if (event is KeyDownEvent) {
+          // Check for Escape key
+          if (event.logicalKey == LogicalKeyboardKey.escape) {
+            Navigator.of(context).pop();
+          }
+        }
+      },
+      child: Stack(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(boxPadding),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F0F6),
+                borderRadius: BorderRadius.circular(5.0),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 4.0,
+                    offset: Offset(0, 2),
                   ),
                 ],
               ),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(24, 8, 24, 24),
+                      child: Text(
+                        'The Archive',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontFamily: 'Unbounded',
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : _buildArchiveContent(_books),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-        Positioned(
-          top: boxPadding + 10,
-          right: boxPadding + 10,
-          child: IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            icon: const Icon(Icons.close_rounded),
+          Positioned(
+            top: boxPadding + 10,
+            right: boxPadding + 10,
+            child: IconButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              icon: const Icon(Icons.close_rounded),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

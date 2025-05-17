@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Add this import for keyboard support
 import 'package:lenski/screens/home/add_course/add_course_button.dart';
 import 'package:lenski/screens/home/add_course/add_course_screen.dart';
 import 'package:lenski/utils/proportions.dart';
@@ -26,6 +27,25 @@ class AddCourseNavigator extends StatefulWidget {
 
 class _AddCourseNavigatorState extends State<AddCourseNavigator> {
   bool _isAddCourseScreenVisible = false;
+  
+  // Add focus node for keyboard events
+  final FocusNode _keyboardFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Request focus when widget initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _keyboardFocusNode.requestFocus();
+    });
+  }
+  
+  @override
+  void dispose() {
+    _keyboardFocusNode.dispose(); // Dispose the focus node
+    super.dispose();
+  }
 
   @override
   void didUpdateWidget(AddCourseNavigator oldWidget) {
@@ -50,22 +70,46 @@ class _AddCourseNavigatorState extends State<AddCourseNavigator> {
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: animationDuration),
-      height: widget.isExpanded ? p.createCourseHeight() : p.sidebarButtonWidth(),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return AnimatedSwitcher(
-            // Set the duration to be slightly less than the parent container to avoid clipping issue
-            duration: Duration(milliseconds: (animationDuration - 1).floor()),
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            child: _isAddCourseScreenVisible
-                ? AddCourseScreen(key: const ValueKey(1), onBack: _toggleAddCourseScreen)
-                : AddCourseButton(key: const ValueKey(2), onPressed: _toggleAddCourseScreen),
-          );
-        },
+    return KeyboardListener(
+      focusNode: _keyboardFocusNode,
+      onKeyEvent: (KeyEvent event) {
+        // Only process KeyDownEvent
+        if (event is KeyDownEvent) {
+          // Make sure no text field is currently focused
+          final currentFocus = FocusScope.of(context);
+          if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild == null) {
+            // Space bar
+            if (event.logicalKey == LogicalKeyboardKey.space) {
+              _toggleAddCourseScreen();
+            }
+            // 'n' key
+            else if (event.logicalKey == LogicalKeyboardKey.keyN) {
+              _toggleAddCourseScreen();
+            }
+          }
+        }
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: animationDuration),
+        height: widget.isExpanded ? p.createCourseHeight() : p.sidebarButtonWidth(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return AnimatedSwitcher(
+              // Set the duration to be slightly less than the parent container to avoid clipping issue
+              duration: Duration(milliseconds: (animationDuration - 1).floor()),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              child: _isAddCourseScreenVisible
+                  ? AddCourseScreen(key: const ValueKey(1), onBack: _toggleAddCourseScreen)
+                  : AddCourseButton(
+                      key: const ValueKey(2),
+                      onPressed: _toggleAddCourseScreen,
+
+                    ),
+            );
+          },
+        ),
       ),
     );
   }

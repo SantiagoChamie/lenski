@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lenski/screens/home/add_course/buttons/competence_selector_button.dart';
 import 'package:lenski/screens/home/add_course/buttons/goal_selector_button.dart';
 import 'package:lenski/screens/home/add_course/course_difficulty_text.dart';
@@ -31,6 +32,9 @@ class EditCourseScreen extends StatefulWidget {
 class _EditCourseScreenState extends State<EditCourseScreen> {
   final CourseRepository _courseRepository = CourseRepository();
   final SessionRepository _sessionRepository = SessionRepository();
+  
+  // Add focus node for keyboard events
+  final FocusNode _keyboardFocusNode = FocusNode();
   
   // Add statistics variables
   int _totalMinutesStudied = 0;
@@ -86,8 +90,19 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
     
     // Load statistics
     _loadStatistics();
+    
+    // Request focus when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _keyboardFocusNode.requestFocus();
+    });
   }
   
+  @override
+  void dispose() {
+    _keyboardFocusNode.dispose(); // Dispose the focus node
+    super.dispose();
+  }
+
   // Update the _loadStatistics method to include days practiced
   Future<void> _loadStatistics() async {
     setState(() {
@@ -271,225 +286,237 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Main content
-            Padding(
-              padding: EdgeInsets.only(left: p.standardPadding(),right: p.standardPadding(),bottom: p.standardPadding()),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [                  
-                  // Main content - make it expandable
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(p.standardPadding()),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF5F0F6),
-                              borderRadius: BorderRadius.circular(20.0),
+    return KeyboardListener(
+      focusNode: _keyboardFocusNode,
+      onKeyEvent: (KeyEvent event) {
+        // Only process KeyDownEvent
+        if (event is KeyDownEvent) {
+          // Check for Escape key
+          if (event.logicalKey == LogicalKeyboardKey.escape) {
+            widget.onBack(widget.course); // Return original course when cancelled
+          }
+        }
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: Stack(
+            children: [
+              // Main content
+              Padding(
+                padding: EdgeInsets.only(left: p.standardPadding(),right: p.standardPadding(),bottom: p.standardPadding()),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [                  
+                    // Main content - make it expandable
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(p.standardPadding()),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF5F0F6),
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Source language selection only
+                                  const Text("Source Language", 
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
+                                  SizedBox(height: p.standardPadding()),
+                                  LanguageSelectorButton(
+                                    onLanguageSelected: (language, flagUrl, code) => 
+                                      _updateSelectedOriginLanguage(language, flagUrl, code),
+                                    startingLanguage: _selectedOriginLanguage,
+                                    isSource: false,
+                                    hideTooltip: true,
+                                  ),
+                                  
+                                  const Divider(height: 40),
+                                  
+                                  // Skills section
+                                  const Text("Skills", 
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
+                                  SizedBox(height: p.standardPadding()),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      CompetenceSelectorButton(
+                                        competence: "listening",
+                                        onToggle: _toggleCompetence,
+                                        isSelected: _selectedCompetences.contains('listening'),
+                                        isSmall: true,
+                                      ),
+                                      SizedBox(width: p.standardPadding()),
+                                      CompetenceSelectorButton(
+                                        competence: "speaking",
+                                        onToggle: _toggleCompetence,
+                                        isSelected: _selectedCompetences.contains('speaking'),
+                                        isSmall: true, 
+                                      ),
+                                      SizedBox(width: p.standardPadding()),
+                                      CompetenceSelectorButton(
+                                        competence: "writing",
+                                        onToggle: _toggleCompetence,
+                                        isSelected: _selectedCompetences.contains('writing'),
+                                        isSmall: true,
+                                      ),
+                                      SizedBox(width: p.standardPadding()),
+                                      CompetenceSelectorButton(
+                                        competence: "reading",
+                                        onToggle: _toggleCompetence,
+                                        isSelected: _selectedCompetences.contains('reading'),
+                                        isSmall: true,
+                                      ),
+                                    ],
+                                  ),
+                                  
+                                  const Divider(height: 40),
+                                  
+                                  // Goals section - both selectors in one row
+                                  const Text("Goals", 
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
+                                  SizedBox(height: p.standardPadding()),
+                                  Row(
+                                    children: [
+                                      // Daily goal selector
+                                      const Icon(Icons.sunny, color: Color(0xFFEE9A1D), size: 24),
+                                      SizedBox(width: p.standardPadding()),
+                                      Expanded(
+                                        child: GoalSelectorButton(
+                                          initialValue: _dailyGoal,
+                                          initialGoalType: _currentGoalType, // Pass current goal type
+                                          onValueChanged: (value) {
+                                            setState(() {
+                                              _dailyGoal = value;
+                                            });
+                                          },
+                                          onGoalTypeChanged: _updateGoalType, // Add this callback
+                                        ),
+                                      ),
+                                      SizedBox(width: p.standardPadding()),
+                                      // Total goal selector
+                                      const Icon(Icons.nightlight_round_outlined, color: Color(0xFF71BDE0), size: 24),
+                                      SizedBox(width: p.standardPadding()),
+                                      Expanded(
+                                        child: GoalSelectorButton(
+                                          initialValue: _totalGoal,
+                                          isDaily: false,
+                                          initialGoalType: _currentGoalType, // Pass same goal type
+                                          onValueChanged: (value) {
+                                            setState(() {
+                                              _totalGoal = value;
+                                            });
+                                          },
+                                          onGoalTypeChanged: _updateGoalType, // Add this callback
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  
+                                  const Divider(height: 40),
+                                  
+                                  // Statistics in a row
+                                  _isLoadingStats 
+                                      ? const Center(child: CircularProgressIndicator())
+                                      : Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          _buildStatisticBox(
+                                            Icons.watch_later_outlined, 
+                                            'Study time', 
+                                            _formatTime(_totalMinutesStudied)
+                                          ),
+                                          const SizedBox(width: 16),
+                                          _buildStatisticBox(
+                                            Icons.add_circle_outline, 
+                                            'Words added', 
+                                            '$_totalWordsAdded'
+                                          ),
+                                          const SizedBox(width: 16),
+                                          _buildStatisticBox(
+                                            Icons.replay, 
+                                            'Words reviewed', 
+                                            '$_totalWordsReviewed'
+                                          ),
+                                          const SizedBox(width: 16),
+                                          _buildStatisticBox(
+                                            Icons.menu_book, 
+                                            'Lines read', 
+                                            '$_totalLinesRead'
+                                          ),
+                                          const SizedBox(width: 16),
+                                          _buildStatisticBox(
+                                            Icons.calendar_today, // Calendar icon for days practiced
+                                            'Days practiced',  
+                                            '$_daysPracticed'
+                                          ),
+                                        ],
+                                      ),
+                                ],
+                              ),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Source language selection only
-                                const Text("Source Language", 
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
-                                SizedBox(height: p.standardPadding()),
-                                LanguageSelectorButton(
-                                  onLanguageSelected: (language, flagUrl, code) => 
-                                    _updateSelectedOriginLanguage(language, flagUrl, code),
-                                  startingLanguage: _selectedOriginLanguage,
-                                  isSource: false,
-                                  hideTooltip: true,
-                                ),
-                                
-                                const Divider(height: 40),
-                                
-                                // Skills section
-                                const Text("Skills", 
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
-                                SizedBox(height: p.standardPadding()),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    CompetenceSelectorButton(
-                                      competence: "listening",
-                                      onToggle: _toggleCompetence,
-                                      isSelected: _selectedCompetences.contains('listening'),
-                                      isSmall: true,
-                                    ),
-                                    SizedBox(width: p.standardPadding()),
-                                    CompetenceSelectorButton(
-                                      competence: "speaking",
-                                      onToggle: _toggleCompetence,
-                                      isSelected: _selectedCompetences.contains('speaking'),
-                                      isSmall: true, 
-                                    ),
-                                    SizedBox(width: p.standardPadding()),
-                                    CompetenceSelectorButton(
-                                      competence: "writing",
-                                      onToggle: _toggleCompetence,
-                                      isSelected: _selectedCompetences.contains('writing'),
-                                      isSmall: true,
-                                    ),
-                                    SizedBox(width: p.standardPadding()),
-                                    CompetenceSelectorButton(
-                                      competence: "reading",
-                                      onToggle: _toggleCompetence,
-                                      isSelected: _selectedCompetences.contains('reading'),
-                                      isSmall: true,
-                                    ),
-                                  ],
-                                ),
-                                
-                                const Divider(height: 40),
-                                
-                                // Goals section - both selectors in one row
-                                const Text("Goals", 
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: "Unbounded")),
-                                SizedBox(height: p.standardPadding()),
-                                Row(
-                                  children: [
-                                    // Daily goal selector
-                                    const Icon(Icons.sunny, color: Color(0xFFEE9A1D), size: 24),
-                                    SizedBox(width: p.standardPadding()),
-                                    Expanded(
-                                      child: GoalSelectorButton(
-                                        initialValue: _dailyGoal,
-                                        initialGoalType: _currentGoalType, // Pass current goal type
-                                        onValueChanged: (value) {
-                                          setState(() {
-                                            _dailyGoal = value;
-                                          });
-                                        },
-                                        onGoalTypeChanged: _updateGoalType, // Add this callback
-                                      ),
-                                    ),
-                                    SizedBox(width: p.standardPadding()),
-                                    // Total goal selector
-                                    const Icon(Icons.nightlight_round_outlined, color: Color(0xFF71BDE0), size: 24),
-                                    SizedBox(width: p.standardPadding()),
-                                    Expanded(
-                                      child: GoalSelectorButton(
-                                        initialValue: _totalGoal,
-                                        isDaily: false,
-                                        initialGoalType: _currentGoalType, // Pass same goal type
-                                        onValueChanged: (value) {
-                                          setState(() {
-                                            _totalGoal = value;
-                                          });
-                                        },
-                                        onGoalTypeChanged: _updateGoalType, // Add this callback
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                
-                                const Divider(height: 40),
-                                
-                                // Statistics in a row
-                                _isLoadingStats 
-                                    ? const Center(child: CircularProgressIndicator())
-                                    : Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        _buildStatisticBox(
-                                          Icons.watch_later_outlined, 
-                                          'Study time', 
-                                          _formatTime(_totalMinutesStudied)
-                                        ),
-                                        const SizedBox(width: 16),
-                                        _buildStatisticBox(
-                                          Icons.add_circle_outline, 
-                                          'Words added', 
-                                          '$_totalWordsAdded'
-                                        ),
-                                        const SizedBox(width: 16),
-                                        _buildStatisticBox(
-                                          Icons.replay, 
-                                          'Words reviewed', 
-                                          '$_totalWordsReviewed'
-                                        ),
-                                        const SizedBox(width: 16),
-                                        _buildStatisticBox(
-                                          Icons.menu_book, 
-                                          'Lines read', 
-                                          '$_totalLinesRead'
-                                        ),
-                                        const SizedBox(width: 16),
-                                        _buildStatisticBox(
-                                          Icons.calendar_today, // Calendar icon for days practiced
-                                          'Days practiced',  
-                                          '$_daysPracticed'
-                                        ),
-                                      ],
-                                    ),
-                              ],
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: p.standardPadding()),
+                    // Bottom container with difficulty text and save button
+                    Container(
+                      padding: EdgeInsets.all(p.standardPadding()),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD9D0DB),
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: CourseDifficultyText(
+                              dailyWords: _dailyGoal,
+                              goalType: _currentGoalType.toString().split('.').last, // Convert enum to string
+                              competences: _selectedCompetences.length,
+                              startingLanguage: _selectedOriginLanguageCode,  // Use selected value
+                              targetLanguage: widget.course.code,
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: _updateCourse,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2C73DE),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: p.standardPadding() * 2,
+                                vertical: p.standardPadding(),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text(
+                              "Save Changes",
+                              style: TextStyle(fontFamily: "Telex", fontSize: 18, color: Colors.white),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  SizedBox(height: p.standardPadding()),
-                  // Bottom container with difficulty text and save button
-                  Container(
-                    padding: EdgeInsets.all(p.standardPadding()),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD9D0DB),
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: CourseDifficultyText(
-                            dailyWords: _dailyGoal,
-                            goalType: _currentGoalType.toString().split('.').last, // Convert enum to string
-                            competences: _selectedCompetences.length,
-                            startingLanguage: _selectedOriginLanguageCode,  // Use selected value
-                            targetLanguage: widget.course.code,
-                          ),
-                        ),
-                        ElevatedButton(
-                          onPressed: _updateCourse,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2C73DE),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: p.standardPadding() * 2,
-                              vertical: p.standardPadding(),
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text(
-                            "Save Changes",
-                            style: TextStyle(fontFamily: "Telex", fontSize: 18, color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            
-            // X button in the upper right corner
-            Positioned(
-              top: 10,
-              right: 30,
-              child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.black87),
-                onPressed: () => widget.onBack(widget.course),  // Pass the original course if canceled
-                iconSize: 24,
+              
+              // X button in the upper right corner
+              Positioned(
+                top: 10,
+                right: 30,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.black87),
+                  onPressed: () => widget.onBack(widget.course),  // Pass the original course if canceled
+                  iconSize: 24,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

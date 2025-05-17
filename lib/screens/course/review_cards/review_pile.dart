@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Add this import
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
@@ -24,15 +25,24 @@ class _ReviewPileState extends State<ReviewPile> {
   bool _disposed = false;
   bool _isHovered = false;
 
+  // Add focus node for keyboard events
+  final FocusNode _keyboardFocusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
     _fetchFirstWord();
+    
+    // Request focus when widget initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _keyboardFocusNode.requestFocus();
+    });
   }
 
   @override
   void dispose() {
     _disposed = true;
+    _keyboardFocusNode.dispose(); // Dispose the focus node
     super.dispose();
   }
 
@@ -86,93 +96,125 @@ class _ReviewPileState extends State<ReviewPile> {
   Widget build(BuildContext context) {
     final p = Proportions(context);
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: GestureDetector(
-        onTap: () {
-          final navigatorKey = Navigator.of(context).widget.key as GlobalKey<NavigatorState>;
-          navigatorKey.currentState?.pushNamed(
-            'Review',
-            arguments: {
-              'course': widget.course,
-              'firstWord': displayText, // Pass the currently displayed word
-            },
-          );
-        },
-        child: Stack(
-          children: [
-            SizedBox(
-              width: p.mainScreenWidth() / 2,
-              height: double.infinity,
-              child: Container(
-                margin: EdgeInsets.only(
-                  bottom: p.standardPadding() * 2,
-                  left: p.standardPadding() * 2,
-                  right: p.standardPadding() * 2
-                ),
-                width: p.mainScreenWidth() / 2 - 40,
-                decoration: BoxDecoration(
-                  color: _isHovered ? const Color(0xFFF8F4F9) : const Color(0xFFF5F0F6),
-                  borderRadius: BorderRadius.circular(5.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _isHovered ? Colors.black45 : Colors.black38,
-                      blurRadius: _isHovered ? 6.0 : 4.0,
-                      offset: Offset(0, _isHovered ? 3 : 2),
-                    ),
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    Center(
-                      child: Text(
-                        displayText ?? 'Loading...',
-                        style: const TextStyle(fontSize: 24, fontFamily: 'Telex'),
+    return KeyboardListener(
+      focusNode: _keyboardFocusNode,
+      onKeyEvent: (KeyEvent event) {
+        // Only handle KeyDownEvent
+        if (event is KeyDownEvent) {
+          // 'r' key for refreshing the word
+          if (event.logicalKey == LogicalKeyboardKey.keyS) {
+            _refreshWord();
+          } else if (event.logicalKey == LogicalKeyboardKey.keyR) {
+            final navigatorKey = Navigator.of(context).widget.key as GlobalKey<NavigatorState>;
+            navigatorKey.currentState?.pushNamed(
+              'Review',
+              arguments: {
+                'course': widget.course,
+                'firstWord': displayText, // Pass the currently displayed word
+              },
+            );
+          }
+          // Space key for adding a new card
+          else if (event.logicalKey == LogicalKeyboardKey.space) {
+            if (widget.onNewPressed != null) {
+              _navigateToAddCardScreen();
+            }
+          }
+        }
+      },
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        child: GestureDetector(
+          onTap: () {
+            final navigatorKey = Navigator.of(context).widget.key as GlobalKey<NavigatorState>;
+            navigatorKey.currentState?.pushNamed(
+              'Review',
+              arguments: {
+                'course': widget.course,
+                'firstWord': displayText, // Pass the currently displayed word
+              },
+            );
+          },
+          child: Stack(
+            children: [
+              SizedBox(
+                width: p.mainScreenWidth() / 2,
+                height: double.infinity,
+                child: Container(
+                  margin: EdgeInsets.only(
+                    bottom: p.standardPadding() * 2,
+                    left: p.standardPadding() * 2,
+                    right: p.standardPadding() * 2
+                  ),
+                  width: p.mainScreenWidth() / 2 - 40,
+                  decoration: BoxDecoration(
+                    color: _isHovered ? const Color(0xFFF8F4F9) : const Color(0xFFF5F0F6),
+                    borderRadius: BorderRadius.circular(5.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _isHovered ? Colors.black45 : Colors.black38,
+                        blurRadius: _isHovered ? 6.0 : 4.0,
+                        offset: Offset(0, _isHovered ? 3 : 2),
                       ),
-                    ),
-                    Positioned(
-                      bottom: 20,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: Text(
-                          cardFronts.isEmpty 
-                              ? '' 
-                              : '${cardFronts.length} card${cardFronts.length != 1 ? 's' : ''} to review',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontFamily: 'Telex',
-                            color: Colors.grey[700],
+                    ],
+                  ),
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              displayText ?? 'Loading...',
+                              style: const TextStyle(fontSize: 24, fontFamily: 'Telex'),
+                            ),                      
+                          ],
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 20,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Text(
+                            cardFronts.isEmpty 
+                                ? '' 
+                                : '${cardFronts.length} card${cardFronts.length != 1 ? 's' : ''} to review',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontFamily: 'Telex',
+                              color: Colors.grey[700],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            if(cardFronts.length > 1)
-            Positioned(
-              top: 0,
-              left: 40,
-              child: IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: _refreshWord,
+              if(cardFronts.length > 1)
+                Positioned(
+                  top: 0,
+                  left: 40,
+                  child: IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: _refreshWord,
+                  ),
+                ),
+              Positioned(
+                bottom: 60,
+                right: 60,
+                child: FloatingActionButton(
+                  onPressed: _navigateToAddCardScreen,
+                  hoverElevation: 0,
+                  elevation: 0,
+                  backgroundColor: const Color(0xFFD9D0DB),
+                  child: const Icon(Icons.add, color: Colors.black),
+                ),
               ),
-            ),
-            Positioned(
-              bottom: 60,
-              right: 60,
-              child: FloatingActionButton(
-                onPressed: _navigateToAddCardScreen,
-                hoverElevation: 0,
-                elevation: 0,
-                backgroundColor: const Color(0xFFD9D0DB),
-                child: const Icon(Icons.add, color: Colors.black),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

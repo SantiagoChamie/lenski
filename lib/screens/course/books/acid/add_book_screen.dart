@@ -8,6 +8,7 @@ import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_creator.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
 class AddBookScreen extends StatefulWidget {
   final VoidCallback onBackPressed;
@@ -31,6 +32,9 @@ class _AddBookScreenState extends State<AddBookScreen> {
   bool? isFileMode;
   bool isHelpVisible = false;
   bool isShuffleEnabled = false; 
+  
+  // Add a focus node for keyboard events
+  final FocusNode _keyboardFocusNode = FocusNode();
 
   static const String _prefKey = 'last_used_file_mode';
   static const int animationDuration = 300;
@@ -44,6 +48,17 @@ class _AddBookScreenState extends State<AddBookScreen> {
     } else {
       _loadLastUsedMode();
     }
+    
+    // Request focus when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _keyboardFocusNode.requestFocus();
+    });
+  }
+  
+  @override
+  void dispose() {
+    _keyboardFocusNode.dispose(); // Dispose the focus node
+    super.dispose();
   }
 
   Future<void> _loadLastUsedMode() async {
@@ -192,207 +207,222 @@ class _AddBookScreenState extends State<AddBookScreen> {
       );
     }
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          Center(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: p.standardPadding() * 2),
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF5F0F6),
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 2,
-                          offset: Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    width: p.mainScreenWidth() - p.standardPadding() * 4,
-                    child: Padding(
-                      padding: EdgeInsets.all(p.standardPadding() * 2),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('Add your own texts!', 
-                                style: TextStyle(fontSize: 24, fontFamily: appFonts['Title'])),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 8.0),
-                                child: IconButton(
-                                  icon: Icon(
-                                    isHelpVisible ? Icons.close : Icons.help_outline, 
-                                    size: 20, 
-                                    color: Colors.grey[600]
-                                  ),
-                                  onPressed: _toggleHelpSection,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.all(p.standardPadding()),
-                              child: _buildAnimatedSection(),
-                            ),
-                          ),
-                          Column(
-                            children: [
-                              if (!isHelpVisible) _buildPageIndicator(),
-                              SizedBox(height: p.standardPadding()),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  // Main start learning button with proper width constraint
-                                  SizedBox(
-                                    width: 300,
-                                    height: p.sidebarButtonWidth(),
-                                    child: ElevatedButton(
-                                      onPressed: isLoading || isHelpVisible ? null : () async {
-                                        if (!_hasText()) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Please add some text or file before creating a book'),
-                                              duration: Duration(seconds: 2),
-                                            ),
-                                          );
-                                          return;
-                                        }
-                                        setState(() => isLoading = true);
-                                        try {
-                                          bool success;
-                                          if (isFileMode == true) {
-                                            success = await _bookCreator.processFile(
-                                              selectedFilePath!, 
-                                              widget.languageCode,
-                                              shuffleSentences: isShuffleEnabled,
-                                            );
-                                          } else {
-                                            success = await _bookCreator.processBook(
-                                              textController.text, 
-                                              widget.languageCode,
-                                              shuffleSentences: isShuffleEnabled,
-                                            );
-                                          }
-                                          
-                                          if (!_bookCreator.isCancelled) {
-                                            if (success) {
-                                              widget.onBackPressed();
-                                            } else {
-                                              _showLanguageMismatchDialog(
-                                                isFileMode == true ? selectedFilePath! : textController.text,
-                                                isFileMode == true
-                                              );
-                                            }
-                                          }
-                                        } finally {
-                                          if (!_bookCreator.isCancelled) {
-                                            setState(() => isLoading = false);
-                                          }
-                                        }
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF2C73DE),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        disabledBackgroundColor: Colors.grey[300],
-                                        disabledForegroundColor: Colors.grey[600],
-                                      ),
-                                      child: Text(
-                                        "Start learning!",
-                                        style: TextStyle(
-                                          fontFamily: appFonts['Subtitle'], 
-                                          fontSize: 30, 
-                                          color: Colors.white
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  // Shuffle toggle button with improved tooltip
-                                  Container(
-                                    height: p.sidebarButtonWidth(),
-                                    margin: const EdgeInsets.only(left: 8),
-                                    child: Tooltip(
-                                      message: isShuffleEnabled 
-                                          ? 'Random sentences' 
-                                          : 'Real sentences',
-                                      verticalOffset: -40,
-                                      waitDuration: const Duration(milliseconds: 500),
-                                      preferBelow: false,
-                                      child: ElevatedButton(
-                                        onPressed: isLoading || isHelpVisible ? null : () {
-                                          setState(() {
-                                            isShuffleEnabled = !isShuffleEnabled;
-                                          });
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: isShuffleEnabled 
-                                              ? const Color(0xFF71BDE0) // Light blue when active
-                                              : Colors.grey[300], // Grey when inactive
-                                          shape: const CircleBorder(),
-                                          padding: const EdgeInsets.all(16),
-                                          disabledBackgroundColor: Colors.grey[200],
-                                          disabledForegroundColor: Colors.grey[400],
-                                        ),
-                                        child: Icon(
-                                          isShuffleEnabled ? Icons.shuffle : Icons.format_list_numbered,
-                                          color: isShuffleEnabled ? Colors.white : Colors.grey[700],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+    return KeyboardListener(
+      focusNode: _keyboardFocusNode,
+      onKeyEvent: (KeyEvent event) {
+        // Only process KeyDownEvent
+        if (event is KeyDownEvent) {
+          // Check for Escape key
+          if (event.logicalKey == LogicalKeyboardKey.escape) {
+            // Don't allow closing if loading is in progress
+            if (!isLoading) {
+              widget.onBackPressed();
+            }
+          }
+        }
+      },
+      child: Scaffold(
+        body: Stack(
+          children: [
+            Center(
+              child: Padding(
+                padding: EdgeInsets.only(bottom: p.standardPadding() * 2),
+                child: Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5F0F6),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 2,
+                            offset: Offset(0, 5),
                           ),
                         ],
                       ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 10,
-                    right: 10,
-                    child: IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: isLoading ? null : () {
-                        widget.onBackPressed();
-                      },
-                    ),
-                  ),
-                  if (!isHelpVisible && widget.languageCode != 'AR')
-                    Positioned(
-                      top: p.createCourseHeight() / 3,
-                      left: isFileMode == true ? null : 0,
-                      right: isFileMode == true ? 0 : null,
-                      child: IconButton(
-                        onPressed: () => _switchMode(!(isFileMode == true)),
-                        icon: Icon(
-                          isFileMode == true 
-                            ? Icons.keyboard_arrow_right
-                            : Icons.keyboard_arrow_left
+                      width: p.mainScreenWidth() - p.standardPadding() * 4,
+                      child: Padding(
+                        padding: EdgeInsets.all(p.standardPadding() * 2),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Add your own texts!', 
+                                  style: TextStyle(fontSize: 24, fontFamily: appFonts['Title'])),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: IconButton(
+                                    icon: Icon(
+                                      isHelpVisible ? Icons.close : Icons.help_outline, 
+                                      size: 20, 
+                                      color: Colors.grey[600]
+                                    ),
+                                    onPressed: _toggleHelpSection,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.all(p.standardPadding()),
+                                child: _buildAnimatedSection(),
+                              ),
+                            ),
+                            Column(
+                              children: [
+                                if (!isHelpVisible) _buildPageIndicator(),
+                                SizedBox(height: p.standardPadding()),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    // Main start learning button with proper width constraint
+                                    SizedBox(
+                                      width: 300,
+                                      height: p.sidebarButtonWidth(),
+                                      child: ElevatedButton(
+                                        onPressed: isLoading || isHelpVisible ? null : () async {
+                                          if (!_hasText()) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text('Please add some text or file before creating a book'),
+                                                duration: Duration(seconds: 2),
+                                              ),
+                                            );
+                                            return;
+                                          }
+                                          setState(() => isLoading = true);
+                                          try {
+                                            bool success;
+                                            if (isFileMode == true) {
+                                              success = await _bookCreator.processFile(
+                                                selectedFilePath!, 
+                                                widget.languageCode,
+                                                shuffleSentences: isShuffleEnabled,
+                                              );
+                                            } else {
+                                              success = await _bookCreator.processBook(
+                                                textController.text, 
+                                                widget.languageCode,
+                                                shuffleSentences: isShuffleEnabled,
+                                              );
+                                            }
+                                            
+                                            if (!_bookCreator.isCancelled) {
+                                              if (success) {
+                                                widget.onBackPressed();
+                                              } else {
+                                                _showLanguageMismatchDialog(
+                                                  isFileMode == true ? selectedFilePath! : textController.text,
+                                                  isFileMode == true
+                                                );
+                                              }
+                                            }
+                                          } finally {
+                                            if (!_bookCreator.isCancelled) {
+                                              setState(() => isLoading = false);
+                                            }
+                                          }
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: const Color(0xFF2C73DE),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          disabledBackgroundColor: Colors.grey[300],
+                                          disabledForegroundColor: Colors.grey[600],
+                                        ),
+                                        child: Text(
+                                          "Start learning!",
+                                          style: TextStyle(
+                                            fontFamily: appFonts['Subtitle'], 
+                                            fontSize: 30, 
+                                            color: Colors.white
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    // Shuffle toggle button with improved tooltip
+                                    Container(
+                                      height: p.sidebarButtonWidth(),
+                                      margin: const EdgeInsets.only(left: 8),
+                                      child: Tooltip(
+                                        message: isShuffleEnabled 
+                                            ? 'Random sentences' 
+                                            : 'Real sentences',
+                                        verticalOffset: -40,
+                                        waitDuration: const Duration(milliseconds: 500),
+                                        preferBelow: false,
+                                        child: ElevatedButton(
+                                          onPressed: isLoading || isHelpVisible ? null : () {
+                                            setState(() {
+                                              isShuffleEnabled = !isShuffleEnabled;
+                                            });
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: isShuffleEnabled 
+                                                ? const Color(0xFF71BDE0) // Light blue when active
+                                                : Colors.grey[300], // Grey when inactive
+                                            shape: const CircleBorder(),
+                                            padding: const EdgeInsets.all(16),
+                                            disabledBackgroundColor: Colors.grey[200],
+                                            disabledForegroundColor: Colors.grey[400],
+                                          ),
+                                          child: Icon(
+                                            isShuffleEnabled ? Icons.shuffle : Icons.format_list_numbered,
+                                            color: isShuffleEnabled ? Colors.white : Colors.grey[700],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                        iconSize: 40,
                       ),
                     ),
-                ],
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: isLoading ? null : () {
+                          widget.onBackPressed();
+                        },
+                      ),
+                    ),
+                    if (!isHelpVisible && widget.languageCode != 'AR')
+                      Positioned(
+                        top: p.createCourseHeight() / 3,
+                        left: isFileMode == true ? null : 0,
+                        right: isFileMode == true ? 0 : null,
+                        child: IconButton(
+                          onPressed: () => _switchMode(!(isFileMode == true)),
+                          icon: Icon(
+                            isFileMode == true 
+                              ? Icons.keyboard_arrow_right
+                              : Icons.keyboard_arrow_left
+                          ),
+                          iconSize: 40,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
-          if (isLoading)
-            LoadingOverlay(
-              onCancel: () {
-                _bookCreator.cancelProcessing();
-                setState(() => isLoading = false);
-              },
-            ),
-        ],
+            if (isLoading)
+              LoadingOverlay(
+                onCancel: () {
+                  _bookCreator.cancelProcessing();
+                  setState(() => isLoading = false);
+                },
+              ),
+          ],
+        ),
       ),
     );
   }

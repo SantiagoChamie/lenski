@@ -328,7 +328,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
             _showEditCardDialog(currentCard);
           }
 
-          if(logicalKey == LogicalKeyboardKey.keyD) {
+          if(logicalKey == LogicalKeyboardKey.keyD || 
+             logicalKey == LogicalKeyboardKey.delete) {
             handleDelete();
           }
 
