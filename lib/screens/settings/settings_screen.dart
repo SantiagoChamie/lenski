@@ -177,7 +177,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.colorMap['error'],
+                foregroundColor: AppColors.error,
                 textStyle: TextStyle(
                   fontSize: 14,
                   fontFamily: appFonts['Detail'],
@@ -220,8 +220,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ? localizations.importSuccess
                   : localizations.importFailed(migrationResult.message!)),
               backgroundColor: migrationResult.success ? 
-                (AppColors.colorMap['success']) : 
-                (AppColors.colorMap['error']),
+                (AppColors.success) : 
+                (AppColors.error),
             ),
           );
         }
@@ -231,7 +231,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(localizations.importFailed(e.toString())),
-            backgroundColor: AppColors.colorMap['error'],
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -263,7 +263,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(localizations.importFailed(migrationResult.message!)),
-            backgroundColor: AppColors.colorMap['error'],
+            backgroundColor: AppColors.error,
           ),
         );
         return;
@@ -290,7 +290,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("${localizations.importSuccess} $outputPath"),
-            backgroundColor: AppColors.colorMap['success'],
+            backgroundColor: AppColors.success,
           ),
         );
       } else {
@@ -302,7 +302,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(localizations.cancel),
-            backgroundColor: AppColors.colorMap['warning'],
+            backgroundColor: AppColors.warning,
           ),
         );
       }
@@ -311,7 +311,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(localizations.importFailed(e.toString())),
-            backgroundColor: AppColors.colorMap['error'],
+            backgroundColor: AppColors.error,
           ),
         );
       }

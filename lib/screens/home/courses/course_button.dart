@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lenski/screens/home/competences/competence_icon.dart';
 import 'package:lenski/screens/home/competences/competence_list.dart';
 import 'package:lenski/utils/proportions.dart';
+import 'package:lenski/utils/colors.dart';
+import 'package:lenski/utils/fonts.dart';
 import 'package:lenski/data/course_repository.dart';
 import 'package:lenski/screens/home/courses/course_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,11 +12,26 @@ import '../../../models/course_model.dart';
 import '../../../widgets/flag_icon.dart';
 import '../../../data/session_repository.dart';
 
-/// CourseButton is a widget that displays a course as a button.
-/// It shows the competences, the course name, the flag, and the level.
+/// A button representing a language learning course.
+///
+/// This widget displays a course as an interactive button, showing key information:
+/// - Course name and flag
+/// - Active competences (reading, writing, speaking, listening)
+/// - Streak count
+/// - Goal completion indicator
+/// 
+/// It also provides functionality for:
+/// - Navigating to the course details
+/// - Changing the course color
+/// - Hiding or deleting the course
 class CourseButton extends StatefulWidget {
+  /// The course to display
   final Course course;
+  
+  /// Callback function triggered after course deletion or update
   final VoidCallback onDelete;
+  
+  /// The total number of courses (used for sizing)
   final int courseCount;
 
   /// Creates a CourseButton widget.
@@ -21,18 +39,34 @@ class CourseButton extends StatefulWidget {
   /// [course] is the course to be displayed.
   /// [onDelete] is the callback function to be called when the delete button is pressed.
   /// [courseCount] is the total number of courses.
-  const CourseButton({super.key, required this.course, required this.onDelete, required this.courseCount});
+  const CourseButton({
+    super.key, 
+    required this.course, 
+    required this.onDelete, 
+    required this.courseCount
+  });
 
   @override
   State<CourseButton> createState() => _CourseButtonState();
 }
 
 class _CourseButtonState extends State<CourseButton> {
+  /// Whether to show the color selection menu
   bool _showColorMenu = false;
+  
+  /// Repository for course data operations
   final _repository = CourseRepository();
+  
+  /// Repository for session data operations
   final _sessionRepository = SessionRepository();
-  bool _isGoalMet = false;  // Change to a boolean to track if goal is met
+  
+  /// Whether the course goal has been met
+  bool _isGoalMet = false;
+  
+  /// Whether course stats are currently loading
   bool _isLoading = true;
+  
+  /// Whether to show streak indicators (from settings)
   bool _streakIndicatorEnabled = true;
 
   @override
@@ -42,6 +76,12 @@ class _CourseButtonState extends State<CourseButton> {
     _loadStreakIndicatorSetting();
   }
 
+  /// Loads course statistics including goal completion status.
+  ///
+  /// This method:
+  /// 1. Sets the initial goal completion state from the course model
+  /// 2. If not already complete, checks the database for updated completion status
+  /// 3. Updates the UI if the completion status has changed
   Future<void> _loadCourseStats() async {
     try {
       // Set initial state from course model
@@ -63,23 +103,30 @@ class _CourseButtonState extends State<CourseButton> {
         });
       }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
-  // Add this method to load the streak indicator setting
+  /// Loads the streak indicator display setting from shared preferences.
+  ///
+  /// This determines whether to show the streak counter on course buttons.
   Future<void> _loadStreakIndicatorSetting() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _streakIndicatorEnabled = prefs.getBool('streak_indicator_enabled') ?? true;
-    });
+    if (mounted) {
+      setState(() {
+        _streakIndicatorEnabled = prefs.getBool('streak_indicator_enabled') ?? true;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
+    
     return Padding(
       padding: EdgeInsets.only(bottom: p.standardPadding()),
       child: Stack(
@@ -97,9 +144,9 @@ class _CourseButtonState extends State<CourseButton> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: widget.course.color, // Example of using a parameter
+                backgroundColor: widget.course.color, // Maintain user's selected color
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(33), // Adjust the radius as needed
+                  borderRadius: BorderRadius.circular(33),
                 ),
               ),
               child: Row(
@@ -121,20 +168,20 @@ class _CourseButtonState extends State<CourseButton> {
                       const SizedBox(height: 20, width: 20),
                       Text(
                         widget.course.name, 
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 40, 
-                          fontFamily: "Unbounded", 
+                          fontFamily: appFonts['Title'], 
                           color: Colors.white
                         )
                       ),
                       
                       // Add the gold star if goal is achieved based on goal type
                       if (!_isLoading && _isGoalMet)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 8.0),
                           child: Icon(
                             Icons.star,
-                            color: Colors.amber[300],
+                            color: AppColors.gold,
                             size: 32,
                           ),
                         ),
@@ -164,7 +211,7 @@ class _CourseButtonState extends State<CourseButton> {
                       children: [
                         Icon(
                           Icons.local_fire_department,
-                          color: isToday ? Colors.orange : Colors.grey[400],
+                          color: isToday ? AppColors.streak : AppColors.darkGrey,
                           size: 28,
                         ),
                         const SizedBox(width: 4),
@@ -173,7 +220,8 @@ class _CourseButtonState extends State<CourseButton> {
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: isToday ? Colors.orange : Colors.grey[400],
+                            fontFamily: appFonts['Paragraph'],
+                            color: isToday ? AppColors.streak : AppColors.darkGrey,
                           ),
                         ),
                       ],
@@ -250,7 +298,7 @@ class _CourseButtonState extends State<CourseButton> {
             bottom: 10,
             right: 10,
             child: IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
+              icon: Icon(Icons.delete, color: AppColors.error),
               onPressed: () => _showDeleteDialog(context),
             ),
           ),
@@ -259,6 +307,13 @@ class _CourseButtonState extends State<CourseButton> {
     );
   }
 
+  /// Builds the competence icons section of the course button.
+  ///
+  /// Shows either a single large icon if only one competence is enabled,
+  /// or a list of smaller icons for multiple competences.
+  ///
+  /// @param course The course object containing competence information
+  /// @return A widget representing the competence section
   Widget _buildCompetenceSection(Course course) {
     // Count enabled competences
     int enabledCompetences = 0;
@@ -302,52 +357,63 @@ class _CourseButtonState extends State<CourseButton> {
     }
   }
 
+  /// Shows a dialog asking the user whether to hide or delete the course.
+  ///
+  /// @param context The build context
   void _showDeleteDialog(BuildContext context) async {
+    final localizations = AppLocalizations.of(context)!;
+    
     final choice = await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Remove Course',
+          title: Text(
+            localizations.removeCourseTitle,
             style: TextStyle(
               fontSize: 24,
-              fontFamily: "Unbounded",
+              fontFamily: appFonts['Title'],
             ),
           ),
-          content: const Text('Do you want to hide this course or delete it permanently?',
+          content: Text(
+            localizations.removeCoursePrompt,
             style: TextStyle(
               fontSize: 16,
+              fontFamily: appFonts['Paragraph'],
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop('cancel'),
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF2C73DE),
-                textStyle: const TextStyle(
+                foregroundColor: AppColors.blue,
+                textStyle: TextStyle(
                   fontSize: 14,
+                  fontFamily: appFonts['Detail'],
                 ),
               ),
-              child: const Text('Cancel'),
+              child: Text(localizations.cancel),
             ),
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: Colors.orange,
-                textStyle: const TextStyle(
+                foregroundColor: AppColors.warning,
+                textStyle: TextStyle(
                   fontSize: 14,
+                  fontFamily: appFonts['Detail'],
                 ),
               ),
               onPressed: () => Navigator.of(context).pop('hide'),
-              child: const Text('Hide Course'),
+              child: Text(localizations.hideCourse),
             ),
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: Colors.red,
-                textStyle: const TextStyle(
+                foregroundColor: AppColors.error,
+                textStyle: TextStyle(
                   fontSize: 14,
+                  fontFamily: appFonts['Detail'],
                 ),
               ),
               onPressed: () => Navigator.of(context).pop('delete'),
-              child: const Text('Delete Permanently'),
+              child: Text(localizations.deletePermanently),
             ),
           ],
         );
@@ -362,21 +428,28 @@ class _CourseButtonState extends State<CourseButton> {
     }
   }
 
+  /// Shows a confirmation dialog before permanently deleting a course.
+  ///
+  /// @param context The build context
   void _showDeleteConfirmationDialog(BuildContext context) async {
+    final localizations = AppLocalizations.of(context)!;
+    
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Confirm Deletion',
+          title: Text(
+            localizations.confirmDeleteTitle,
             style: TextStyle(
               fontSize: 24,
-              fontFamily: "Unbounded",
+              fontFamily: appFonts['Title'],
             ),
           ),
-          content: const Text(
-            'Warning: This will permanently delete all data associated with this course \nincluding progress, sessions, and saved words. This action cannot be undone.',
+          content: Text(
+            localizations.confirmDeleteMessage,
             style: TextStyle(
               fontSize: 16,
+              fontFamily: appFonts['Paragraph'],
             ),
           ),
           actions: [
@@ -387,22 +460,24 @@ class _CourseButtonState extends State<CourseButton> {
                 _showDeleteDialog(context);
               },
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF2C73DE),
-                textStyle: const TextStyle(
+                foregroundColor: AppColors.blue,
+                textStyle: TextStyle(
                   fontSize: 14,
+                  fontFamily: appFonts['Detail'],
                 ),
               ),
-              child: const Text('Cancel'),
+              child: Text(localizations.cancel),
             ),
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: Colors.red,
-                textStyle: const TextStyle(
+                foregroundColor: AppColors.error,
+                textStyle: TextStyle(
                   fontSize: 14,
+                  fontFamily: appFonts['Detail'],
                 ),
               ),
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Delete Permanently'),
+              child: Text(localizations.deletePermanently),
             ),
           ],
         );

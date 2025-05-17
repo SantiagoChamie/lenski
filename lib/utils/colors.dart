@@ -12,6 +12,7 @@ class AppColors {
   static const Color yellow = Color(0xFFEE9A1D);
   
   // Greys
+  static const Color darkerGrey = Color(0xFF4B4B4D);
   static const Color darkGrey = Color(0xFF99909B);
   static const Color grey = Color(0xFFD9D0DB);
   static const Color lightGrey = Color(0xFFF5F0F6);
@@ -21,28 +22,18 @@ class AppColors {
   static const Color error = Color(0xFFE53935);    // Red for error states
   static const Color warning = Color(0xFFFF9800);  // Orange for warning states
 
+  // Other colors
+  static const Color streak = Color(0xFFFF9800);   // Used for streaks
+  static const Color gold = Color(0xFFFFD54F); // Gold color for star achievement
+
+  static const Color lightGreen = Color(0xFF0BAE44); // Light green for low difficulty
+  static const Color darkRed = Color(0xFF9B1D1D);     // For Extreme difficulty
+
   // Competences
   static const Color reading = Color(0xFFEDA42E);
   static const Color writing = Color(0xFFEDE72D);
   static const Color speaking = Color(0xFFDE2C50);
   static const Color listening = Color(0xFFD52CDE);
 
-  /// A map of color names to Color objects.
-  /// Use this to maintain consistent colors throughout the app.
-  static final Map<String, Color> colorMap = {
-    'blue': blue,
-    'lightBlue': lightBlue,
-    'lightYellow': lightYellow,
-    'yellow': yellow,
-    'grey': grey,
-    'lightGrey': lightGrey,
-    'darkGrey': darkGrey,
-    'reading': reading,
-    'writing': writing,
-    'speaking': speaking,
-    'listening': listening,
-    'success': success,
-    'error': error,
-    'warning': warning,
-  };
+  static const Color black = Colors.black;
 }

@@ -5,6 +5,101 @@
     "description": "The application title"
   },
   
+  "addCoursePrompt": "Add a course to start learning!",
+  "@addCoursePrompt": {
+    "description": "Prompt shown when the user has no courses"
+  },
+
+  "removeCourseTitle": "Remove Course",
+  "@removeCourseTitle": {
+    "description": "Title for the course removal dialog"
+  },
+
+  "removeCoursePrompt": "Do you want to hide this course or delete it permanently?",
+  "@removeCoursePrompt": {
+    "description": "Prompt asking whether to hide or delete a course"
+  },
+
+  "hideCourse": "Hide Course",
+  "@hideCourse": {
+    "description": "Button to hide a course"
+  },
+
+  "deletePermanently": "Delete Permanently",
+  "@deletePermanently": {
+    "description": "Button to permanently delete something"
+  },
+
+  "confirmDeleteTitle": "Confirm Deletion",
+  "@confirmDeleteTitle": {
+    "description": "Title for delete confirmation dialog"
+  },
+
+  "confirmDeleteMessage": "Warning: This will permanently delete all data associated with this course including progress, sessions, and saved words. This action cannot be undone.",
+  "@confirmDeleteMessage": {
+    "description": "Warning message shown before permanent deletion"
+  },
+
+  "errorLoadingCourses": "Error loading courses\nPlease restart the app or contact support if the issue persists.",
+  "@errorLoadingCourses": {
+    "description": "Error message shown when courses cannot be loaded"
+  },
+  
+  "difficultyLight": "Light",
+  "@difficultyLight": {
+    "description": "Light difficulty level"
+  },
+  
+  "difficultyMedium": "Medium",
+  "@difficultyMedium": {
+    "description": "Medium difficulty level"
+  },
+  
+  "difficultyHeavy": "Heavy",
+  "@difficultyHeavy": {
+    "description": "Heavy difficulty level"
+  },
+  
+  "difficultyExtreme": "Extreme",
+  "@difficultyExtreme": {
+    "description": "Extreme difficulty level"
+  },
+  
+  "difficultyUnknown": "Unknown",
+  "@difficultyUnknown": {
+    "description": "Unknown difficulty level"
+  },
+  
+  "intensityLow": "low",
+  "@intensityLow": {
+    "description": "Low intensity level"
+  },
+  
+  "intensityMedium": "medium",
+  "@intensityMedium": {
+    "description": "Medium intensity level"
+  },
+  
+  "intensityHigh": "high",
+  "@intensityHigh": {
+    "description": "High intensity level"
+  },
+  
+  "intensityExtreme": "extreme",
+  "@intensityExtreme": {
+    "description": "Extreme intensity level"
+  },
+  
+  "courseWithIntensity": " course with ",
+  "@courseWithIntensity": {
+    "description": "Text connecting course difficulty and intensity"
+  },
+  
+  "intensity": " intensity",
+  "@intensity": {
+    "description": "Text after intensity level"
+  },
+  
   "apiKeys": "API Keys",
   "deeplApiKey": "DeepL API Key",
   "saveApiKey": "Save API Key",
@@ -36,5 +131,151 @@
         "example": "File not found"
       }
     }
+  },
+  
+  "languageColumnTitle": "Language",
+  "@languageColumnTitle": {
+    "description": "Title for the language selection column"
+  },
+  
+  "selectSourceLanguage": "Select source language",
+  "@selectSourceLanguage": {
+    "description": "Title for the source language selection dialog"
+  },
+  
+  "selectTargetLanguage": "Select target language",
+  "@selectTargetLanguage": {
+    "description": "Title for the target language selection dialog"
+  },
+  
+  "skillsColumnTitle": "Skills",
+  "@skillsColumnTitle": {
+    "description": "Title for the skills selection column"
+  },
+  
+  "goalColumnTitle": "Goal",
+  "@goalColumnTitle": {
+    "description": "Title for the goal selection column"
+  },
+  
+  "selectGoalType": "Select Goal Type",
+  "@selectGoalType": {
+    "description": "Title for the goal type selection dialog"
+  },
+  
+  "goalTypeLearnTitle": "Learn",
+  "@goalTypeLearnTitle": {
+    "description": "Title for the 'learn' goal type option"
+  },
+  
+  "goalTypeLearnDescription": "Track words learned",
+  "@goalTypeLearnDescription": {
+    "description": "Description for the 'learn' goal type option"
+  },
+  
+  "goalTypeDailyTitle": "Daily",
+  "@goalTypeDailyTitle": {
+    "description": "Title for the 'daily' goal type option"
+  },
+  
+  "goalTypeDailyDescription": "Track study days",
+  "@goalTypeDailyDescription": {
+    "description": "Description for the 'daily' goal type option"
+  },
+  
+  "goalTypeTimeTitle": "Time",
+  "@goalTypeTimeTitle": {
+    "description": "Title for the 'time' goal type option"
+  },
+  
+  "goalTypeTimeDescription": "Track study hours",
+  "@goalTypeTimeDescription": {
+    "description": "Description for the 'time' goal type option"
+  },
+  
+  "wordsPerDay": "words per day",
+  "@wordsPerDay": {
+    "description": "Label for words per day goal"
+  },
+  
+  "oneDailySession": "1 daily session",
+  "@oneDailySession": {
+    "description": "Label for one daily session goal"
+  },
+  
+  "minutesPerDay": "minutes per day",
+  "@minutesPerDay": {
+    "description": "Label for minutes per day goal"
+  },
+  
+  "totalWords": "total words",
+  "@totalWords": {
+    "description": "Label for total words goal"
+  },
+  
+  "totalDays": "total days",
+  "@totalDays": {
+    "description": "Label for total days goal"
+  },
+  
+  "totalHours": "total hours",
+  "@totalHours": {
+    "description": "Label for total hours goal"
+  },
+  
+  "startLearningButton": "Start learning!",
+  "@startLearningButton": {
+    "description": "Text for the button to create a new course"
+  },
+  
+  "sameLanguageError": "Source and target languages cannot be the same!",
+  "@sameLanguageError": {
+    "description": "Error shown when source and target languages are the same"
+  },
+  
+  "noCompetenceError": "Please select at least one competence!",
+  "@noCompetenceError": {
+    "description": "Error shown when no competences are selected"
+  },
+  
+  "courseExistsError": "Course already exists!",
+  "@courseExistsError": {
+    "description": "Error shown when trying to create a course that already exists"
+  },
+  
+  "languageYouKnowTooltip": "A language you already know.",
+  "@languageYouKnowTooltip": {
+    "description": "Tooltip explaining that this is a language the user already knows"
+  },
+  
+  "languageToLearnTooltip": "A language you want to learn.",
+  "@languageToLearnTooltip": {
+    "description": "Tooltip explaining that this is a language the user wants to learn"
+  },
+  
+  "readingCompetence": "Reading",
+  "@readingCompetence": {
+    "description": "Name of the reading competence"
+  },
+  
+  "writingCompetence": "Writing",
+  "@writingCompetence": {
+    "description": "Name of the writing competence"
+  },
+  
+  "speakingCompetence": "Speaking",
+  "@speakingCompetence": {
+    "description": "Name of the speaking competence"
+  },
+  
+  "listeningCompetence": "Listening",
+  "@listeningCompetence": {
+    "description": "Name of the listening competence"
+  },
+  
+  "readingRequiredTooltip": "Reading is the base of LenSki's learning method.",
+  "@readingRequiredTooltip": {
+    "description": "Tooltip explaining why reading competence is always required"
   }
 }
+

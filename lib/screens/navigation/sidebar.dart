@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/utils/colors.dart';
 import 'package:lenski/utils/proportions.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// A sidebar navigation component that provides access to main app sections.
 ///
@@ -91,7 +90,7 @@ class Sidebar extends StatelessWidget {
     return IconButton(
       icon: Icon(
         icon,
-        color: Colors.black,
+        color: AppColors.black,
         size: p.sidebarButtonWidth() / 2,
       ),
       onPressed: () {

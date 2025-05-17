@@ -2,6 +2,31 @@
   "@@locale": "es",
   "appTitle": "Lenski",
   
+  "difficultyLight": "Ligero",
+  "difficultyMedium": "Medio",
+  "difficultyHeavy": "Pesado",
+  "difficultyExtreme": "Extremo",
+  "difficultyUnknown": "Desconocido",
+  
+  "intensityLow": "baja",
+  "intensityMedium": "media",
+  "intensityHigh": "alta",
+  "intensityExtreme": "extrema",
+  
+  "courseWithIntensity": " curso con intensidad ",
+  "intensity": "",
+  
+  "addCoursePrompt": "¡Añade un curso para empezar a aprender!",
+  
+  "removeCourseTitle": "Eliminar curso",
+  "removeCoursePrompt": "¿Quieres ocultar este curso o eliminarlo permanentemente?",
+  "hideCourse": "Ocultar curso",
+  "deletePermanently": "Eliminar permanentemente",
+  "confirmDeleteTitle": "Confirmar eliminación",
+  "confirmDeleteMessage": "Advertencia: Esto eliminará permanentemente todos los datos asociados con este curso incluyendo progreso, sesiones y palabras guardadas. Esta acción no se puede deshacer.",
+  
+  "errorLoadingCourses": "Error al cargar los cursos\nPor favor reinicie la aplicación o contacte a soporte si el problema persiste.",
+
   "apiKeys": "Claves API",
   "deeplApiKey": "Clave API DeepL",
   "saveApiKey": "Guardar clave API",
@@ -24,5 +49,37 @@
   "importAndReplace": "Importar y reemplazar",
   
   "importSuccess": "Importación exitosa. Reinicie la aplicación para ver los cambios.",
-  "importFailed": "Error en la importación: {error}"
+  "importFailed": "Error en la importación: {error}",
+  
+  "languageColumnTitle": "Idioma",
+  "selectSourceLanguage": "Seleccionar idioma de origen",
+  "selectTargetLanguage": "Seleccionar idioma de destino",
+  "skillsColumnTitle": "Habilidades",
+  "goalColumnTitle": "Meta",
+  "startLearningButton": "¡Empezar a aprender!",
+  "sameLanguageError": "¡Los idiomas de origen y destino no pueden ser iguales!",
+  "noCompetenceError": "¡Por favor selecciona al menos una competencia!",
+  "courseExistsError": "¡Este curso ya existe!",
+  "languageYouKnowTooltip": "Un idioma que ya conoces.",
+  "languageToLearnTooltip": "Un idioma que quieres aprender.",
+  
+  "selectGoalType": "Seleccionar tipo de meta",
+  "goalTypeLearnTitle": "Aprender",
+  "goalTypeLearnDescription": "Seguir palabras aprendidas",
+  "goalTypeDailyTitle": "Diario",
+  "goalTypeDailyDescription": "Seguir días de estudio",
+  "goalTypeTimeTitle": "Tiempo",
+  "goalTypeTimeDescription": "Seguir horas de estudio",
+  "wordsPerDay": "palabras por día",
+  "oneDailySession": "1 sesión diaria",
+  "minutesPerDay": "minutos por día",
+  "totalWords": "palabras totales",
+  "totalDays": "días totales",
+  "totalHours": "horas totales",
+  
+  "readingCompetence": "Lectura",
+  "writingCompetence": "Escritura",
+  "speakingCompetence": "Habla",
+  "listeningCompetence": "Escucha", 
+  "readingRequiredTooltip": "La lectura es la base del método de aprendizaje de LenSki."
 }
