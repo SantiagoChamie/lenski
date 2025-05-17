@@ -15,6 +15,11 @@ class AppColors {
   static const Color darkGrey = Color(0xFF99909B);
   static const Color grey = Color(0xFFD9D0DB);
   static const Color lightGrey = Color(0xFFF5F0F6);
+  
+  // UI state colors
+  static const Color success = Color(0xFF4CAF50);  // Green for success states
+  static const Color error = Color(0xFFE53935);    // Red for error states
+  static const Color warning = Color(0xFFFF9800);  // Orange for warning states
 
   // Competences
   static const Color reading = Color(0xFFEDA42E);
@@ -36,5 +41,8 @@ class AppColors {
     'writing': writing,
     'speaking': speaking,
     'listening': listening,
+    'success': success,
+    'error': error,
+    'warning': warning,
   };
 }

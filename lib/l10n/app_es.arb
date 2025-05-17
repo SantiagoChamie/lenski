@@ -8,17 +8,17 @@
   "usePremiumApi": "Usar API Premium de DeepL",
   
   "translationSettings": "Ajustes de traducción",
-  "toggleContextual": "Alternar entre traducción contextual y no contextual en la ventana",
+  "toggleContextual": "Alternar entre traducción contextual y no contextual en la ventana de traducción",
   
   "displaySettings": "Ajustes de visualización",
-  "showStreakIndicators": "Mostrar indicadores de racha en cursos",
-  "useColoredCards": "Usar tarjetas de competencia coloreadas",
+  "showStreakIndicators": "Mostrar indicador de racha en cursos",
+  "useColoredCards": "Usar tarjetas de repaso a color",
   
   "export": "Exportar",
   "import": "Importar",
   
   "warningTitle": "Advertencia: Importación de datos",
-  "warningMessage": "La importación de datos reemplazará todos sus cursos, libros, tarjetas y progreso actuales.\nEsta acción no se puede deshacer. ¿Desea continuar?",
+  "warningMessage": "Importar datos reemplazará todos sus cursos, libros, tarjetas y progreso actuales.\nEsta acción no se puede deshacer. ¿Desea continuar?",
   
   "cancel": "Cancelar",
   "importAndReplace": "Importar y reemplazar",

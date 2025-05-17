@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
-import '../../data/migration_handler.dart'; // Add this import
+import '../../data/migration_handler.dart';
+import '../../utils/colors.dart';
+import '../../utils/fonts.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// A screen that allows the user to configure settings for the app.
+///
+/// This screen provides controls for:
+/// - API configuration (DeepL API key, premium API toggle)
+/// - Translation settings (contextual translation toggle)
+/// - Display preferences (streak indicators, colored competence cards)
+/// - Data management (import and export functionality)
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -13,15 +22,28 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  /// Controller for the API key text field
   final TextEditingController _apiKeyController = TextEditingController();
+  
+  /// Whether contextual translation is enabled
   bool _contextualTranslationEnabled = false;
+  
+  /// Whether premium DeepL API is enabled
   bool _premiumApiEnabled = false;
+  
+  /// Whether streak indicators are shown on courses
   bool _streakIndicatorEnabled = true;
-  bool _coloredCompetenceCards = true; // New setting
+  
+  /// Whether competence cards are colored
+  bool _coloredCompetenceCards = true;
 
-  // Create an instance of MigrationHandler
+  /// Handler for importing and exporting app data
   final MigrationHandler _migrationHandler = MigrationHandler();
+  
+  /// Whether data is currently being exported
   bool _isExporting = false;
+  
+  /// Whether data is currently being imported
   bool _isImporting = false;
 
   @override
@@ -31,7 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadContextualTranslationSetting();
     _loadPremiumApiSetting();
     _loadStreakIndicatorSetting();
-    _loadColoredCompetenceCardsSetting(); // Add this line
+    _loadColoredCompetenceCardsSetting();
   }
 
   /// Loads the saved API key from shared preferences and sets it in the text controller.
@@ -116,46 +138,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  /// Handles file picking and importing data
+  /// Handles file picking and importing data.
+  ///
+  /// Shows a confirmation dialog before importing, then lets the user select a file.
+  /// After importing, shows a success or error message.
   Future<void> _importFile() async {
     // Show confirmation dialog first
+    final localizations = AppLocalizations.of(context)!;
     final String? confirmation = await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text(
-            'Warning: Data Import',
+          title: Text(
+            localizations.warningTitle,
             style: TextStyle(
               fontSize: 24,
-              fontFamily: "Unbounded",
+              fontFamily: appFonts['Title'],
             ),
           ),
-          content: const Text(
-            'Importing data will replace all your current courses, books, cards, and progress \nThis action cannot be undone. Do you want to continue?',
+          content: Text(
+            localizations.warningMessage,
             style: TextStyle(
               fontSize: 16,
+              fontFamily: appFonts['Paragraph'],
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop('cancel'),
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF2C73DE),
-                textStyle: const TextStyle(
+                foregroundColor: AppColors.blue,
+                textStyle: TextStyle(
                   fontSize: 14,
+                  fontFamily: appFonts['Detail'],
                 ),
               ),
-              child: const Text('Cancel'),
+              child: Text(localizations.cancel),
             ),
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: Colors.red,
-                textStyle: const TextStyle(
+                foregroundColor: AppColors.colorMap['error'],
+                textStyle: TextStyle(
                   fontSize: 14,
+                  fontFamily: appFonts['Detail'],
                 ),
               ),
               onPressed: () => Navigator.of(context).pop('import'),
-              child: const Text('Import and Replace'),
+              child: Text(localizations.importAndReplace),
             ),
           ],
         );
@@ -188,9 +217,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(migrationResult.success
-                  ? 'Import successful. Please restart the app to see changes.'
-                  : 'Import failed: ${migrationResult.message}'),
-              backgroundColor: migrationResult.success ? Colors.green : Colors.red,
+                  ? localizations.importSuccess
+                  : localizations.importFailed(migrationResult.message!)),
+              backgroundColor: migrationResult.success ? 
+                (AppColors.colorMap['success']) : 
+                (AppColors.colorMap['error']),
             ),
           );
         }
@@ -199,8 +230,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error during import: $e'),
-            backgroundColor: Colors.red,
+            content: Text(localizations.importFailed(e.toString())),
+            backgroundColor: AppColors.colorMap['error'],
           ),
         );
       }
@@ -213,8 +244,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  /// Exports app data to a file at user-selected location
+  /// Exports app data to a file at user-selected location.
+  ///
+  /// Generates export data, then lets the user choose where to save it.
+  /// Shows success or error messages after export completes.
   Future<void> _exportFile() async {
+    final localizations = AppLocalizations.of(context)!;
     try {
       setState(() {
         _isExporting = true; // Show loading indicator
@@ -227,8 +262,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Export failed: ${migrationResult.message}'),
-            backgroundColor: Colors.red,
+            content: Text(localizations.importFailed(migrationResult.message!)),
+            backgroundColor: AppColors.colorMap['error'],
           ),
         );
         return;
@@ -237,9 +272,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       // Now let the user pick where to save the file
       String? outputPath = await FilePicker.platform.saveFile(
         dialogTitle: 'Save your Lenski data file',
-        fileName: 'lenski_export_${DateTime.now().day.toString() +
-          DateTime.now().month.toString() +
-          DateTime.now().year.toString()}.json',
+        fileName: 'lenski_export_${DateTime.now().day}_${DateTime.now().month}_${DateTime.now().year}.json',
         type: FileType.custom,
         allowedExtensions: ['json'],
       );
@@ -247,7 +280,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (outputPath != null) {
         // Copy the generated file to user's chosen location
         final sourceFile = File(migrationResult.filePath!);
-        final destinationFile = File(outputPath);
         await sourceFile.copy(outputPath);
         
         // Delete the temporary file
@@ -257,8 +289,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Export successful. File saved to: $outputPath'),
-            backgroundColor: Colors.green,
+            content: Text("${localizations.importSuccess} $outputPath"),
+            backgroundColor: AppColors.colorMap['success'],
           ),
         );
       } else {
@@ -268,9 +300,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Export cancelled by user'),
-            backgroundColor: Colors.orange,
+          SnackBar(
+            content: Text(localizations.cancel),
+            backgroundColor: AppColors.colorMap['warning'],
           ),
         );
       }
@@ -278,8 +310,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error during export: $e'),
-            backgroundColor: Colors.red,
+            content: Text(localizations.importFailed(e.toString())),
+            backgroundColor: AppColors.colorMap['error'],
           ),
         );
       }
@@ -294,6 +326,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Scaffold(
       appBar: AppBar(),
       body: Padding(
@@ -301,127 +335,149 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Theme(
           data: Theme.of(context).copyWith(
             textSelectionTheme: const TextSelectionThemeData(
-              selectionColor: Color(0xFFFFD38D),
+              selectionColor: AppColors.lightYellow,
             ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'API Keys',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Telex'),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _apiKeyController,
-                            obscureText: true,
-                            cursorColor: const Color.fromARGB(255, 0, 0, 0),
-                            decoration: const InputDecoration(
-                              labelText: 'DeepL API Key',
-                              labelStyle: TextStyle(fontFamily: 'Sansation', color: Colors.black),
-                              focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        localizations.apiKeys,
+                        style: TextStyle(
+                          fontSize: 24, 
+                          fontWeight: FontWeight.bold, 
+                          fontFamily: appFonts['Subtitle']
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _apiKeyController,
+                              obscureText: true,
+                              cursorColor: Colors.black,
+                              decoration: InputDecoration(
+                                labelText: localizations.deeplApiKey,
+                                labelStyle: TextStyle(
+                                  fontFamily: appFonts['Detail'], 
+                                  color: Colors.black
+                                ),
+                                focusedBorder: const UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.black),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: _saveApiKey,
-                          child: const Text(
-                            'Save API Key',
-                            style: TextStyle(color: Color(0xFF2C73DE)),
+                          const SizedBox(width: 10),
+                          ElevatedButton(
+                            onPressed: _saveApiKey,
+                            child: Text(
+                              localizations.saveApiKey,
+                              style: TextStyle(
+                                color: AppColors.blue,
+                                fontFamily: appFonts['Detail'],
+                              ),
+                            ),
                           ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            localizations.usePremiumApi,
+                            style: TextStyle(fontFamily: appFonts['Detail']),
+                          ),
+                          const SizedBox(width: 10),
+                          Switch(
+                            value: _premiumApiEnabled,
+                            onChanged: _savePremiumApiSetting,
+                            activeColor: AppColors.blue,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        localizations.translationSettings,
+                        style: TextStyle(
+                          fontSize: 24, 
+                          fontWeight: FontWeight.bold, 
+                          fontFamily: appFonts['Subtitle']
                         ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Use Premium DeepL API',
-                          style: TextStyle(fontFamily: 'Sansation'),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              localizations.toggleContextual,
+                              style: TextStyle(fontFamily: appFonts['Detail']),
+                            ),
+                          ),
+                          Switch(
+                            value: _contextualTranslationEnabled,
+                            onChanged: _saveContextualTranslationSetting,
+                            activeColor: AppColors.blue,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        localizations.displaySettings,
+                        style: TextStyle(
+                          fontSize: 24, 
+                          fontWeight: FontWeight.bold, 
+                          fontFamily: appFonts['Subtitle']
                         ),
-                        const SizedBox(width: 10),
-                        Switch(
-                          value: _premiumApiEnabled,
-                          onChanged: _savePremiumApiSetting,
-                          activeColor: const Color(0xFF2C73DE),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      'Translation Settings',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Telex'),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Toggle between contextual and non-contextual translation in the overlay',
-                          style: TextStyle(fontFamily: 'Sansation'),
-                        ),
-                        Switch(
-                          value: _contextualTranslationEnabled,
-                          onChanged: _saveContextualTranslationSetting,
-                          activeColor: const Color(0xFF2C73DE),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      'Display Settings',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Telex'),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Show streak indicators on courses',
-                          style: TextStyle(fontFamily: 'Sansation'),
-                        ),
-                        Switch(
-                          value: _streakIndicatorEnabled,
-                          onChanged: _saveStreakIndicatorSetting,
-                          activeColor: const Color(0xFF2C73DE),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Use colored competence cards',
-                          style: TextStyle(fontFamily: 'Sansation'),
-                        ),
-                        Switch(
-                          value: _coloredCompetenceCards,
-                          onChanged: _saveColoredCompetenceCardsSetting,
-                          activeColor: const Color(0xFF2C73DE),
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            localizations.showStreakIndicators,
+                            style: TextStyle(fontFamily: appFonts['Detail']),
+                          ),
+                          Switch(
+                            value: _streakIndicatorEnabled,
+                            onChanged: _saveStreakIndicatorSetting,
+                            activeColor: AppColors.blue,
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            localizations.useColoredCards,
+                            style: TextStyle(fontFamily: appFonts['Detail']),
+                          ),
+                          Switch(
+                            value: _coloredCompetenceCards,
+                            onChanged: _saveColoredCompetenceCardsSetting,
+                            activeColor: AppColors.blue,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
                     onPressed: _isExporting ? null : _exportFile,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE8E8E8),
+                      backgroundColor: AppColors.lightGrey,
                       foregroundColor: Colors.black,
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                     ),
@@ -431,16 +487,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text(
-                            'Export',
-                            style: TextStyle(fontFamily: 'Sansation'),
+                        : Text(
+                            localizations.export,
+                            style: TextStyle(fontFamily: appFonts['Detail']),
                           ),
                   ),
                   const SizedBox(width: 20),
                   ElevatedButton(
                     onPressed: _isImporting ? null : _importFile,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2C73DE),
+                      backgroundColor: AppColors.blue,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                     ),
@@ -453,9 +509,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Text(
-                            'Import',
-                            style: TextStyle(fontFamily: 'Sansation'),
+                        : Text(
+                            localizations.import,
+                            style: TextStyle(fontFamily: appFonts['Detail']),
                           ),
                   ),
                 ],
