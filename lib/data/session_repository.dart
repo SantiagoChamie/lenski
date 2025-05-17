@@ -45,7 +45,6 @@ class SessionRepository {
         whereArgs: ['table', 'sessions']);
         
     if (tables.isEmpty) {
-      print('Creating sessions table in unified database');
       // Create the sessions table if it doesn't exist
       await db.execute(
         'CREATE TABLE sessions('

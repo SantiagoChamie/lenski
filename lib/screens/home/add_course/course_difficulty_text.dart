@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lenski/utils/languages.dart';
+import 'package:lenski/utils/languages/language_attributes.dart';
 
 /// A widget that displays the difficulty and intensity of a course as styled text.
 class CourseDifficultyText extends StatelessWidget {

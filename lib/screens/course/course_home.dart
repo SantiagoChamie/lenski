@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/course/course_navigator.dart';
 import 'package:lenski/screens/course/metrics.dart';
+import 'package:lenski/utils/languages/welcome_messages.dart';
 import 'package:lenski/widgets/flag_icon.dart';
-import 'package:lenski/utils/languages.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/widgets/ltext.dart';
 import 'package:lenski/data/course_repository.dart'; // Add this import

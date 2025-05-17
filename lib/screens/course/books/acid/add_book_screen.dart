@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lenski/screens/course/books/acid/loading_overlay.dart';
 import 'package:lenski/screens/course/books/acid/help_section_screen.dart';
 import 'package:lenski/utils/fonts.dart';
-import 'package:lenski/utils/languages.dart';
+import 'package:lenski/utils/languages/languages.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_creator.dart';
 import 'package:dotted_border/dotted_border.dart';

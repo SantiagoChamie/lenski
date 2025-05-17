@@ -32,5 +32,9 @@ class AppColors {
     'grey': grey,
     'lightGrey': lightGrey,
     'darkGrey': darkGrey,
+    'reading': reading,
+    'writing': writing,
+    'speaking': speaking,
+    'listening': listening,
   };
 }

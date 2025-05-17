@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lenski/utils/languages/language_flags.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/widgets/flag_icon.dart';
-import 'package:lenski/utils/languages.dart';
+import 'package:lenski/utils/languages/languages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A button widget for selecting a language.

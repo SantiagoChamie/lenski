@@ -3,7 +3,7 @@ import 'package:lenski/screens/home/competences/competence_icon.dart';
 import 'package:lenski/screens/home/competences/competence_list.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/course_repository.dart';
-import 'package:lenski/utils/course_colors.dart';
+import 'package:lenski/screens/home/courses/course_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../models/course_model.dart';
 import '../../../widgets/flag_icon.dart';

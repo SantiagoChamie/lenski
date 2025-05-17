@@ -4,7 +4,7 @@ import 'package:lenski/screens/home/add_course/buttons/competence_selector_butto
 import 'package:lenski/screens/home/add_course/buttons/goal_selector_button.dart';
 import 'package:lenski/screens/home/add_course/course_difficulty_text.dart';
 import 'package:lenski/screens/home/add_course/buttons/language_selector_button.dart';
-import 'package:lenski/utils/languages.dart';
+import 'package:lenski/utils/languages/languages.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/data/course_repository.dart';
