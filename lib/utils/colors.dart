@@ -12,9 +12,16 @@ class AppColors {
   static const Color yellow = Color(0xFFEE9A1D);
   
   // Greys
+  static const Color darkGrey = Color(0xFF99909B);
   static const Color grey = Color(0xFFD9D0DB);
   static const Color lightGrey = Color(0xFFF5F0F6);
-  
+
+  // Competences
+  static const Color reading = Color(0xFFEDA42E);
+  static const Color writing = Color(0xFFEDE72D);
+  static const Color speaking = Color(0xFFDE2C50);
+  static const Color listening = Color(0xFFD52CDE);
+
   /// A map of color names to Color objects.
   /// Use this to maintain consistent colors throughout the app.
   static final Map<String, Color> colorMap = {
@@ -24,5 +31,6 @@ class AppColors {
     'yellow': yellow,
     'grey': grey,
     'lightGrey': lightGrey,
+    'darkGrey': darkGrey,
   };
 }

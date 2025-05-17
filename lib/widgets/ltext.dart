@@ -413,17 +413,19 @@ class _LTextState extends State<LText> {
   /// @return True if the word exists with proper boundaries
   bool _containsWordWithBoundaries(String text, String word) {
     // Define all characters that can act as word boundaries, including quotes and punctuation
-    const String boundaryChars = r''' \t\n\r.,;:!?()[]{}<>/\\|=+-_*&^%$#@~`"'‟„«»‹›。！？，；：（）【】［］｛｝「」『』、、； ''';
+    const String rawBc = ' \t\n\r.,;:!?()[]{}<>/\\|=+-_*&^%\$#@~`"\'‟„«»‹›。！？，；：（）【】［］｛｝「」『』、、；';
     
     // Escape special regex characters in the word
-    final String escapedWord = RegExp.escape(word);
-    
+    final String safeBc = RegExp.escape(rawBc);
+
     // Create a pattern that matches the word when surrounded by start/end of string or boundary chars
-    final pattern = '(^|[$boundaryChars])$escapedWord(\$|[$boundaryChars])';
-    
+    final String boundaryClass = '[$safeBc]';
+    final String pattern = r'(^|' + boundaryClass + r')'
+                     + RegExp.escape(word)
+                     + r'($|' + boundaryClass + r')';
+
     // Create and use the RegExp
-    final RegExp wordRegExp = RegExp(pattern);
-    return wordRegExp.hasMatch(text);
+    return RegExp(pattern).hasMatch(text);
   }
 
   /// Finds the index of a word with proper word boundaries.
@@ -436,22 +438,25 @@ class _LTextState extends State<LText> {
   /// @return The starting index of the word, or -1 if not found
   int _findWordWithBoundariesIndex(String text, String word) {
     // Define all characters that can act as word boundaries, including quotes and punctuation
-    const String boundaryChars = r''' \t\n\r.,;:!?()[]{}<>/\\|=+-_*&^%$#@~`"'‟„«»‹›。！？，；：（）【】［］｛｝「」『』、、； ''';
+    const String rawBc = ' \t\n\r.,;:!?()[]{}<>/\\|=+-_*&^%\$#@~`"\'‟„«»‹›。！？，；：（）【】［］｛｝「」『』、、；';
     
     // Escape special regex characters in the word
-    final String escapedWord = RegExp.escape(word);
+    final String safeBc = RegExp.escape(rawBc);
     
     // Create a pattern that matches the word when surrounded by start/end of string or boundary chars
-    final pattern = "(^|[$boundaryChars])($escapedWord)(\$|[$boundaryChars])";
+    final String boundaryClass = '[$safeBc]';
+    final String pattern = r'(^|' + boundaryClass + r')'
+                     + RegExp.escape(word)
+                     + r'($|' + boundaryClass + r')';
     
     // Create and use the RegExp to find the first match
     final RegExp wordRegExp = RegExp(pattern);
-    final match = wordRegExp.firstMatch(text);
+    final Match? match = wordRegExp.firstMatch(text);
     
     // If found, return the start index of the captured word (group 2)
     // We need to adjust the index to account for the boundary character
-    if (match != null && match.groupCount >= 2) {
-      // Return the start index of the second capture group (the word itself)
+    
+    if (match != null) {
       return match.start + (match.group(1)?.length ?? 0);
     }
     return -1;
