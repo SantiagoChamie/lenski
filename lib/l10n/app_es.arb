@@ -1,0 +1,28 @@
+{
+  "@@locale": "es",
+  "appTitle": "Lenski",
+  
+  "apiKeys": "Claves API",
+  "deeplApiKey": "Clave API DeepL",
+  "saveApiKey": "Guardar clave API",
+  "usePremiumApi": "Usar API Premium de DeepL",
+  
+  "translationSettings": "Ajustes de traducción",
+  "toggleContextual": "Alternar entre traducción contextual y no contextual en la ventana",
+  
+  "displaySettings": "Ajustes de visualización",
+  "showStreakIndicators": "Mostrar indicadores de racha en cursos",
+  "useColoredCards": "Usar tarjetas de competencia coloreadas",
+  
+  "export": "Exportar",
+  "import": "Importar",
+  
+  "warningTitle": "Advertencia: Importación de datos",
+  "warningMessage": "La importación de datos reemplazará todos sus cursos, libros, tarjetas y progreso actuales.\nEsta acción no se puede deshacer. ¿Desea continuar?",
+  
+  "cancel": "Cancelar",
+  "importAndReplace": "Importar y reemplazar",
+  
+  "importSuccess": "Importación exitosa. Reinicie la aplicación para ver los cambios.",
+  "importFailed": "Error en la importación: {error}"
+}

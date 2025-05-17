@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart'; 
 import 'package:lenski/screens/navigation/navigation_handler.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:window_size/window_size.dart';
@@ -6,18 +8,15 @@ import 'dart:io' show Platform;
 
 /// Main function to run the app
 void main() async {
-  // Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Set minimum window size for desktop platforms
+
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     setWindowMinSize(const Size(1750, 900)); 
-
   }
 
-  sqfliteFfiInit(); // Initialize FFI
-  databaseFactory = databaseFactoryFfi; // Set the database factory to FFI
-  runApp(const MyApp()); // Run the Flutter app
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
+  runApp(const MyApp());
 }
 
 /// Root widget of the application
@@ -27,12 +26,22 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'LenSki Beta', // Title of the app
-      debugShowCheckedModeBanner: false, // Disable debug banner
+      title: 'LenSki', 
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('es'),
+      ],
       theme: ThemeData(
-        primarySwatch: Colors.blue, // Set the primary color theme
+        primarySwatch: Colors.blue,
       ),
-      home: const NavigationHandler(), // Set the home widget
+      home: const NavigationHandler(),
     );
   }
 }

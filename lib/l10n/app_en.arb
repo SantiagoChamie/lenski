@@ -1,0 +1,40 @@
+{
+  "@@locale": "en",
+  "appTitle": "Lenski",
+  "@appTitle": {
+    "description": "The application title"
+  },
+  
+  "apiKeys": "API Keys",
+  "deeplApiKey": "DeepL API Key",
+  "saveApiKey": "Save API Key",
+  "usePremiumApi": "Use Premium DeepL API",
+  
+  "translationSettings": "Translation Settings",
+  "toggleContextual": "Toggle between contextual and non-contextual translation in the overlay",
+  
+  "displaySettings": "Display Settings",
+  "showStreakIndicators": "Show streak indicators on courses",
+  "useColoredCards": "Use colored competence cards",
+  
+  "export": "Export",
+  "import": "Import",
+  
+  "warningTitle": "Warning: Data Import",
+  "warningMessage": "Importing data will replace all your current courses, books, cards, and progress.\nThis action cannot be undone. Do you want to continue?",
+  
+  "cancel": "Cancel",
+  "importAndReplace": "Import and Replace",
+  
+  "importSuccess": "Import successful. Please restart the app to see changes.",
+  "importFailed": "Import failed: {error}",
+  "@importFailed": {
+    "description": "Message shown when import fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "File not found"
+      }
+    }
+  }
+}
