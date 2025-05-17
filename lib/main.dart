@@ -1,9 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:lenski/screens/navigation/navigation_handler.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:window_size/window_size.dart';
+import 'dart:io' show Platform;
 
 /// Main function to run the app
 void main() async {
+  // Ensure Flutter binding is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Set minimum window size for desktop platforms
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    setWindowMinSize(const Size(1750, 900)); 
+
+  }
+
   sqfliteFfiInit(); // Initialize FFI
   databaseFactory = databaseFactoryFfi; // Set the database factory to FFI
   runApp(const MyApp()); // Run the Flutter app
