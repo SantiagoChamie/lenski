@@ -172,13 +172,16 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
     // Sort the types based on the defined order
     types.sort((a, b) => typeOrder.indexOf(a).compareTo(typeOrder.indexOf(b)));
     
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
     // Create cards in sequence with different due dates
     for (int i = 0; i < types.length; i++) {
       final card = custom_card.Card(
         front: widget.text,
         back: backText,
         context: _useContext ? widget.contextText: widget.text,
-        dueDate: DateTime.now().add(Duration(days: i)),
+        dueDate: today.add(Duration(days: i)),
         language: widget.sourceLang,
         type: types[i],
       );

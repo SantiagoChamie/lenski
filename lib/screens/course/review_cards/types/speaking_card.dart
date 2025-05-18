@@ -95,13 +95,19 @@ class SpeakingCard extends StatelessWidget {
     );
   }
 
-  /// Builds the context text spans with proper highlighting of the front text
-  /// using word boundary detection for accurate matching.
+  /// Builds the context text spans with proper highlighting of the front text.
+  /// First tries to find the word using word boundaries, and if that fails,
+  /// falls back to a simple substring search.
   List<TextSpan> _buildContextTextSpans() {
-    // Use word boundaries to find the index of the front text in the context
-    final int index = _findWordWithBoundariesIndex(card.context, card.front);
+    // First try: Use word boundaries to find the index of the front text in the context
+    int index = _findWordWithBoundariesIndex(card.context, card.front);
     
-    // If front text isn't in context with word boundaries, just show the context as plain text
+    // Second try (fallback): If not found with word boundaries, try simple substring search
+    if (index == -1) {
+      index = card.context.toLowerCase().indexOf(card.front.toLowerCase());
+    }
+    
+    // If front text isn't found by either method, just show the context as plain text
     if (index == -1) {
       return [
         TextSpan(
@@ -115,7 +121,7 @@ class SpeakingCard extends StatelessWidget {
       ];
     }
     
-    // If front text is in context, split into three parts
+    // If front text is found (by either method), split into three parts
     return [
       // Text before the highlighted word
       TextSpan(
@@ -126,12 +132,12 @@ class SpeakingCard extends StatelessWidget {
           fontFamily: appFonts['Paragraph'],
         ),
       ),
-      // The highlighted word
+      // The highlighted word - use the actual text from the context for proper casing
       TextSpan(
-        text: card.front,
+        text: card.context.substring(index, index + card.front.length),
         style: TextStyle(
           fontSize: 18.0,
-          color: showColors ? AppColors.speaking : AppColors.darkGrey,
+          color: showColors ? AppColors.reading : AppColors.darkGrey,
           fontFamily: appFonts['Paragraph'],
           fontWeight: FontWeight.bold,
         ),
