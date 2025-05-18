@@ -40,7 +40,7 @@ class Course {
   /// [goalComplete] indicates whether the course goal has been completed.
   Course({
     required this.name,
-    required this.level,
+    required this.level, //TODO remove or use it
     required this.code,
     required this.fromCode,
     required this.listening,

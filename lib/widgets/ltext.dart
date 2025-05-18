@@ -544,7 +544,7 @@ class _LTextState extends State<LText> {
         });
       },
       child: TextSelectionTheme(
-        data: TextSelectionThemeData(
+        data: const TextSelectionThemeData(
           selectionColor: AppColors.lightYellow, // Use app color instead of hardcoded
         ),
         child: LayoutBuilder(

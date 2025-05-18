@@ -1,8 +1,10 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lenski/screens/course/books/acid/loading_overlay.dart';
 import 'package:lenski/screens/course/books/acid/help_section_screen.dart';
 import 'package:lenski/utils/fonts.dart';
+import 'package:lenski/utils/colors.dart';
 import 'package:lenski/utils/languages/languages.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_creator.dart';
@@ -10,10 +12,23 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 
+/// A screen for adding new books to a language course.
+///
+/// This component allows users to add custom text content as books by:
+/// - Directly pasting text
+/// - Uploading text files (.txt, .pdf, .srt)
+/// - Setting options for content processing (like sentence shuffling)
 class AddBookScreen extends StatefulWidget {
+  /// Callback function to return to the previous screen
   final VoidCallback onBackPressed;
+  
+  /// The language code of the course
   final String languageCode;
 
+  /// Creates an AddBookScreen widget.
+  /// 
+  /// [onBackPressed] is the callback function to be called when the back button is pressed.
+  /// [languageCode] is the code of the language for which to create the book.
   const AddBookScreen({
     super.key, 
     required this.onBackPressed, 
@@ -98,7 +113,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
             margin: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isFileMode == true ? const Color(0xFF2C73DE) : Colors.grey,
+              color: isFileMode == true ? AppColors.blue : AppColors.grey,
             ),
           ),
         ),
@@ -110,7 +125,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
             margin: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isFileMode == false ? const Color(0xFF2C73DE) : Colors.grey,
+              color: isFileMode == false ? AppColors.blue : AppColors.grey,
             ),
           ),
         ),
@@ -197,12 +212,13 @@ class _AddBookScreenState extends State<AddBookScreen> {
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
+    final localizations = AppLocalizations.of(context)!;
 
     // Add null check for isFileMode
     if (isFileMode == null && widget.languageCode != 'AR') {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2C73DE)),
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.blue),
         ),
       );
     }
@@ -231,11 +247,11 @@ class _AddBookScreenState extends State<AddBookScreen> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF5F0F6),
+                        color: AppColors.lightGrey,
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: const [
                           BoxShadow(
-                            color: Colors.black12,
+                            color: Colors.black12, // Keep as is for shadow
                             blurRadius: 2,
                             offset: Offset(0, 5),
                           ),
@@ -250,8 +266,13 @@ class _AddBookScreenState extends State<AddBookScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('Add your own texts!', 
-                                  style: TextStyle(fontSize: 24, fontFamily: appFonts['Title'])),
+                                Text(
+                                  localizations.addYourOwnTexts,
+                                  style: TextStyle(
+                                    fontSize: 24, 
+                                    fontFamily: appFonts['Title']
+                                  ),
+                                ),
                                 Padding(
                                   padding: const EdgeInsets.only(left: 8.0),
                                   child: IconButton(
@@ -286,9 +307,9 @@ class _AddBookScreenState extends State<AddBookScreen> {
                                         onPressed: isLoading || isHelpVisible ? null : () async {
                                           if (!_hasText()) {
                                             ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(
-                                                content: Text('Please add some text or file before creating a book'),
-                                                duration: Duration(seconds: 2),
+                                              SnackBar(
+                                                content: Text(localizations.pleaseAddTextOrFile),
+                                                duration: const Duration(seconds: 2),
                                               ),
                                             );
                                             return;
@@ -327,7 +348,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
                                           }
                                         },
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFF2C73DE),
+                                          backgroundColor: AppColors.blue,
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(10),
                                           ),
@@ -335,7 +356,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
                                           disabledForegroundColor: Colors.grey[600],
                                         ),
                                         child: Text(
-                                          "Start learning!",
+                                          localizations.startLearningButton,
                                           style: TextStyle(
                                             fontFamily: appFonts['Subtitle'], 
                                             fontSize: 30, 
@@ -350,8 +371,8 @@ class _AddBookScreenState extends State<AddBookScreen> {
                                       margin: const EdgeInsets.only(left: 8),
                                       child: Tooltip(
                                         message: isShuffleEnabled 
-                                            ? 'Random sentences' 
-                                            : 'Real sentences',
+                                            ? localizations.randomSentences 
+                                            : localizations.realSentences,
                                         verticalOffset: -40,
                                         waitDuration: const Duration(milliseconds: 500),
                                         preferBelow: false,
@@ -363,7 +384,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
                                           },
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: isShuffleEnabled 
-                                                ? const Color(0xFF71BDE0) // Light blue when active
+                                                ? AppColors.lightBlue // Light blue when active
                                                 : Colors.grey[300], // Grey when inactive
                                             shape: const CircleBorder(),
                                             padding: const EdgeInsets.all(16),
@@ -430,20 +451,20 @@ class _AddBookScreenState extends State<AddBookScreen> {
   Widget _buildTextInput() {
     return Theme(
       data: Theme.of(context).copyWith(
-        textSelectionTheme: const TextSelectionThemeData(
-          selectionColor: Color(0xFF71BDE0), // Light blue highlight
-          cursorColor: Color(0xFF2C73DE),    // Blue cursor
+        textSelectionTheme: TextSelectionThemeData(
+          selectionColor: AppColors.lightBlue,
+          cursorColor: AppColors.blue,
         ),
       ),
       child: TextField(
         controller: textController,
         enabled: !isLoading,
-        decoration: const InputDecoration(
-          border: OutlineInputBorder(),
-          hintText: 'Place the text here',
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          hintText: AppLocalizations.of(context)!.placeTextHere,
           floatingLabelBehavior: FloatingLabelBehavior.always,
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+            borderSide: BorderSide(color: AppColors.blue, width: 2.0),
           ),
         ),
         maxLines: null,
@@ -454,14 +475,17 @@ class _AddBookScreenState extends State<AddBookScreen> {
 
   // File selector widget
   Widget _buildFileSelector() {
+    final localizations = AppLocalizations.of(context)!;
+    final bool isAsianLanguage = ['JA', 'ZH', 'KO'].contains(widget.languageCode);
+    
     return Tooltip(
-      message: 'Poor quality PDFs will not work properly.${(['JA', 'ZH', 'KO'].contains(widget.languageCode)) 
-          ? '\n\nPDFs with vertical text (top to bottom) are not supported'
+      message: '${localizations.poorQualityPdfWarning}${isAsianLanguage 
+          ? '\n\n${localizations.verticalTextPdfWarning}'
           : ''}',
       verticalOffset: 70,
       waitDuration: const Duration(milliseconds: 500),
       child: DottedBorder(
-        color: Colors.grey,
+        color: Colors.grey, // Keep the original Colors.grey instead of AppColors.grey
         strokeWidth: 2,
         borderType: BorderType.RRect,
         radius: const Radius.circular(10),
@@ -483,22 +507,26 @@ class _AddBookScreenState extends State<AddBookScreen> {
                   const Icon(
                     Icons.upload_file,
                     size: 64,
-                    color: Colors.grey,
+                    color: Colors.grey, // Keep the original Colors.grey
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                   'Add files (.txt .pdf .srt)',
+                  Text(
+                   localizations.addFilesTypes,
                     style: TextStyle(
                       fontSize: 18,
-                      color: Colors.grey,
+                      color: Colors.grey, // Keep the original Colors.grey
+                      fontFamily: appFonts['Paragraph'],
                     ),
                   ),
                   if (selectedFilePath != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 16),
                       child: Text(
-                        'Selected file: ${selectedFilePath!.split('\\').last}',
-                        style: const TextStyle(fontSize: 16),
+                        '${localizations.selectedFile}: ${selectedFilePath!.split('\\').last}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: appFonts['Paragraph'],
+                        ),
                       ),
                     ),
                 ],
@@ -511,27 +539,45 @@ class _AddBookScreenState extends State<AddBookScreen> {
   }
 
   Future<void> _showLanguageMismatchDialog(String content, bool isFile) async {
+    final localizations = AppLocalizations.of(context)!;
+    
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Language Mismatch'),
+          title: Text(
+            localizations.languageMismatchTitle,
+            style: TextStyle(
+              fontFamily: appFonts['Subtitle'],
+            ),
+          ),
           content: Text(
-            'The text\'s language doesn\'t match the course\'s language: ${codeToLanguage[widget.languageCode]}'
+            '${localizations.languageMismatchContent} ${codeToLanguage[widget.languageCode]}',
+            style: TextStyle(
+              fontFamily: appFonts['Paragraph'],
+            ),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel',
-                style: TextStyle(color: Color(0xFF71BDE0)),
+              child: Text(
+                localizations.cancel,
+                style: TextStyle(
+                  color: AppColors.lightBlue,
+                  fontFamily: appFonts['Detail'],
+                ),
               ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('Add Anyway',
-                style: TextStyle(color: Colors.red),
+              child: Text(
+                localizations.addAnyway,
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontFamily: appFonts['Detail'],
+                ),
               ),
               onPressed: () async {
                 Navigator.of(context).pop();
@@ -542,13 +588,13 @@ class _AddBookScreenState extends State<AddBookScreen> {
                     await _bookCreator.forceAddFile(
                       content, 
                       widget.languageCode,
-                      shuffleSentences: isShuffleEnabled, // Add shuffle parameter
+                      shuffleSentences: isShuffleEnabled,
                     );
                   } else {
                     await _bookCreator.forceAddBook(
                       content, 
                       widget.languageCode,
-                      shuffleSentences: isShuffleEnabled, // Add shuffle parameter
+                      shuffleSentences: isShuffleEnabled,
                     );
                   }
                   if (!_bookCreator.isCancelled) {

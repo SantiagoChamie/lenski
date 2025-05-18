@@ -1,14 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lenski/models/card_model.dart' as lenski_card;
 import 'package:lenski/utils/colors.dart';
 import 'package:lenski/utils/fonts.dart';
 
+/// A widget that displays a reading practice card during review.
+///
+/// This component shows a card with a word that the user needs to recognize
+/// and recall its meaning. Features include:
+/// - The target word prominently displayed
+/// - An example sentence with the word highlighted
+/// - Visual feedback using competence-specific colors
+/// - Button to check the answer (translation)
 class ReadingCard extends StatelessWidget {
+  /// The card being reviewed
   final lenski_card.Card card;
+  
+  /// The language code of the course being studied
   final String courseCode;
+  
+  /// Callback function when the user wants to see the answer
   final VoidCallback onShowAnswer;
+  
+  /// Whether to show colored highlight for this competence type
   final bool showColors;
 
+  /// Creates a ReadingCard widget.
+  /// 
+  /// [card] is the flashcard being reviewed.
+  /// [courseCode] is the language code of the course.
+  /// [onShowAnswer] is called when the user wants to see the translation.
+  /// [showColors] determines whether to use competence-specific colors.
   const ReadingCard({
     super.key,
     required this.card,
@@ -19,28 +41,30 @@ class ReadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return SizedBox(
       width: double.infinity, // Make container take full width
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center, // Align text to the left
+        crossAxisAlignment: CrossAxisAlignment.center, // Center text alignment
         children: [
           Text(
             '${courseCode.toLowerCase()}.',
             style: TextStyle(
               fontSize: 18.0,
-              color: AppColors.grey,
+              color: AppColors.darkGrey,
               fontFamily: appFonts['Paragraph'],
             ),
           ),
           Column(
-            crossAxisAlignment: CrossAxisAlignment.center, // Align text to the left
+            crossAxisAlignment: CrossAxisAlignment.center, // Center text alignment
             children: [
               Text(
                 card.front,
                 style: TextStyle(
                   fontSize: 24.0,
-                  color: Colors.black,
+                  color: AppColors.black,
                   fontFamily: appFonts['Paragraph'],
                 ),
               ),
@@ -58,10 +82,10 @@ class ReadingCard extends StatelessWidget {
           ElevatedButton(
             onPressed: onShowAnswer,
             child: Text(
-              'Show answer',
+              localizations.checkAnswer,
               style: TextStyle(
                 fontSize: 18.0,
-                color: Colors.black,
+                color: AppColors.black,
                 fontFamily: appFonts['Detail'],
               ),
             ),

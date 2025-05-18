@@ -213,7 +213,7 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
             ),
             child: Row(
               children: [
-                Icon(icon, size: 30, color: AppColors.darkerGrey),
+                Icon(icon, size: 30, color: Colors.grey[700]),
                 const SizedBox(width: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,7 +223,7 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
                       style: TextStyle(
                         fontSize: 18,
                         fontFamily: appFonts['Paragraph'],
-                        color: AppColors.darkerGrey,
+                        color: AppColors.black,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
@@ -232,7 +232,7 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
                       style: TextStyle(
                         fontSize: 14,
                         fontFamily: appFonts['Detail'],
-                        color: AppColors.darkGrey,
+                        color: Colors.grey[600],
                       ),
                     ),
                   ],

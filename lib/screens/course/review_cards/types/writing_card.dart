@@ -1,13 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lenski/models/card_model.dart' as lenski_card;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:lenski/utils/colors.dart';
+import 'package:lenski/utils/fonts.dart';
 
+/// A widget that displays a writing practice card during review.
+///
+/// This component shows a card with a context sentence where the target word
+/// is replaced with a text field. The user must type the correct word to practice
+/// writing skills. Features include:
+/// - Gap text where the target word needs to be filled in
+/// - Visual feedback using competence-specific colors
+/// - Translation hint to help recall the word
+/// - Button to check the answer
 class WritingCard extends StatefulWidget {
+  /// The card being reviewed
   final lenski_card.Card card;
+  
+  /// The language code of the course being studied
   final String courseCode;
+  
+  /// Callback function when the user wants to see the answer
   final VoidCallback onShowAnswer;
+  
+  /// Whether to show colored highlight for this competence type
   final bool showColors;
 
+  /// Creates a WritingCard widget.
+  /// 
+  /// [card] is the flashcard being reviewed.
+  /// [courseCode] is the language code of the course.
+  /// [onShowAnswer] is called when the user wants to check their answer.
+  /// [showColors] determines whether to use competence-specific colors.
   const WritingCard({
     super.key,
     required this.card,
@@ -31,6 +55,8 @@ class _WritingCardState extends State<WritingCard> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return SizedBox(
       width: double.infinity,
       child: Column(
@@ -39,10 +65,10 @@ class _WritingCardState extends State<WritingCard> {
         children: [
           Text(
             '${widget.courseCode.toLowerCase()}.',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18.0,
-              color: Color(0xFF99909B),
-              fontFamily: "Varela Round",
+              color: AppColors.darkGrey,
+              fontFamily: appFonts['Paragraph'],
             ),
           ),
           Column(
@@ -53,10 +79,10 @@ class _WritingCardState extends State<WritingCard> {
                   text: widget.card.context.contains(widget.card.front)
                       ? widget.card.context.substring(0, widget.card.context.indexOf(widget.card.front))
                       : widget.card.context,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 24.0,
-                    color: Color.fromARGB(255, 0, 0, 0),
-                    fontFamily: "Varela Round",
+                    color: AppColors.black,
+                    fontFamily: appFonts['Paragraph'],
                   ),
                   children: widget.card.context.contains(widget.card.front)
                       ? [
@@ -66,24 +92,24 @@ class _WritingCardState extends State<WritingCard> {
                               child: Theme(
                                 data: Theme.of(context).copyWith(
                                   textSelectionTheme: TextSelectionThemeData(
-                                    selectionColor: widget.showColors ? const Color(0xFFEDE72D) : const Color.fromARGB(255, 176, 176, 176), // Writing competence color
+                                    selectionColor: widget.showColors ? AppColors.writing : const Color.fromARGB(255, 176, 176, 176), // Writing competence color
                                   ),
                                 ),
                                 child: TextField(
                                   controller: _controller,
-                                  cursorColor: widget.showColors ? const Color(0xFFEDE72D) : const Color(0xFF808080), // Writing competence color
-                                  decoration: const InputDecoration(
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                                  cursorColor: widget.showColors ? AppColors.writing : const Color(0xFF808080), // Writing competence color
+                                  decoration: InputDecoration(
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 8),
                                     focusedBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
+                                      borderSide: BorderSide(color: AppColors.black),
                                     ),
-                                    border: UnderlineInputBorder(),
+                                    border: const UnderlineInputBorder(),
                                     isDense: true,
                                   ),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 24.0,
-                                    color: Color.fromARGB(255, 0, 0, 0),
-                                    fontFamily: "Varela Round",
+                                    color: AppColors.black,
+                                    fontFamily: appFonts['Paragraph'],
                                   ),
                                 ),
                               ),
@@ -101,10 +127,10 @@ class _WritingCardState extends State<WritingCard> {
               const SizedBox(height: 16.0),
               Text(
                 '~${widget.card.back}~',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18.0,
-                  color: Color(0xFF99909B),
-                  fontFamily: "Varela Round",
+                  color: AppColors.darkGrey,
+                  fontFamily: appFonts['Paragraph'],
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -112,12 +138,12 @@ class _WritingCardState extends State<WritingCard> {
           ),
           ElevatedButton(
             onPressed: widget.onShowAnswer,
-            child: const Text(
-              'Check answer',
+            child: Text(
+              localizations.checkAnswer,
               style: TextStyle(
                 fontSize: 18.0,
-                color: Color(0xFF000000),
-                fontFamily: "Sansation",
+                color: AppColors.black,
+                fontFamily: appFonts['Detail'],
               ),
             ),
           ),

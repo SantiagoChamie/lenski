@@ -8,16 +8,31 @@ import 'package:lenski/screens/course/edit_course_screen.dart';
 import 'package:lenski/screens/course/review_cards/review_pile.dart';
 import 'package:lenski/screens/course/review_cards/add_card_screen.dart';
 import 'package:lenski/utils/proportions.dart';
+import 'package:lenski/utils/colors.dart';
 
 /// A widget that navigates between different screens within a course.
+///
+/// This component serves as a central navigation hub for all course-related activities:
+/// - Reviewing flash cards (via ReviewPile)
+/// - Adding new flash cards (via AddCardScreen)
+/// - Managing books in the library (via Library)
+/// - Editing course settings (via EditCourseScreen)
+/// - Accessing archived content
+///
+/// The navigator tracks the current screen state and provides smooth transitions
+/// between different course activities while maintaining the course state.
 class CourseNavigator extends StatefulWidget {
+  /// The course being navigated
   final Course course;
-  final Function(Course updatedCourse)? onCourseUpdate; // Add this callback
+  
+  /// Optional callback triggered when the course data is updated
+  final Function(Course updatedCourse)? onCourseUpdate;
 
   /// Creates a CourseNavigator widget.
   /// 
   /// [course] is the course for which the navigator is being created.
-  /// [onCourseUpdate] is called when the course is updated.
+  /// [onCourseUpdate] is called when the course is updated, allowing parent
+  /// widgets to react to changes in course data.
   const CourseNavigator({
     super.key, 
     required this.course,
@@ -29,11 +44,22 @@ class CourseNavigator extends StatefulWidget {
 }
 
 class _CourseNavigatorState extends State<CourseNavigator> {
-  late Course _currentCourse; // Add this to track the current course
+  /// The currently active course (may be updated from the original)
+  late Course _currentCourse;
+  
+  /// Whether the add book screen is currently displayed
   bool _showAddBookScreen = false;
+  
+  /// Whether the add card screen is currently displayed
   bool _showAddCardScreen = false;
+  
+  /// Whether a book is currently being edited
   bool _isEditingBook = false;
+  
+  /// Whether the edit course screen is currently displayed
   bool _showEditCourseScreen = false;
+  
+  /// The book currently being edited, if any
   Book? _bookToEdit;
 
   @override
@@ -42,6 +68,10 @@ class _CourseNavigatorState extends State<CourseNavigator> {
     _currentCourse = widget.course; // Initialize with the provided course
   }
 
+  /// Toggles the visibility of the add book screen.
+  ///
+  /// When showing the add book screen, resets any book editing state
+  /// to ensure a clean state for adding a new book.
   void _toggleAddBookScreen() {
     setState(() {
       _showAddBookScreen = !_showAddBookScreen;
@@ -52,6 +82,9 @@ class _CourseNavigatorState extends State<CourseNavigator> {
     });
   }
 
+  /// Shows the edit book screen for a specific book.
+  ///
+  /// @param book The book to be edited
   void _showEditBookScreen(Book book) {
     setState(() {
       _bookToEdit = book;
@@ -60,6 +93,7 @@ class _CourseNavigatorState extends State<CourseNavigator> {
     });
   }
 
+  /// Closes the edit book screen and resets related state.
   void _closeEditBookScreen() {
     setState(() {
       _isEditingBook = false;
@@ -74,20 +108,16 @@ class _CourseNavigatorState extends State<CourseNavigator> {
     });
   }
 
-  /// Handles the course edit screen and updates the course if changed.
+  /// Toggles the visibility of the course edit screen.
   void _toggleEditCourseScreen() {
-    if (_showEditCourseScreen) {
-      setState(() {
-        _showEditCourseScreen = false;
-      });
-    } else {
-      setState(() {
-        _showEditCourseScreen = true;
-      });
-    }
+    setState(() {
+      _showEditCourseScreen = !_showEditCourseScreen;
+    });
   }
 
-  /// Updates the course with the edited version.
+  /// Updates the course with the edited version and notifies parent widgets.
+  ///
+  /// @param updatedCourse The new version of the course after editing
   void _handleCourseUpdate(Course updatedCourse) {
     setState(() {
       _currentCourse = updatedCourse;
@@ -100,7 +130,10 @@ class _CourseNavigatorState extends State<CourseNavigator> {
     }
   }
 
-  // Add a method to refresh the course data which will rebuild the metrics
+  /// Refreshes the current course state, triggering a UI rebuild.
+  ///
+  /// This is typically called after operations that modify the course
+  /// (like adding cards) to ensure the UI reflects the latest data.
   void _refreshCourse() {
     setState(() {
       // This empty setState will rebuild the widget with the latest data
@@ -115,6 +148,7 @@ class _CourseNavigatorState extends State<CourseNavigator> {
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
+    
     if (_showAddBookScreen) {
       return AddBookScreen(
         onBackPressed: _toggleAddBookScreen,
@@ -139,13 +173,13 @@ class _CourseNavigatorState extends State<CourseNavigator> {
                   ? AddCardScreen(
                       onBackPressed: _toggleAddCardScreen, 
                       course: _currentCourse,
-                      onCardAdded: _refreshCourse, // Add this callback
+                      onCardAdded: _refreshCourse,
                     )
-                  : ReviewPile(course: _currentCourse, onNewPressed: _toggleAddCardScreen), // Use updated course
+                  : ReviewPile(course: _currentCourse, onNewPressed: _toggleAddCardScreen),
               const Spacer(),
               Center(
                 child: Library(
-                  course: _currentCourse, // Use updated course
+                  course: _currentCourse,
                   onAddBookPressed: _toggleAddBookScreen,
                   onEditBook: _showEditBookScreen,
                 ),
@@ -161,13 +195,13 @@ class _CourseNavigatorState extends State<CourseNavigator> {
                 shape: BoxShape.circle,
                 color: Colors.white,
                 border: Border.all(
-                  color: const Color(0xFF2C73DE),
+                  color: AppColors.blue,
                   width: 2,
                 ),
               ),
               child: IconButton(
                 icon: const Icon(Icons.settings),
-                color: const Color(0xFF2C73DE),
+                color: AppColors.blue,
                 onPressed: _toggleEditCourseScreen,
               ),
             ),
@@ -181,13 +215,13 @@ class _CourseNavigatorState extends State<CourseNavigator> {
                 shape: BoxShape.circle,
                 color: Colors.white,
                 border: Border.all(
-                  color: const Color(0xFF2C73DE),
+                  color: AppColors.blue,
                   width: 2,
                 ),
               ),
               child: IconButton(
                 icon: const Icon(Icons.archive_outlined),
-                color: const Color(0xFF2C73DE),
+                color: AppColors.blue,
                 onPressed: () {
                   Navigator.of(context).pushNamed(
                     'Archive',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lenski/models/card_model.dart' as lenski_card;
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/course/review_cards/back_card.dart';
@@ -11,17 +12,35 @@ import 'package:lenski/screens/course/review_cards/types/writing_card.dart';
 import 'package:lenski/screens/home/competences/competence_icon.dart';
 import 'package:lenski/services/tts_service.dart';
 import 'package:lenski/utils/fonts.dart';
+import 'package:lenski/utils/colors.dart';
 import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
 import 'package:lenski/data/course_repository.dart';
-import 'package:lenski/data/session_repository.dart'; // Add this import
+import 'package:lenski/data/session_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A screen for reviewing flashcards within a course.
+///
+/// This component displays cards that are due for review using a spaced repetition
+/// system and provides an interface for:
+/// - Showing the front of flashcards with different competence types
+/// - Flipping to show the back of the card with translation
+/// - Rating cards as easy or difficult, affecting their next review date
+/// - Editing card content or deleting cards from the deck
+/// - Tracking study time and updating progress statistics
+///
+/// Features:
+/// - Keyboard shortcuts for efficient reviewing
+/// - First-card prioritization for specific words
+/// - Different card types based on competence (reading, writing, listening, speaking)
+/// - Study time tracking and session statistics
 class ReviewScreen extends StatefulWidget {
+  /// The course associated with these flashcards
   final Course course;
-  final String? firstWord; // Add this field
+  
+  /// Optional specific word that should be shown first in the review
+  final String? firstWord;
 
   /// Creates a ReviewScreen widget.
   /// 
@@ -38,21 +57,39 @@ class ReviewScreen extends StatefulWidget {
 }
 
 class _ReviewScreenState extends State<ReviewScreen> {
+  /// Whether the card is showing its front (question) or back (answer)
   bool isFront = true;
-  bool isAudioEnabled = true; // Default value
-  bool isTtsAvailable = false; // New state variable
-  bool _showColors = true; 
-  List<lenski_card.Card> cards = [];
-  final CardRepository repository = CardRepository();
-  final CourseRepository courseRepository = CourseRepository();
-  final SessionRepository sessionRepository = SessionRepository(); // Add session repository
   
-  // Add tracking variable for study time
+  /// Whether audio should play automatically when showing cards
+  bool isAudioEnabled = true;
+  
+  /// Whether text-to-speech is available for the current language
+  bool isTtsAvailable = false;
+  
+  /// Whether to show colored competence indicators
+  bool _showColors = true; 
+  
+  /// List of cards to be reviewed in this session
+  List<lenski_card.Card> cards = [];
+  
+  /// Repository for card data operations
+  final CardRepository repository = CardRepository();
+  
+  /// Repository for course data operations
+  final CourseRepository courseRepository = CourseRepository();
+  
+  /// Repository for session statistics
+  final SessionRepository sessionRepository = SessionRepository();
+  
+  /// Start time of the review session for tracking study duration
   late DateTime _startTime;
-  bool _attemptedReload = false; // Add this field to track if we've tried reloading
+  
+  /// Whether an attempt to reload cards has already been made
+  bool _attemptedReload = false;
 
-  // Add focus node for keyboard events
+  /// Focus node for keyboard shortcuts
   final FocusNode _focusNode = FocusNode();
+
 
   @override
   void initState() {
@@ -79,6 +116,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
     super.dispose();
   }
   
+  /// Loads the colored cards preference from SharedPreferences.
+  ///
+  /// This determines whether competence cards show their type-specific colors
+  /// or appear in a neutral gray color.
   Future<void> _loadColors() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -86,10 +127,13 @@ class _ReviewScreenState extends State<ReviewScreen> {
     });
   }
 
-  /// Saves the time spent studying to session repository
+  /// Saves the time spent studying to the session repository.
+  ///
+  /// This calculates the duration between the session start and current time,
+  /// then stores it in the session statistics for the course.
   Future<void> _saveStudyTime() async {
     final now = DateTime.now();
-    final minutesStudied = now.difference(_startTime).inMinutes-1; 
+    final minutesStudied = now.difference(_startTime).inMinutes; 
     
     // Only update if user spent at least a minute
     if (minutesStudied > 0) {
@@ -101,6 +145,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
 
   /// Loads the audio preference from SharedPreferences.
+  ///
+  /// This determines whether cards should automatically read their content
+  /// aloud when shown.
   Future<void> _loadAudioPreference() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -109,6 +156,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
 
   /// Loads the cards to be reviewed from the repository.
+  ///
+  /// This method:
+  /// 1. Fetches all cards due for review today
+  /// 2. If firstWord is specified, prioritizes it at the beginning of the deck
+  /// 3. Randomizes the order of the remaining cards
   Future<void> _loadCards() async {
     final today = DateTime.now();
     final fetchedCards = await repository.cards(today, widget.course.code);
@@ -147,6 +199,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
 
   /// Checks the availability of TTS for the current course language.
+  ///
+  /// This determines whether text-to-speech functionality is available
+  /// for the language being learned, and disables audio if not available.
   Future<void> _checkTtsAvailability() async {
     try {
       final List<dynamic> availableLanguages = await TtsService().getLanguages();
@@ -169,6 +224,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
   
   /// Toggles the visibility of the card (front/back).
+  /// 
   /// If the card is on the front and audio is enabled, it reads the front of the card.
   void toggleCard() async {
     if (isFront && isAudioEnabled) {
@@ -178,13 +234,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
     setState(() {
       isFront = !isFront;
     });
-    /**for (var card in cards) {
-      print('Due date for card ${card.id}: ${_intToDateTime(card.dueDate)}');
-    }
-    */
   }
 
-  /// Handles the difficulty selection and updates streak on first review.
+  /// Handles the difficulty selection and updates card scheduling.
+  ///
+  /// @param quality The difficulty rating (1 for difficult, 4 for easy)
   void handleDifficulty(int quality) async {
     // Track card review in the session stats
     await sessionRepository.updateSessionStats(
@@ -194,14 +248,20 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
     final currentCard = cards.removeAt(0);
     final nextDue = await repository.updateCardEFactor(currentCard, quality);
+    
     if (nextDue < 1) {
+      // If card should be reviewed again in this session, add it back
       cards.add(currentCard);
     }
     toggleCard();
   }
 
   /// Handles the deletion of the current card.
+  ///
+  /// This removes the card from the deck and provides an undo option.
   void handleDelete() async {
+    final localizations = AppLocalizations.of(context)!;
+    
     if (cards.isNotEmpty) {
       final currentCard = cards.removeAt(0);
       await repository.deleteCard(currentCard.id);
@@ -215,10 +275,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Card deleted'),
+          content: Text(localizations.cardDeleted),
           action: SnackBarAction(
-            label: 'Undo',
-            textColor: const Color(0xFFFFD38D),
+            label: localizations.undoAction,
+            textColor: AppColors.lightYellow,
             onPressed: () async {
               cards.insert(0, currentCard);
               await repository.insertCard(currentCard);
@@ -234,8 +294,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
     }
   }
 
-  /// Shows a dialog for editing the current card
+  /// Shows a dialog for editing the current card.
+  ///
+  /// @param card The card to be edited
   void _showEditCardDialog(lenski_card.Card card) async {
+    final localizations = AppLocalizations.of(context)!;
     final result = await showDialog<lenski_card.Card>(
       context: context,
       builder: (context) => EditCardDialog(card: card),
@@ -253,9 +316,26 @@ class _ReviewScreenState extends State<ReviewScreen> {
       // Show confirmation
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Card updated successfully')),
+          SnackBar(content: Text(localizations.cardUpdatedSuccessfully)),
         );
       }
+    }
+  }
+
+  /// Gets the tooltip text for a specific card type.
+  ///
+  /// @param cardType The type of card ('writing', 'speaking', or other)
+  /// @return A localized string describing the card's prompt
+  String _getCardTypeTooltip(String cardType) {
+    final localizations = AppLocalizations.of(context)!;
+    
+    switch (cardType) {
+      case 'writing':
+        return localizations.writingCardTooltip;
+      case 'speaking':
+        return localizations.speakingCardTooltip;
+      default:
+        return localizations.readingCardTooltip;
     }
   }
 
@@ -344,7 +424,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
               child: Center(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isFront ? const Color(0xFFF5F0F6) : const Color(0xFFFFFFFF),
+                    color: isFront ? AppColors.lightGrey : Colors.white,
                     borderRadius: BorderRadius.circular(5.0),
                     boxShadow: const [
                       BoxShadow(
@@ -412,7 +492,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
               child: FlagIcon(
                 size: iconSize,
                 borderWidth: 5.0,
-                borderColor: const Color(0xFFD9D0DB),
+                borderColor: AppColors.grey,
                 language: widget.course.name,
               ),
             ),
@@ -432,19 +512,17 @@ class _ReviewScreenState extends State<ReviewScreen> {
               left: boxPadding + 10,
               child: Column(
                 children: [
-                  Text(cards.length.toString(),
+                  Text(
+                    cards.length.toString(),
                     style: TextStyle(
                       fontFamily: appFonts['Paragraph'], 
                       fontWeight: FontWeight.bold, 
-                      color: Colors.grey,
+                      color: AppColors.darkGrey,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Tooltip(
-                    message: 
-                      currentCard.type == 'writing' ? "How do you write this word?"
-                      : currentCard.type == 'speaking' ? "How do you pronounce this word?" 
-                      : "What does this word mean?",
+                    message: _getCardTypeTooltip(currentCard.type),
                     child: CompetenceIcon(
                       type: currentCard.type,
                       size: iconSize/2,
@@ -465,8 +543,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     onPressed: () => _showEditCardDialog(currentCard),
                     hoverElevation: 0,
                     elevation: 0,
-                    backgroundColor: const Color(0xFFFFD38D),
-                    child: const Icon(Icons.edit, color: Colors.black, size: 20),
+                    backgroundColor: AppColors.lightYellow,
+                    child: const Icon(Icons.edit, color: AppColors.black, size: 20),
                   ),
                   const SizedBox(height: 16),
                   // Delete button (now smaller)
@@ -474,8 +552,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     onPressed: handleDelete,
                     hoverElevation: 0,
                     elevation: 0,
-                    backgroundColor: const Color(0xFFFFD38D),
-                    child: const Icon(Icons.delete, color: Colors.black, size: 20),
+                    backgroundColor: AppColors.lightYellow,
+                    child: const Icon(Icons.delete, color: AppColors.black, size: 20),
                   ),
                 ],
               ),
@@ -487,10 +565,20 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
 }
 
-/// Dialog for editing a card
+/// Dialog for editing a card's content.
+///
+/// This component allows users to modify:
+/// - The front (word to learn)
+/// - The back (translation)
+/// - The context (example sentence)
+/// - The card type (competence)
 class EditCardDialog extends StatefulWidget {
+  /// The card being edited
   final lenski_card.Card card;
   
+  /// Creates an EditCardDialog widget.
+  /// 
+  /// [card] is the card to be edited.
   const EditCardDialog({super.key, required this.card});
   
   @override
@@ -498,10 +586,19 @@ class EditCardDialog extends StatefulWidget {
 }
 
 class _EditCardDialogState extends State<EditCardDialog> {
+  /// Controller for the front text field
   late TextEditingController _frontController;
+  
+  /// Controller for the back text field
   late TextEditingController _backController;
+  
+  /// Controller for the context text field
   late TextEditingController _contextController;
+  
+  /// Currently selected card type
   late String _selectedType;
+  
+  /// Available card types
   final List<String> _cardTypes = ['reading', 'writing', 'speaking', 'listening'];
   
   @override
@@ -523,6 +620,8 @@ class _EditCardDialogState extends State<EditCardDialog> {
   
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Dialog(
       child: Container(
         padding: const EdgeInsets.all(24),
@@ -530,8 +629,8 @@ class _EditCardDialogState extends State<EditCardDialog> {
         child: Theme(
           data: Theme.of(context).copyWith(
             textSelectionTheme: const TextSelectionThemeData(
-              selectionColor: Color(0xFF71BDE0),
-              cursorColor: Colors.black54,
+              selectionColor: AppColors.lightBlue,
+              cursorColor: AppColors.darkGrey,
             ),
           ),
           child: Column(
@@ -539,7 +638,7 @@ class _EditCardDialogState extends State<EditCardDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Edit Card',
+                localizations.editCardTitle,
                 style: TextStyle(
                   fontSize: 24,
                   fontFamily: appFonts['Subtitle'],
@@ -549,15 +648,15 @@ class _EditCardDialogState extends State<EditCardDialog> {
               TextField(
                 controller: _frontController,
                 decoration: InputDecoration(
-                  labelText: 'Front (word to learn)',
+                  labelText: localizations.frontCardLabel,
                   labelStyle: TextStyle(
                     fontFamily: appFonts['Detail'],
                     fontSize: 16,
-                    color: Colors.grey[700],
+                    color: AppColors.darkGrey,
                   ),
                   border: const OutlineInputBorder(),
                   focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                    borderSide: BorderSide(color: AppColors.blue, width: 2.0),
                   ),
                 ),
               ),
@@ -565,15 +664,15 @@ class _EditCardDialogState extends State<EditCardDialog> {
               TextField(
                 controller: _backController,
                 decoration: InputDecoration(
-                  labelText: 'Back (translation)',
+                  labelText: localizations.backCardLabel,
                   labelStyle: TextStyle(
                     fontFamily: appFonts['Detail'],
                     fontSize: 16,
-                    color: Colors.grey[700],
+                    color: AppColors.darkGrey,
                   ),
                   border: const OutlineInputBorder(),
                   focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                    borderSide: BorderSide(color: AppColors.blue, width: 2.0),
                   ),
                 ),
               ),
@@ -582,15 +681,15 @@ class _EditCardDialogState extends State<EditCardDialog> {
                 controller: _contextController,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  labelText: 'Context (example sentence)',
+                  labelText: localizations.contextCardLabel,
                   labelStyle: TextStyle(
                     fontFamily: appFonts['Detail'],
                     fontSize: 16,
-                    color: Colors.grey[700],
+                    color: AppColors.darkGrey,
                   ),
                   border: const OutlineInputBorder(),
                   focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                    borderSide: BorderSide(color: AppColors.blue, width: 2.0),
                   ),
                 ),
               ),
@@ -598,15 +697,15 @@ class _EditCardDialogState extends State<EditCardDialog> {
               DropdownButtonFormField<String>(
                 value: _selectedType,
                 decoration: InputDecoration(
-                  labelText: 'Card Type',
+                  labelText: localizations.cardTypeLabel,
                   labelStyle: TextStyle(
                     fontFamily: appFonts['Detail'],
                     fontSize: 16,
-                    color: Colors.grey[700],
+                    color: AppColors.darkGrey,
                   ),
                   border: const OutlineInputBorder(),
                   focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                    borderSide: BorderSide(color: AppColors.blue, width: 2.0),
                   ),
                 ),
                 items: _cardTypes.map((type) {
@@ -635,7 +734,7 @@ class _EditCardDialogState extends State<EditCardDialog> {
                         Icon(icon, size: 20),
                         const SizedBox(width: 8),
                         Text(
-                          type.substring(0, 1).toUpperCase() + type.substring(1),
+                          localizations.getCardTypeDisplay(type),
                           style: TextStyle(
                             fontFamily: appFonts['Detail'],
                           ),
@@ -658,11 +757,12 @@ class _EditCardDialogState extends State<EditCardDialog> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel',
+                    child: Text(
+                      localizations.cancel,
                       style: TextStyle(
-                        fontFamily: 'Sansation',
+                        fontFamily: appFonts['Detail'],
                         fontSize: 14,
-                        color: Colors.red,
+                        color: AppColors.error,
                       ),
                     ),
                   ),
@@ -684,11 +784,12 @@ class _EditCardDialogState extends State<EditCardDialog> {
                       Navigator.pop(context, updatedCard);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2C73DE),
+                      backgroundColor: AppColors.blue,
                     ),
-                    child: const Text('Save',
+                    child: Text(
+                      localizations.save,
                       style: TextStyle(
-                        fontFamily: 'Sansation',
+                        fontFamily: appFonts['Detail'],
                         fontSize: 14,
                         color: Colors.white,
                       ),
@@ -704,8 +805,10 @@ class _EditCardDialogState extends State<EditCardDialog> {
   }
   
   /// Converts an integer representing the number of days since Unix epoch to a DateTime object.
+  ///
+  /// @param days Integer number of days since Unix epoch
+  /// @return A DateTime object corresponding to that date
   static DateTime _intToDateTime(int days) {
     return DateTime.utc(1970, 1, 1).add(Duration(days: days));
   }
-
 }

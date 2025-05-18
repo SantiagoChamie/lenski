@@ -1,14 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lenski/models/card_model.dart' as lenski_card;
 import 'package:lenski/utils/colors.dart';
 import 'package:lenski/utils/fonts.dart';
 
+/// A widget that displays a speaking practice card during review.
+///
+/// This component shows a card that prompts the user to practice speaking
+/// a word or phrase aloud. Features include:
+/// - The target word prominently displayed
+/// - An example sentence with the word highlighted
+/// - Visual feedback using competence-specific colors
+/// - Button to check the correct pronunciation
 class SpeakingCard extends StatelessWidget {
+  /// The card being reviewed
   final lenski_card.Card card;
+  
+  /// The language code of the course being studied
   final String courseCode;
+  
+  /// Callback function when the user wants to see the answer
   final VoidCallback onShowAnswer;
+  
+  /// Whether to show colored highlight for this competence type
   final bool showColors;
 
+  /// Creates a SpeakingCard widget.
+  /// 
+  /// [card] is the flashcard being reviewed.
+  /// [courseCode] is the language code of the course.
+  /// [onShowAnswer] is called when the user wants to check their answer.
+  /// [showColors] determines whether to use competence-specific colors.
   const SpeakingCard({
     super.key,
     required this.card,
@@ -19,6 +41,8 @@ class SpeakingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return SizedBox(
       width: double.infinity, // Make container take full width
       child: Column(
@@ -27,10 +51,10 @@ class SpeakingCard extends StatelessWidget {
         children: [
           Text(
             '${courseCode.toLowerCase()}.',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18.0,
-              color: Color(0xFF99909B),
-              fontFamily: "Varela Round",
+              color: AppColors.darkGrey,
+              fontFamily: appFonts['Paragraph'],
             ),
           ),
           Column(
@@ -38,10 +62,10 @@ class SpeakingCard extends StatelessWidget {
             children: [
               Text(
                 card.front,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24.0,
-                  color: Color.fromARGB(255, 0, 0, 0),
-                  fontFamily: "Varela Round",
+                  color: AppColors.black,
+                  fontFamily: appFonts['Paragraph'],
                 ),
               ),
               if (card.context != card.front)
@@ -57,12 +81,12 @@ class SpeakingCard extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: onShowAnswer,
-            child: const Text(
-              'Show answer',
+            child: Text(
+              localizations.checkAnswer,
               style: TextStyle(
                 fontSize: 18.0,
-                color: Color(0xFF000000),
-                fontFamily: "Sansation",
+                color: AppColors.black,
+                fontFamily: appFonts['Detail'],
               ),
             ),
           ),

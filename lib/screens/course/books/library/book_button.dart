@@ -4,15 +4,35 @@ import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/course/books/acid/add_book_button.dart';
 import 'package:lenski/screens/course/books/library/empty_book_button.dart';
 import 'package:lenski/utils/proportions.dart';
-
+import 'package:lenski/utils/colors.dart';
+import 'package:lenski/utils/fonts.dart';
 
 /// A button widget for displaying a book.
+///
+/// This component serves multiple purposes:
+/// - Shows an existing book with cover image and progress indicator
+/// - Shows an "add new book" button
+/// - Shows an empty placeholder to maintain grid layout
+///
+/// Books display their title and completion percentage. Pressing a book
+/// navigates to the book reader screen.
 class BookButton extends StatefulWidget {
+  /// The book to be displayed (null for add or empty buttons)
   final Book? book;
+  
+  /// The course to which the book belongs
   final Course? course;
+  
+  /// Whether this button is for adding a new book
   final bool? add;
+  
+  /// Callback function for when the add button is pressed
   final VoidCallback? onPressed;
+  
+  /// Callback function for when the book is deleted
   final VoidCallback? onDelete;
+  
+  /// Callback function for when the edit button is pressed
   final Function(Book)? onEdit;
 
   /// Creates a BookButton widget.
@@ -22,6 +42,7 @@ class BookButton extends StatefulWidget {
   /// [add] indicates whether this button is for adding a new book.
   /// [onPressed] is the callback function to be called when the button is pressed.
   /// [onDelete] is the callback function to be called when the delete button is pressed.
+  /// [onEdit] is the callback function to be called when the edit button is pressed.
   const BookButton({
     super.key,
     this.book,
@@ -37,6 +58,7 @@ class BookButton extends StatefulWidget {
 }
 
 class _BookButtonState extends State<BookButton> {
+  /// The book displayed by this button
   Book? book;
 
   @override
@@ -47,11 +69,13 @@ class _BookButtonState extends State<BookButton> {
 
   @override
   void dispose() {
-    // Add any cleanup here if needed
     super.dispose();
   }
 
   /// Handles the button press event.
+  /// 
+  /// If this is an add button, calls the onPressed callback.
+  /// If this is a book button, navigates to the book screen.
   void _handleBookPress(BuildContext context) {
     if (widget.add == true) {
       if (widget.onPressed != null) {
@@ -76,11 +100,13 @@ class _BookButtonState extends State<BookButton> {
   Widget build(BuildContext context) {
     final p = Proportions(context);
     const double bookWidth = 150;
-    const randomColor = Color(0xFFFFD38D); //Color((Random().nextDouble() * 0xFFFFFF).toInt()).withValues(alpha: 1.0);
+    
+    // Calculate completion percentage
     final percentage = (book != null && book!.totalLines > 0)
-        ? book!.finished ? 100: book!.currentLine == 1 ? 0 : ((book!.currentLine) / book!.totalLines * 100).toInt()
+        ? book!.finished ? 100 : book!.currentLine == 1 ? 0 : ((book!.currentLine) / book!.totalLines * 100).toInt()
         : 100;
 
+    // Adjust font size based on percentage width
     double fontSize;
     if (percentage < 10) {
       fontSize = 16;
@@ -103,7 +129,7 @@ class _BookButtonState extends State<BookButton> {
                       width: bookWidth,
                       height: bookWidth * 1.5,
                       decoration: BoxDecoration(
-                        color: book!.imageUrl == null ? randomColor : null,
+                        color: book!.imageUrl == null ? AppColors.lightYellow : null,
                         image: book!.imageUrl != null
                             ? DecorationImage(
                                 image: NetworkImage(book!.imageUrl!),
@@ -133,8 +159,8 @@ class _BookButtonState extends State<BookButton> {
                                 style: TextStyle(
                                   fontSize: fontSize,
                                   fontWeight: FontWeight.bold,
-                                  fontFamily: 'Sansation',
-                                  color: const Color.fromARGB(255, 0, 0, 0),
+                                  fontFamily: appFonts['Detail'],
+                                  color: AppColors.black,
                                 ),
                               ),
                             ),
@@ -146,7 +172,7 @@ class _BookButtonState extends State<BookButton> {
                               value: percentage / 100,
                               strokeWidth: 5,
                               backgroundColor: Colors.white,
-                              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2C73DE)),
+                              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.blue),
                             ),
                           ),
                         ],
@@ -171,9 +197,9 @@ class _BookButtonState extends State<BookButton> {
           width: 100 + p.standardPadding() * 2,
           child: Text(
             book?.name ?? ' ',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
-              fontFamily: 'Varela Round',
+              fontFamily: appFonts['Paragraph'],
             ),
             textAlign: TextAlign.center,
             maxLines: 2,

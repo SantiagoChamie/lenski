@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/home/competences/competence_icon.dart';
 import 'package:lenski/utils/fonts.dart';
+import 'package:lenski/utils/colors.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/card_repository.dart';
 import 'package:lenski/data/session_repository.dart';
@@ -10,11 +12,31 @@ import 'package:lenski/models/card_model.dart' as card_model;
 import 'package:lenski/services/translation_service.dart';
 
 /// A screen for adding a new card to the course.
+///
+/// This component provides an interface for creating new flashcards with:
+/// - Front text (the word or phrase to learn)
+/// - Back text (the translation)
+/// - Context (an example sentence containing the word)
+/// - Selection of competence types (reading, writing, listening, speaking)
+///
+/// The screen includes a translation button to automatically translate
+/// from target language to source language, and validates input before
+/// allowing card creation.
 class AddCardScreen extends StatefulWidget {
+  /// Callback function to return to previous screen
   final VoidCallback onBackPressed;
+  
+  /// The course for which cards are being added
   final Course course;
+  
+  /// Optional callback when a card is successfully added
   final VoidCallback? onCardAdded;
 
+  /// Creates an AddCardScreen widget.
+  /// 
+  /// [onBackPressed] is called when user wants to exit the add card screen.
+  /// [course] is the course for which cards are being added.
+  /// [onCardAdded] is called when a card is successfully added.
   const AddCardScreen({
     super.key, 
     required this.onBackPressed, 
@@ -27,27 +49,37 @@ class AddCardScreen extends StatefulWidget {
 }
 
 class _AddCardScreenState extends State<AddCardScreen> {
+  /// Controller for the front (word to learn) text field
   final TextEditingController frontController = TextEditingController();
+  
+  /// Controller for the back (translation) text field
   final TextEditingController backController = TextEditingController();
+  
+  /// Controller for the context (example sentence) text field
   final TextEditingController contextController = TextEditingController();
   
-  // Add focus node for keyboard events
+  /// Focus node for keyboard events
   final FocusNode _keyboardFocusNode = FocusNode();
   
-  // Use late initialization for the competences map
+  /// Map of selected competences for the card
   late final Map<String, bool> selectedCompetences;
   
-  // Helper method to get tooltip text for competences
+  /// Gets the localized tooltip text for a specific competence.
+  ///
+  /// @param type The competence type identifier ('reading', 'writing', etc)
+  /// @return A localized string describing the competence
   String _getCompetenceTooltip(String type) {
+    final localizations = AppLocalizations.of(context)!;
+    
     switch (type) {
       case 'reading':
-        return 'Reading';
+        return localizations.readingCompetence;
       case 'listening':
-        return 'Listening';
+        return localizations.listeningCompetence;
       case 'writing':
-        return 'Writing';
+        return localizations.writingCompetence;
       case 'speaking':
-        return 'Speaking';
+        return localizations.speakingCompetence;
       default:
         return type;
     }
@@ -88,14 +120,16 @@ class _AddCardScreenState extends State<AddCardScreen> {
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
+    final localizations = AppLocalizations.of(context)!;
 
     return KeyboardListener(
       focusNode: _keyboardFocusNode,
       onKeyEvent: (KeyEvent event) {
         // Only process KeyDownEvent
         if (event is KeyDownEvent) {
-          // Check for Escape key
-          if (event.logicalKey == LogicalKeyboardKey.escape || event.logicalKey == LogicalKeyboardKey.space) {
+          // Check for Escape key or Space key
+          if (event.logicalKey == LogicalKeyboardKey.escape || 
+              event.logicalKey == LogicalKeyboardKey.space) {
             widget.onBackPressed();
           }
         }
@@ -103,14 +137,18 @@ class _AddCardScreenState extends State<AddCardScreen> {
       child: Stack(
         children: [
           Container(
-            margin: EdgeInsets.only(bottom: p.standardPadding() * 2, left: p.standardPadding() * 2, right: p.standardPadding() * 2),
+            margin: EdgeInsets.only(
+              bottom: p.standardPadding() * 2, 
+              left: p.standardPadding() * 2, 
+              right: p.standardPadding() * 2
+            ),
             width: p.mainScreenWidth() / 2 - p.standardPadding() * 4,
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F0F6),
+              color: AppColors.lightGrey,
               borderRadius: BorderRadius.circular(5.0),
               boxShadow: const [
                 BoxShadow(
-                  color: Colors.black38,
+                  color: Colors.black38, // Keep as is for shadow
                   blurRadius: 4.0,
                   offset: Offset(0, 2),
                 ),
@@ -126,9 +164,9 @@ class _AddCardScreenState extends State<AddCardScreen> {
                       padding: EdgeInsets.all(p.standardPadding()),
                       child: Theme(
                         data: Theme.of(context).copyWith(
-                          textSelectionTheme: const TextSelectionThemeData(
-                            selectionColor: Color(0xFF71BDE0),
-                            cursorColor: Colors.black54,   
+                          textSelectionTheme: TextSelectionThemeData(
+                            selectionColor: AppColors.lightBlue,
+                            cursorColor: Colors.black54, // Keep as is for cursor color
                           ),
                         ),
                         child: Column(
@@ -136,12 +174,12 @@ class _AddCardScreenState extends State<AddCardScreen> {
                             TextField(
                               controller: frontController,
                               style: TextStyle(fontFamily: appFonts['Detail']),
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                hintText: 'Front (word to learn)',
+                              decoration: InputDecoration(
+                                border: const OutlineInputBorder(),
+                                hintText: localizations.frontCardLabel,
                                 floatingLabelBehavior: FloatingLabelBehavior.always,
                                 focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                                  borderSide: BorderSide(color: AppColors.blue, width: 2.0),
                                 ),
                               ),
                               maxLines: 1,
@@ -153,19 +191,19 @@ class _AddCardScreenState extends State<AddCardScreen> {
                                   child: TextField(
                                     controller: backController,
                                     style: TextStyle(fontFamily: appFonts['Detail']),
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                      hintText: 'Back (translation)',
+                                    decoration: InputDecoration(
+                                      border: const OutlineInputBorder(),
+                                      hintText: localizations.backCardLabel,
                                       floatingLabelBehavior: FloatingLabelBehavior.always,
                                       focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                                        borderSide: BorderSide(color: AppColors.blue, width: 2.0),
                                       ),
                                     ),
                                     maxLines: 1,
                                   ),
                                 ),
                                 Tooltip(
-                                  message: 'Translate front text',
+                                  message: localizations.translateTextTooltip,
                                   child: IconButton(
                                     icon: const Icon(Icons.translate),
                                     onPressed: () async {
@@ -186,12 +224,12 @@ class _AddCardScreenState extends State<AddCardScreen> {
                               child: TextField(
                                 controller: contextController,
                                 style: TextStyle(fontFamily: appFonts['Detail']),
-                                decoration: const InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  hintText: 'Context (optional)',
+                                decoration: InputDecoration(
+                                  border: const OutlineInputBorder(),
+                                  hintText: localizations.contextOptional,
                                   floatingLabelBehavior: FloatingLabelBehavior.always,
                                   focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                                    borderSide: BorderSide(color: AppColors.blue, width: 2.0),
                                   ),
                                 ),
                                 maxLines: null,
@@ -239,23 +277,24 @@ class _AddCardScreenState extends State<AddCardScreen> {
                       onPressed: () async {
                         if (frontController.text.isEmpty || backController.text.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Fill in the front and back fields to create a card')),
+                            SnackBar(content: Text(localizations.fillFieldsMessage)),
                           );
                           return;
-                        } else if (contextController.text != '' && !contextController.text.toLowerCase().contains(frontController.text.toLowerCase())) {
+                        } else if (contextController.text != '' && 
+                                 !contextController.text.toLowerCase().contains(frontController.text.toLowerCase())) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('The context must include the front text')),
+                            SnackBar(content: Text(localizations.contextMustIncludeFrontText)),
                           );
                           return;
                         } else if (!selectedCompetences.values.contains(true)) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Select at least one competence for your card')),
+                            SnackBar(content: Text(localizations.noCompetenceError)),
                           );
                           return;
                         }
 
-                        //if case doesn't match, make it match
-                        if (contextController.text != '' && !contextController.text.contains(frontController.text)){
+                        // If case doesn't match, make it match
+                        if (contextController.text != '' && !contextController.text.contains(frontController.text)) {
                           frontController.text = frontController.text.toLowerCase();
                         }
 
@@ -297,14 +336,18 @@ class _AddCardScreenState extends State<AddCardScreen> {
                         widget.onBackPressed();
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2C73DE),
+                        backgroundColor: AppColors.blue,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                       child: Text(
-                        "Add card!",
-                        style: TextStyle(fontFamily: appFonts['Subtitle'], fontSize: 30, color: Colors.white),
+                        localizations.addCardButton,
+                        style: TextStyle(
+                          fontFamily: appFonts['Subtitle'], 
+                          fontSize: 30, 
+                          color: Colors.white // Keep as is for text color
+                        ),
                       ),
                     ),
                   ),
@@ -314,16 +357,13 @@ class _AddCardScreenState extends State<AddCardScreen> {
           ),
           Positioned(
             top: 0,
-            right: p.standardPadding()*2,
-            child: Tooltip(
-              message: 'Close',
-              child: IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: widget.onBackPressed,
-              ),
+            right: p.standardPadding() * 2,
+            child: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: widget.onBackPressed,
             ),
           ),
-        ]
+        ],
       ),
     );
   }

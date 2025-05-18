@@ -153,7 +153,7 @@
     "description": "Title for the skills selection column"
   },
   
-  "goalColumnTitle": "Goal",
+  "goalColumnTitle": "Goals",
   "@goalColumnTitle": {
     "description": "Title for the goal selection column"
   },
@@ -223,6 +223,31 @@
     "description": "Label for total hours goal"
   },
   
+  "wordsToday": " Words Today",
+  "@wordsToday": {
+    "description": "Label for daily word count goal"
+  },
+  
+  "dailyActivity": " Daily Activity",
+  "@dailyActivity": {
+    "description": "Label for daily activity goal"
+  },
+  
+  "minutesToday": " Minutes Today",
+  "@minutesToday": {
+    "description": "Label for daily minutes goal"
+  },
+  
+  "dailyGoal": " Daily Goal",
+  "@dailyGoal": {
+    "description": "Generic label for daily goal"
+  },
+  
+  "dayStreak": " Day Streak",
+  "@dayStreak": {
+    "description": "Label for consecutive days streak"
+  },
+  
   "startLearningButton": "Start learning!",
   "@startLearningButton": {
     "description": "Text for the button to create a new course"
@@ -276,6 +301,700 @@
   "readingRequiredTooltip": "Reading is the base of LenSki's learning method.",
   "@readingRequiredTooltip": {
     "description": "Tooltip explaining why reading competence is always required"
+  },
+  
+  "sourceLanguageTitle": "Source Language",
+  "@sourceLanguageTitle": {
+    "description": "Title for the source language section"
+  },
+  
+  "saveChangesButton": "Save Changes",
+  "@saveChangesButton": {
+    "description": "Text for the button to save course changes"
+  },
+  
+  "studyTimeLabel": "Study time",
+  "@studyTimeLabel": {
+    "description": "Label for study time statistics"
+  },
+  
+  "wordsAddedLabel": "Words added",
+  "@wordsAddedLabel": {
+    "description": "Label for words added statistics"
+  },
+  
+  "wordsReviewedLabel": "Words reviewed",
+  "@wordsReviewedLabel": {
+    "description": "Label for words reviewed statistics"
+  },
+  
+  "linesReadLabel": "Lines read",
+  "@linesReadLabel": {
+    "description": "Label for lines read statistics"
+  },
+  
+  "daysPracticedLabel": "Days practiced",
+  "@daysPracticedLabel": {
+    "description": "Label for days practiced statistics"
+  },
+  
+  "minutesFormat": "{minutes} min",
+  "@minutesFormat": {
+    "description": "Format for showing minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  
+  "hoursFormat": "{hours} h",
+  "@hoursFormat": {
+    "description": "Format for showing hours",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  
+  "hoursMinutesFormat": "{hours} h {minutes} min",
+  "@hoursMinutesFormat": {
+    "description": "Format for showing hours and minutes",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "2"
+      },
+      "minutes": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  
+  "daysFormat": "{days} days",
+  "@daysFormat": {
+    "description": "Format for showing days",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  
+  "daysHoursFormat": "{days} day{plural} {hours} h",
+  "@daysHoursFormat": {
+    "description": "Format for showing days and hours",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "2"
+      },
+      "hours": {
+        "type": "int",
+        "example": "12"
+      },
+      "plural": {
+        "type": "String",
+        "example": "s"
+      }
+    }
+  },
+  
+  "yearsFormat": "{years} year{plural}",
+  "@yearsFormat": {
+    "description": "Format for showing years",
+    "placeholders": {
+      "years": {
+        "type": "int",
+        "example": "2"
+      },
+      "plural": {
+        "type": "String",
+        "example": "s"
+      }
+    }
+  },
+  
+  "yearsDaysFormat": "{years} year{yearPlural} {days} day{dayPlural}",
+  "@yearsDaysFormat": {
+    "description": "Format for showing years and days",
+    "placeholders": {
+      "years": {
+        "type": "int",
+        "example": "2"
+      },
+      "days": {
+        "type": "int",
+        "example": "5"
+      },
+      "yearPlural": {
+        "type": "String",
+        "example": "s"
+      },
+      "dayPlural": {
+        "type": "String",
+        "example": "s"
+      }
+    }
+  },
+  
+  "goalTooSmallWords": "Total goal cannot be less than words already added ({wordsAdded})",
+  "@goalTooSmallWords": {
+    "description": "Error message when goal is smaller than words added",
+    "placeholders": {
+      "wordsAdded": {
+        "type": "int",
+        "example": "500"
+      }
+    }
+  },
+  
+  "goalTooSmallDays": "Total goal cannot be less than days already practiced ({daysPracticed})",
+  "@goalTooSmallDays": {
+    "description": "Error message when goal is smaller than days practiced",
+    "placeholders": {
+      "daysPracticed": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  
+  "goalTooSmallTime": "Total goal cannot be less than time already studied ({timeStudied})",
+  "@goalTooSmallTime": {
+    "description": "Error message when goal is smaller than time studied",
+    "placeholders": {
+      "timeStudied": {
+        "type": "String",
+        "example": "5 h 30 min"
+      }
+    }
+  },
+  
+  "highlightTextTooltip": "Highlight text to see its translation",
+  "@highlightTextTooltip": {
+    "description": "Tooltip explaining how to use the interactive text translation feature"
+  },
+  
+  "cardAddedSuccessfully": "Card added successfully",
+  "@cardAddedSuccessfully": {
+    "description": "Message shown when a card is successfully added to the deck"
+  },
+  
+  "installTtsMessage": "Install the text-to-speech for this language in your device to access this functionality",
+  "@installTtsMessage": {
+    "description": "Message shown when TTS is not available for a language"
+  },
+  
+  "usingContextualTranslation": "Using contextual translation",
+  "@usingContextualTranslation": {
+    "description": "Tooltip for contextual translation mode"
+  },
+  
+  "usingWordOnlyTranslation": "Using word-only translation",
+  "@usingWordOnlyTranslation": {
+    "description": "Tooltip for word-only translation mode"
+  },
+  
+  "cardDeleted": "Card deleted",
+  "@cardDeleted": {
+    "description": "Message shown when a card is deleted"
+  },
+  
+  "undoAction": "Undo",
+  "@undoAction": {
+    "description": "Text for the undo action"
+  },
+  
+  "cardUpdatedSuccessfully": "Card updated successfully",
+  "@cardUpdatedSuccessfully": {
+    "description": "Message shown when a card is successfully updated"
+  },
+  
+  "writingCardTooltip": "How do you write this word?",
+  "@writingCardTooltip": {
+    "description": "Tooltip for writing cards"
+  },
+  
+  "speakingCardTooltip": "How do you pronounce this word?",
+  "@speakingCardTooltip": {
+    "description": "Tooltip for speaking cards"
+  },
+  
+  "readingCardTooltip": "What does this word mean?",
+  "@readingCardTooltip": {
+    "description": "Tooltip for reading/listening cards"
+  },
+  
+  "editCardTitle": "Edit Card",
+  "@editCardTitle": {
+    "description": "Title for the edit card dialog"
+  },
+  
+  "frontCardLabel": "Front (word to learn)",
+  "@frontCardLabel": {
+    "description": "Label for the front card field"
+  },
+  
+  "backCardLabel": "Back (translation)",
+  "@backCardLabel": {
+    "description": "Label for the back card field"
+  },
+  
+  "contextCardLabel": "Context (example sentence)",
+  "@contextCardLabel": {
+    "description": "Label for the context field"
+  },
+  
+  "contextOptional": "Context (optional)",
+  "@contextOptional": {
+    "description": "Label for the optional context field"
+  },
+  
+  "fillFieldsMessage": "Fill in the front and back fields to create a card",
+  "@fillFieldsMessage": {
+    "description": "Error message when front or back fields are empty"
+  },
+  
+  "contextMustIncludeFrontText": "The context must include the front text",
+  "@contextMustIncludeFrontText": {
+    "description": "Error message when context doesn't include the front text"
+  },
+  
+  "cardTypeLabel": "Card Type",
+  "@cardTypeLabel": {
+    "description": "Label for the card type field"
+  },
+  
+  "save": "Save",
+  "@save": {
+    "description": "Text for save button"
+  },
+  
+  "closeTooltip": "Close",
+  "@closeTooltip": {
+    "description": "Tooltip for close button"
+  },
+  
+  "editCardTooltip": "Edit card",
+  "@editCardTooltip": {
+    "description": "Tooltip for edit card button"
+  },
+  
+  "deleteCardTooltip": "Delete card",
+  "@deleteCardTooltip": {
+    "description": "Tooltip for delete card button"
+  },
+  
+  "translateTextTooltip": "Translate front text",
+  "@translateTextTooltip": {
+    "description": "Tooltip for the translate button in the add card screen"
+  },
+  
+  "addCardButton": "Add card!",
+  "@addCardButton": {
+    "description": "Text for the button to add a new card"
+  },
+  
+  "getCardTypeDisplay": "{cardType, select, reading{Reading} writing{Writing} speaking{Speaking} listening{Listening} other{Unknown}}",
+  "@getCardTypeDisplay": {
+    "description": "Helper to get the display name for a card type",
+    "placeholders": {
+      "cardType": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "hardButton": "Hard",
+  "@hardButton": {
+    "description": "Text for the hard difficulty button"
+  },
+  
+  "easyButton": "Easy",
+  "@easyButton": {
+    "description": "Text for the easy difficulty button"
+  },
+  
+  "noNewCardsRemaining": "No new cards remaining",
+  "@noNewCardsRemaining": {
+    "description": "Message displayed when there are no cards left to review"
+  },
+  
+  "cardsToReview": "{count, plural, =1{1 card to review} other{{count} cards to review}}",
+  "@cardsToReview": {
+    "description": "Count of cards waiting to be reviewed",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  
+  "refreshCardTooltip": "Show different card",
+  "@refreshCardTooltip": {
+    "description": "Tooltip for the refresh button in review pile"
+  },
+  
+  "addCardTooltip": "Add new card",
+  "@addCardTooltip": {
+    "description": "Tooltip for the add new card button"
+  },
+
+  "checkAnswer": "Check answer",
+  "@checkAnswer": {
+    "description": "Text for the button to check the answer in writing cards"
+  },
+
+  "listenToContext": "Listen to context",
+  "@listenToContext": {
+    "description": "Text for the context listening option in listening cards"
+  },
+  
+  "listenToWordTooltip": "Listen to the word",
+  "@listenToWordTooltip": {
+    "description": "Tooltip for the main listening button"
+  },
+  
+  "listenToContextTooltip": "Listen to the example sentence",
+  "@listenToContextTooltip": {
+    "description": "Tooltip for the context listening button"
+  },
+  
+  "errorLoadingSentences": "Error loading sentences",
+  "@errorLoadingSentences": {
+    "description": "Message shown when sentences cannot be loaded"
+  },
+  
+  "noSentencesFound": "No sentences found",
+  "@noSentencesFound": {
+    "description": "Message shown when no sentences are found for a book"
+  },
+
+  "errorLoadingBooks": "Error loading books",
+  "@errorLoadingBooks": {
+    "description": "Message shown when books cannot be loaded"
+  },
+
+  "textProcessingMessage": "Your text is being processed,\nplease be patient",
+  "@textProcessingMessage": {
+    "description": "Message shown while text processing is in progress"
+  },
+
+  "realLifeInteractionsTitle": "Real-Life Interactions",
+  "@realLifeInteractionsTitle": {
+    "description": "Title for real life interactions content section"
+  },
+  
+  "videoTranscripts": "Video transcripts",
+  "@videoTranscripts": {
+    "description": "Video transcripts content example"
+  },
+  
+  "conversationLogs": "Conversation logs",
+  "@conversationLogs": {
+    "description": "Conversation logs content example"
+  },
+  
+  "interviewTranscripts": "Interview transcripts",
+  "@interviewTranscripts": {
+    "description": "Interview transcripts content example"
+  },
+  
+  "podcastTranscripts": "Podcasts transcripts",
+  "@podcastTranscripts": {
+    "description": "Podcast transcripts content example"
+  },
+  
+  "dailyDialogues": "Daily dialogues",
+  "@dailyDialogues": {
+    "description": "Daily dialogues content example"
+  },
+  
+  "travelPhrases": "Travel phrases",
+  "@travelPhrases": {
+    "description": "Travel phrases content example"
+  },
+  
+  "realLifeInteractionsDescription": "Great for learning everyday language and common expressions people use in real situations.",
+  "@realLifeInteractionsDescription": {
+    "description": "Description for real life interactions content section"
+  },
+  
+  "entertainmentTitle": "Entertainment",
+  "@entertainmentTitle": {
+    "description": "Title for entertainment content section"
+  },
+  
+  "songLyrics": "Song lyrics",
+  "@songLyrics": {
+    "description": "Song lyrics content example"
+  },
+  
+  "booksAndStories": "Books and stories",
+  "@booksAndStories": {
+    "description": "Books and stories content example"
+  },
+  
+  "movieScripts": "Movie scripts",
+  "@movieScripts": {
+    "description": "Movie scripts content example"
+  },
+  
+  "movieSubtitles": "Movie subtitles",
+  "@movieSubtitles": {
+    "description": "Movie subtitles content example"
+  },
+  
+  "tvShowScripts": "TV show scripts",
+  "@tvShowScripts": {
+    "description": "TV show scripts content example"
+  },
+  
+  "playsAndDialogues": "Plays and dialogues",
+  "@playsAndDialogues": {
+    "description": "Plays and dialogues content example"
+  },
+  
+  "entertainmentDescription": "Contains various difficulty levels from simple songs to complex narratives. Great for cultural context.",
+  "@entertainmentDescription": {
+    "description": "Description for entertainment content section"
+  },
+  
+  "articlesAcademicTitle": "Articles & Academic",
+  "@articlesAcademicTitle": {
+    "description": "Title for articles and academic content section"
+  },
+  
+  "wikipediaArticles": "Wikipedia articles",
+  "@wikipediaArticles": {
+    "description": "Wikipedia articles content example"
+  },
+  
+  "newsArticles": "News articles",
+  "@newsArticles": {
+    "description": "News articles content example"
+  },
+  
+  "scientificPapers": "Scientific papers",
+  "@scientificPapers": {
+    "description": "Scientific papers content example"
+  },
+  
+  "blogPosts": "Blog posts",
+  "@blogPosts": {
+    "description": "Blog posts content example"
+  },
+  
+  "educationalMaterials": "Educational materials",
+  "@educationalMaterials": {
+    "description": "Educational materials content example"
+  },
+  
+  "specializedVocabulary": "Specialized vocabulary",
+  "@specializedVocabulary": {
+    "description": "Specialized vocabulary content example"
+  },
+  
+  "articlesAcademicDescription": "Perfect for learning formal language and specific vocabulary in different fields of interest.",
+  "@articlesAcademicDescription": {
+    "description": "Description for articles and academic content section"
+  },
+  
+  "contentTip": "Tip: Start with content that matches your interests! Learning is more effective when you enjoy what you're reading.",
+  "@contentTip": {
+    "description": "Tip about selecting content that matches user interests"
+  },
+  
+  "deleteBookTitle": "Delete Book",
+  "@deleteBookTitle": {
+    "description": "Title for the delete book dialog"
+  },
+  
+  "deleteBookConfirmation": "Are you sure you want to delete this book?",
+  "@deleteBookConfirmation": {
+    "description": "Confirmation message for book deletion"
+  },
+  
+  "archiveBookTitle": "Archive Book",
+  "@archiveBookTitle": {
+    "description": "Title for the archive book dialog"
+  },
+  
+  "archiveBookConfirmation": "Are you sure you want to archive this book? Archiving will remove all of this book's contents.",
+  "@archiveBookConfirmation": {
+    "description": "Confirmation message for book archiving"
+  },
+  
+  "bookTitleLabel": "Book Title",
+  "@bookTitleLabel": {
+    "description": "Label for book title field"
+  },
+  
+  "imageUrlLabel": "Image URL",
+  "@imageUrlLabel": {
+    "description": "Label for image URL field"
+  },
+  
+  "enterImageUrlHint": "Enter image URL",
+  "@enterImageUrlHint": {
+    "description": "Hint for image URL field"
+  },
+  
+  "languageLabel": "Language",
+  "@languageLabel": {
+    "description": "Label for language info"
+  },
+  
+  "currentProgressLabel": "Current Progress",
+  "@currentProgressLabel": {
+    "description": "Label for progress info"
+  },
+  
+  "lines": "lines",
+  "@lines": {
+    "description": "Text for lines count"
+  },
+  
+  "editBookTitle": "Edit Book",
+  "@editBookTitle": {
+    "description": "Title for the edit book screen"
+  },
+  
+  "archiveBook": "Archive book",
+  "@archiveBook": {
+    "description": "Text for the archive book button"
+  },
+  
+  "deleteBook": "Delete book",
+  "@deleteBook": {
+    "description": "Text for the delete book button"
+  },
+  
+  "archive": "Archive",
+  "@archive": {
+    "description": "Text for archive confirmation button"
+  },
+  
+  "delete": "Delete",
+  "@delete": {
+    "description": "Text for delete confirmation button"
+  },
+
+  "addYourOwnTexts": "Add your own texts!",
+  "@addYourOwnTexts": {
+    "description": "Title for the add book screen"
+  },
+  
+  "pleaseAddTextOrFile": "Please add some text or file before creating a book",
+  "@pleaseAddTextOrFile": {
+    "description": "Error message when trying to create a book without content"
+  },
+  
+  "randomSentences": "Random sentences",
+  "@randomSentences": {
+    "description": "Tooltip for shuffle button when enabled"
+  },
+  
+  "realSentences": "Real sentences",
+  "@realSentences": {
+    "description": "Tooltip for shuffle button when disabled"
+  },
+  
+  "placeTextHere": "Place the text here",
+  "@placeTextHere": {
+    "description": "Placeholder text for text input"
+  },
+  
+  "poorQualityPdfWarning": "Poor quality PDFs will not work properly.",
+  "@poorQualityPdfWarning": {
+    "description": "Warning about poor quality PDFs"
+  },
+  
+  "verticalTextPdfWarning": "PDFs with vertical text (top to bottom) are not supported",
+  "@verticalTextPdfWarning": {
+    "description": "Warning about vertical text in PDFs"
+  },
+  
+  "addFilesTypes": "Add files (.txt .pdf .srt)",
+  "@addFilesTypes": {
+    "description": "Text showing supported file types"
+  },
+  
+  "selectedFile": "Selected file",
+  "@selectedFile": {
+    "description": "Label for selected file"
+  },
+  
+  "languageMismatchTitle": "Language Mismatch",
+  "@languageMismatchTitle": {
+    "description": "Title for language mismatch dialog"
+  },
+  
+  "languageMismatchContent": "The text's language doesn't match the course's language:",
+  "@languageMismatchContent": {
+    "description": "Content of the language mismatch dialog"
+  },
+  
+  "addAnyway": "Add Anyway",
+  "@addAnyway": {
+    "description": "Button to add content despite language mismatch"
+  },
+
+  "archiveTitle": "Archive",
+  "@archiveTitle": {
+    "description": "Title for the archive screen"
+  },
+  
+  "noArchivedBooks": "Finish books to add them to your archive",
+  "@noArchivedBooks": {
+    "description": "Message shown when there are no archived books"
+  },
+  
+  "notCategorized": "Not Categorized",
+  "@notCategorized": {
+    "description": "Default category for uncategorized books"
+  },
+  
+  "deleteArchivedBookTitle": "Delete Book",
+  "@deleteArchivedBookTitle": {
+    "description": "Title for the delete archived book dialog"
+  },
+  
+  "deleteArchivedBookConfirmation": "Are you sure you want to delete this book from your archive?",
+  "@deleteArchivedBookConfirmation": {
+    "description": "Confirmation message for deleting an archived book"
+  },
+  
+  "deleteArchivedBookTooltip": "Delete book",
+  "@deleteArchivedBookTooltip": {
+    "description": "Tooltip for the delete archived book button"
+  },
+  
+  "editArchivedBookTitle": "Edit Book",
+  "@editArchivedBookTitle": {
+    "description": "Title for the edit archived book dialog"
+  },
+  
+  "nameLabel": "Name",
+  "@nameLabel": {
+    "description": "Label for the name field"
+  },
+  
+  "categoryLabel": "Category",
+  "@categoryLabel": {
+    "description": "Label for the category field"
+  },
+  
+  "subcategoryLabel": "Subcategory (optional)",
+  "@subcategoryLabel": {
+    "description": "Label for the subcategory field"
   }
 }
 
