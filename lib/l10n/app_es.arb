@@ -48,7 +48,8 @@
   "cancel": "Cancelar",
   "importAndReplace": "Importar y reemplazar",
   
-  "importSuccess": "Importación exitosa. Reinicie la aplicación para ver los cambios.",
+  "importSuccess": "Importación exitosa.",
+  "exportSuccess": "Exportación exitosa.",
   "importFailed": "Error en la importación: {error}",
   
   "languageColumnTitle": "Idioma",

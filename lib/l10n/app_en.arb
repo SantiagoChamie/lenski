@@ -122,6 +122,7 @@
   "importAndReplace": "Import and Replace",
   
   "importSuccess": "Import successful. Please restart the app to see changes.",
+  "exportSuccess": "Export successful.",
   "importFailed": "Import failed: {error}",
   "@importFailed": {
     "description": "Message shown when import fails",

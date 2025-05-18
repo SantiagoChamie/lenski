@@ -289,7 +289,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("${localizations.importSuccess} $outputPath"),
+            content: Text("${localizations.exportSuccess} $outputPath"),
             backgroundColor: AppColors.success,
           ),
         );
