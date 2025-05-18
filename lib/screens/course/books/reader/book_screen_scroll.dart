@@ -1,21 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Import this for KeyEvent
-import 'package:flutter/gestures.dart'; // Import this for PointerSignalEvent
+import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lenski/models/book_model.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/models/sentence_model.dart';
 import 'package:lenski/utils/fonts.dart';
+import 'package:lenski/utils/colors.dart';
 import 'package:lenski/widgets/flag_icon.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
-import 'package:lenski/data/session_repository.dart'; // Add this import
+import 'package:lenski/data/session_repository.dart';
 import 'package:lenski/widgets/ltext.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Import this for SharedPreferences
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Screen to display a book
 /// Allows the user to read the book sentence by sentence
+///
+/// Features:
+/// - Vertical scroll through sentences
+/// - Customizable font size, line height, and visible lines
+/// - Interactive text translation with LText
+/// - Progress tracking through a draggable progress bar
+/// - Reading session stats tracking for the course
+/// - Keyboard, touchpad and gesture navigation
 class BookScreenScroll extends StatefulWidget {
+  /// The book to display
   final Book book;
+  
+  /// The course to which the book belongs
   final Course course;
 
   /// Creates a BookScreenScroll widget.
@@ -29,17 +42,33 @@ class BookScreenScroll extends StatefulWidget {
 }
 
 class _BookScreenScrollState extends State<BookScreenScroll> {
-  // Add these constants at the top of the class
+  // Settings storage keys
   static const String _fontSizeKey = 'book_font_size';
   static const String _lineHeightKey = 'book_line_height';
   static const String _visibleLinesKey = 'book_visible_lines';
   
-  // Add tracking variables
+  // Reading tracking variables
   late DateTime _startTime;
   late int _startLine;
   final SessionRepository _sessionRepository = SessionRepository();
 
-  // Add these methods to handle preferences
+  // Book state variables
+  late Future<List<Sentence>> _sentencesFuture;
+  late int _currentLine;
+  final FocusNode _focusNode = FocusNode();
+  
+  // Display settings
+  double _fontSize = 30.0;
+  bool _showFontSizeSlider = false;
+  double _lineHeight = 1.2;
+  bool _showLineHeightSlider = false;
+  int _visibleLines = 11;
+  bool _showLineCountSlider = false;
+
+  /// Loads display settings from SharedPreferences.
+  ///
+  /// Retrieves and applies previously saved font size, line height, 
+  /// and number of visible lines.
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -49,22 +78,16 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
     });
   }
 
+  /// Saves display settings to SharedPreferences.
+  ///
+  /// Stores the current font size, line height, and number of visible lines
+  /// for persistence across app restarts.
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_fontSizeKey, _fontSize);
     await prefs.setDouble(_lineHeightKey, _lineHeight);
     await prefs.setInt(_visibleLinesKey, _visibleLines);
   }
-
-  late Future<List<Sentence>> _sentencesFuture;
-  late int _currentLine;
-  final FocusNode _focusNode = FocusNode();
-  double _fontSize = 30.0;
-  bool _showFontSizeSlider = false;
-  double _lineHeight = 1.2;
-  bool _showLineHeightSlider = false;
-  int _visibleLines = 11;
-  bool _showLineCountSlider = false;
 
   @override
   void initState() {
@@ -89,7 +112,10 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
     super.dispose();
   }
 
-  /// Saves reading statistics to the session repository
+  /// Saves reading statistics to the session repository.
+  ///
+  /// Calculates minutes studied and lines read during the session
+  /// and updates the session statistics for the course.
   Future<void> _saveReadingStats() async {
     // Calculate minutes studied
     final now = DateTime.now();
@@ -109,6 +135,8 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
   }
 
   /// Fetches the sentences for the book from the repository.
+  ///
+  /// Retrieves all sentences for this book and sorts them by ID.
   Future<List<Sentence>> _fetchSentences() async {
     final bookRepository = BookRepository();
     final sentences = await bookRepository.getSentences(widget.book.id!);
@@ -117,6 +145,8 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
   }
 
   /// Updates the current line of the book in the repository.
+  ///
+  /// Persists the user's reading progress to the database.
   void _updateCurrentLine(int newLine) async {
     final bookRepository = BookRepository();
     widget.book.currentLine = newLine;
@@ -124,6 +154,9 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
   }
 
   /// Checks if the book should be marked as finished based on current position
+  ///
+  /// If the user has reached the end of the book, marks it as finished
+  /// in the database and updates the local state.
   Future<void> _checkAndMarkAsFinished(List<Sentence> sentences) async {
     if (widget.book.finished) return;  // Skip if already finished
 
@@ -142,6 +175,8 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
   }
 
   /// Moves to the next sentence in the book.
+  ///
+  /// Updates the current line if not at the end of the book.
   void _nextSentence() {
     setState(() {
       if (_currentLine < widget.book.totalLines) {
@@ -152,6 +187,8 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
   }
 
   /// Moves to the previous sentence in the book.
+  ///
+  /// Updates the current line if not at the beginning of the book.
   void _previousSentence() {
     setState(() {
       if (_currentLine > 1) {
@@ -162,17 +199,23 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
   }
 
   /// Handles key events for navigating through sentences.
+  ///
+  /// Supports arrow keys, WASD keys and Escape for navigation.
   void _handleKeyEvent(KeyEvent event) {
     if (event is KeyDownEvent) {
       if (event.logicalKey == LogicalKeyboardKey.arrowDown || event.logicalKey == LogicalKeyboardKey.keyS) {
         _nextSentence();
       } else if (event.logicalKey == LogicalKeyboardKey.arrowUp || event.logicalKey == LogicalKeyboardKey.keyW) {
         _previousSentence();
+      } else if (event.logicalKey == LogicalKeyboardKey.escape) {
+        Navigator.of(context).pop();
       }
     }
   }
 
-  /// Handles scroll events
+  /// Handles scroll events from mouse wheel or touchpad.
+  ///
+  /// Enables scrolling through sentences with the scroll wheel.
   void _handleScrollEvent(PointerSignalEvent event) {
     if (event is PointerScrollEvent) {
       // Using smaller threshold for better touchpad sensitivity
@@ -184,55 +227,11 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
     }
   }
 
-  /// Shows a confirmation dialog for archiving the book.
-  Future<void> _showArchiveConfirmation() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Archive Book',
-          style: TextStyle(
-            fontSize: 24, 
-            fontFamily: appFonts['Subtitle'],
-          ),
-        ),
-        content: Text('Are you sure you want to archive this book? Archiving will remove all of this book\'s contents.',
-          style: TextStyle(
-            fontSize: 16, 
-            fontFamily: appFonts['Paragraph'],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel',
-              style: TextStyle(color: Colors.red, fontSize: 14, fontFamily: appFonts['Detail']),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF2C73DE),
-              textStyle: TextStyle(fontSize: 14, fontFamily: appFonts['Detail']),
-            ),
-            child: const Text('Archive'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true && mounted) {
-      final bookRepository = BookRepository();
-      await bookRepository.archiveBook(widget.book);
-      if (mounted) {
-        Navigator.pop(context); // Close book screen after archiving
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
     final boxPadding = p.standardPadding() * 4;
+    final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: PopScope<Object?>(
@@ -261,7 +260,7 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                     child: Center(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF5F0F6),
+                          color: AppColors.lightGrey,
                           borderRadius: BorderRadius.circular(5.0),
                           boxShadow: const [
                             BoxShadow(
@@ -279,9 +278,21 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                               if (snapshot.connectionState == ConnectionState.waiting) {
                                 return const CircularProgressIndicator();
                               } else if (snapshot.hasError) {
-                                return const Text('Error loading sentences');
+                                return Text(
+                                  localizations.errorLoadingSentences,
+                                  style: TextStyle(
+                                    fontFamily: appFonts['Paragraph'],
+                                    color: AppColors.error,
+                                  ),
+                                );
                               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                                return const Text('No sentences found');
+                                return Text(
+                                  localizations.noSentencesFound, 
+                                  style: TextStyle(
+                                    fontFamily: appFonts['Paragraph'],
+                                    color: AppColors.darkGrey,
+                                  ),
+                                );
                               } else {
                                 final sentences = snapshot.data!;
                                 
@@ -320,8 +331,8 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                                               style: TextStyle(
                                                 fontSize: _fontSize,
                                                 height: _lineHeight,
-                                                color: const Color.fromARGB(255, 0, 0, 0),
-                                                fontFamily: "Varela Round",
+                                                color: AppColors.black,
+                                                fontFamily: appFonts['Paragraph'],
                                               ),
                                               textAlign: widget.course.code != 'AR' ? TextAlign.justify : TextAlign.end,
                                               cardTypes: [
@@ -364,8 +375,8 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                                           quarterTurns: 1,
                                           child: LinearProgressIndicator(
                                             value: _currentLine / widget.book.totalLines,
-                                            backgroundColor: const Color(0xFFD9D0DB),
-                                            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2C73DE)),
+                                            backgroundColor: AppColors.grey,
+                                            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.blue),
                                             minHeight: 10,
                                             borderRadius: BorderRadius.circular(5.0),
                                           ),
@@ -387,7 +398,7 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                     child: FlagIcon(
                       size: 80.0,
                       borderWidth: 5.0,
-                      borderColor: const Color(0xFFD9D0DB),
+                      borderColor: AppColors.grey,
                       language: widget.course.name,
                     ),
                   ),
@@ -408,46 +419,6 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (_showFontSizeSlider) ...[
-                          SizedBox(
-                            height: 200,
-                            child: RotatedBox(
-                              quarterTurns: 3,
-                              child: Slider(
-                                value: _fontSize,
-                                activeColor: const Color(0xFF71BDE0),
-                                min: 16.0,
-                                max: 48.0,
-                                divisions: 16,
-                                label: _fontSize.round().toString(),
-                                onChanged: (value) {
-                                  setState(() {
-                                    _fontSize = value;
-                                    _saveSettings();
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                        IconButton(
-                          icon: const Icon(Icons.text_fields_rounded),
-                          onPressed: () {
-                            setState(() {
-                              _showFontSizeSlider = !_showFontSizeSlider;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  Positioned(
-                    left: boxPadding + 10,
-                    bottom: boxPadding + 10,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
                         if (_showLineCountSlider) ...[
                           SizedBox(
                             height: 200,
@@ -455,7 +426,7 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                               quarterTurns: 3,
                               child: Slider(
                                 value: _visibleLines.toDouble(),
-                                activeColor: const Color(0xFF71BDE0),
+                                activeColor: AppColors.lightBlue,
                                 min: 1,
                                 max: 21,
                                 divisions: 9,
@@ -487,7 +458,7 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                               quarterTurns: 3,
                               child: Slider(
                                 value: _lineHeight,
-                                activeColor: const Color(0xFF71BDE0),
+                                activeColor: AppColors.lightBlue,
                                 min: 1.0,
                                 max: 3.0,
                                 divisions: 20,
@@ -519,7 +490,7 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                               quarterTurns: 3,
                               child: Slider(
                                 value: _fontSize,
-                                activeColor: const Color(0xFF71BDE0),
+                                activeColor: AppColors.lightBlue,
                                 min: 16.0,
                                 max: 48.0,
                                 divisions: 16,
@@ -547,19 +518,6 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                       ],
                     ),
                   ),
-                  if (widget.book.finished) ...[
-                    Positioned(
-                      right: boxPadding + 50,
-                      bottom: boxPadding + 20,
-                      child: FloatingActionButton(
-                        onPressed: _showArchiveConfirmation,
-                        elevation: 0,
-                        hoverElevation: 0,
-                        backgroundColor: const Color(0xFF71BDE0),
-                        child: const Icon(Icons.archive_outlined, color: Colors.black),
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),

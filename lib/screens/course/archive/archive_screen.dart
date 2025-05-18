@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lenski/data/archive_repository.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/models/archived_book_model.dart';
 import 'package:lenski/utils/fonts.dart';
+import 'package:lenski/utils/colors.dart';
 import 'package:lenski/utils/proportions.dart';
-import 'package:lenski/data/book_repository.dart';
 
+/// A screen that displays archived books for a specific course.
+///
+/// This component shows a grid of archived books sorted by category and subcategory.
+/// Users can view and manage their archived books, which are books that have been
+/// finished and removed from the regular library.
 class ArchiveScreen extends StatefulWidget {
+  /// The course whose archived books will be displayed
   final Course course;
 
+  /// Creates an ArchiveScreen widget.
+  /// 
+  /// [course] is the course whose archived books will be displayed.
   const ArchiveScreen({super.key, required this.course});
 
   @override
@@ -16,19 +28,36 @@ class ArchiveScreen extends StatefulWidget {
 
 class _ArchiveScreenState extends State<ArchiveScreen> {
   final bookWidth = 120.0;
-  final BookRepository _bookRepository = BookRepository();
+  final ArchiveRepository _archiveRepository = ArchiveRepository();
   List<ArchivedBook> _books = [];
   bool _isLoading = true;
+  
+  // Add focus node for keyboard events
+  final FocusNode _keyboardFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _loadBooks();
+    
+    // Request focus when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _keyboardFocusNode.requestFocus();
+    });
   }
 
+  @override
+  void dispose() {
+    _keyboardFocusNode.dispose(); // Dispose the focus node
+    super.dispose();
+  }
+
+  /// Loads archived books for the current course.
+  ///
+  /// Fetches the list of archived books from the repository and updates the state.
   Future<void> _loadBooks() async {
     try {
-      final books = await _bookRepository.getArchivedBooks(widget.course.code);
+      final books = await _archiveRepository.getArchivedBooks(widget.course.code);
       if (mounted) {
         setState(() {
           _books = books;
@@ -45,6 +74,10 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     }
   }
 
+  /// Builds a tile representing an archived book.
+  ///
+  /// Creates a book tile with cover image, title and tap handling for editing.
+  /// [book] is the archived book data to display.
   Widget _buildBookTile(ArchivedBook book) {
     return GestureDetector(
       onTap: () async {
@@ -53,7 +86,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
           builder: (context) => EditArchivedBookOverlay(
             book: book,
             onSave: (updatedBook) async {
-              await _bookRepository.updateArchivedBook(updatedBook);
+              await _archiveRepository.updateArchivedBook(updatedBook);
               if (mounted) {
                 setState(() {
                   final index = _books.indexWhere((b) => b.id == updatedBook.id);
@@ -81,7 +114,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
               height: bookWidth * 4 / 3,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                color: book.imageUrl == null ? const Color(0xFF71BDE0) : null,
+                color: book.imageUrl == null ? AppColors.lightBlue : null,
                 // Only add border if there's an image
                 border: book.imageUrl != null ? null : null,
               ),
@@ -116,10 +149,10 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
               width: bookWidth,
               child: Text(
                 book.name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
-                  fontFamily: "Sansation",
-                  color: Colors.black,
+                  fontFamily: appFonts['Detail'],
+                  color: AppColors.black,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -132,15 +165,22 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     );
   }
 
+  /// Builds the content of the archive screen.
+  ///
+  /// Shows either a message when the archive is empty or a grid of books
+  /// organized by category and subcategory.
+  /// [books] is the list of archived books to display.
   Widget _buildArchiveContent(List<ArchivedBook> books) {
+    final localizations = AppLocalizations.of(context)!;
+    
     if (books.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          'Finish books to add them to your archive',
+          localizations.noArchivedBooks,
           style: TextStyle(
             fontSize: 18,
-            fontFamily: "Varela Round",
-            color: Color(0xFF757575),
+            fontFamily: appFonts['Paragraph'],
+            color: AppColors.darkGrey,
           ),
         ),
       );
@@ -155,7 +195,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     final booksByCategory = <String, List<ArchivedBook>>{};
     
     for (var book in books) {
-      final category = book.category.trim().isEmpty ? 'Not Categorized' : book.category;
+      final category = book.category.trim().isEmpty ? localizations.notCategorized : book.category;
       if (!booksByCategory.containsKey(category)) {
         booksByCategory[category] = [];
       }
@@ -165,8 +205,8 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     // Sort categories
     final orderedCategories = booksByCategory.keys.toList()
       ..sort((a, b) {
-        if (a == 'Not Categorized') return -1;
-        if (b == 'Not Categorized') return 1;
+        if (a == localizations.notCategorized) return -1;
+        if (b == localizations.notCategorized) return 1;
         return a.compareTo(b);
       });
 
@@ -225,12 +265,12 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        fontFamily: "Telex",
-                        color: Colors.grey[800],
+                        fontFamily: appFonts['Subtitle'],
+                        color: AppColors.darkerGrey,
                       ),
                     ),
                     const Divider(
-                      color: Color(0xFFE0E0E0),
+                      color: Color(0xFFE0E0E0), // Keep original color
                       thickness: 1,
                       height: 16,
                     ),
@@ -269,71 +309,95 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
   Widget build(BuildContext context) {
     final p = Proportions(context);
     final boxPadding = p.standardPadding() * 4;
+    final localizations = AppLocalizations.of(context)!;
 
-    return Stack(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(boxPadding),
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F0F6),
-              borderRadius: BorderRadius.circular(5.0),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 4.0,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.only(top: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(24, 8, 24, 24),
-                    child: Text(
-                      'The Archive',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontFamily: 'Unbounded',
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: _isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : _buildArchiveContent(_books),
-                    ),
+    return KeyboardListener(
+      focusNode: _keyboardFocusNode,
+      onKeyEvent: (KeyEvent event) {
+        // Only process KeyDownEvent
+        if (event is KeyDownEvent) {
+          // Check for Escape key
+          if (event.logicalKey == LogicalKeyboardKey.escape) {
+            Navigator.of(context).pop();
+          }
+        }
+      },
+      child: Stack(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(boxPadding),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.lightGrey,
+                borderRadius: BorderRadius.circular(5.0),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26, // Keep original shadow color
+                    blurRadius: 4.0,
+                    offset: Offset(0, 2),
                   ),
                 ],
               ),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                      child: Text(
+                        localizations.archiveTitle,
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontFamily: appFonts['Title'],
+                          color: AppColors.black,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : _buildArchiveContent(_books),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-        Positioned(
-          top: boxPadding + 10,
-          right: boxPadding + 10,
-          child: IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            icon: const Icon(Icons.close_rounded),
+          Positioned(
+            top: boxPadding + 10,
+            right: boxPadding + 10,
+            child: IconButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              icon: const Icon(Icons.close_rounded),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
+/// A dialog for editing an archived book's details.
+///
+/// Allows users to modify the book's name, image URL, category, and subcategory.
+/// Also provides an option to delete the book from the archive.
 class EditArchivedBookOverlay extends StatefulWidget {
+  /// The book to be edited
   final ArchivedBook book;
+  
+  /// Callback function when the book is saved
   final Function(ArchivedBook) onSave;
 
+  /// Creates an EditArchivedBookOverlay widget.
+  /// 
+  /// [book] is the archived book to be edited.
+  /// [onSave] is the callback function to be called when the book is saved.
   const EditArchivedBookOverlay({
     super.key,
     required this.book,
@@ -345,7 +409,7 @@ class EditArchivedBookOverlay extends StatefulWidget {
 }
 
 class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
-  final BookRepository _bookRepository = BookRepository();
+  final ArchiveRepository _archiveRepository = ArchiveRepository();
 
   late TextEditingController _nameController;
   late TextEditingController _imageUrlController;
@@ -370,17 +434,23 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
     super.dispose();
   }
 
+  /// Shows a confirmation dialog before deleting a book.
+  ///
+  /// If the user confirms deletion, removes the book from the archive.
   Future<void> _deleteBook() async {
+    final localizations = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Book',
+        title: Text(
+          localizations.deleteArchivedBookTitle,
           style: TextStyle(
             fontFamily: appFonts['Subtitle'],
             fontSize: 24,
           ),
         ),
-        content: Text('Are you sure you want to delete this book from your archive?',
+        content: Text(
+          localizations.deleteArchivedBookConfirmation,
           style: TextStyle(
             fontFamily: appFonts['Paragraph'],
             fontSize: 16,
@@ -389,31 +459,32 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel',
+            child: Text(
+              localizations.cancel,
               style: TextStyle(
                 fontFamily: appFonts['Detail'],
                 fontSize: 14,
-                color: const Color(0xFF2C73DE),
+                color: AppColors.blue,
               ),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
+              foregroundColor: AppColors.error,
               textStyle: TextStyle(
                 fontFamily: appFonts['Detail'],
                 fontSize: 14,
               ),
             ),
-            child: const Text('Delete'),
+            child: Text(localizations.delete),
           ),
         ],
       ),
     );
 
     if (confirmed == true && mounted) {
-      await _bookRepository.deleteArchivedBook(widget.book.id!);
+      await _archiveRepository.deleteArchivedBook(widget.book.id!);
       if (mounted) {
         Navigator.pop(context, 'deleted'); // Special return value to indicate deletion
       }
@@ -422,6 +493,8 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
     return Dialog(
       child: Container(
         padding: const EdgeInsets.all(24),
@@ -429,9 +502,9 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
         
         child: Theme(
           data: Theme.of(context).copyWith(
-            textSelectionTheme: const TextSelectionThemeData(
-              selectionColor: Color(0xFF71BDE0),
-              cursorColor: Colors.black54,   
+            textSelectionTheme: TextSelectionThemeData(
+              selectionColor: AppColors.lightBlue,
+              cursorColor: Colors.black54, // Keep original cursor color
             ),
           ),
           child: Column(
@@ -442,7 +515,7 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Edit Book',
+                    localizations.editArchivedBookTitle,
                     style: TextStyle(
                       fontSize: 24,
                       fontFamily: appFonts['Subtitle'],
@@ -451,8 +524,8 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
                   IconButton(
                     onPressed: _deleteBook,
                     icon: const Icon(Icons.delete_outline),
-                    color: Colors.red,
-                    tooltip: 'Delete book',
+                    color: AppColors.error,
+                    tooltip: localizations.deleteArchivedBookTooltip,
                   ),
                 ],
               ),
@@ -460,15 +533,15 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
               TextField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: 'Name',
+                  labelText: localizations.nameLabel,
                   labelStyle: TextStyle(
                     fontFamily: appFonts['Detail'],
                     fontSize: 16,
-                    color: Colors.grey[700],
+                    color: AppColors.darkGrey,
                   ),
                   border: const OutlineInputBorder(),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.blue, width: 2.0),
                   ),
                 ),
               ),
@@ -476,15 +549,15 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
               TextField(
                 controller: _imageUrlController,
                 decoration: InputDecoration(
-                  labelText: 'Image URL',
+                  labelText: localizations.imageUrlLabel,
                   labelStyle: TextStyle(
                     fontFamily: appFonts['Detail'],
                     fontSize: 16,
-                    color: Colors.grey[700],
+                    color: AppColors.darkGrey,
                   ),
                   border: const OutlineInputBorder(),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.blue, width: 2.0),
                   ),
                 ),
               ),
@@ -492,15 +565,15 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
               TextField(
                 controller: _categoryController,
                 decoration: InputDecoration(
-                  labelText: 'Category',
+                  labelText: localizations.categoryLabel,
                   labelStyle: TextStyle(
                     fontFamily: appFonts['Detail'],
                     fontSize: 16,
-                    color: Colors.grey[700],
+                    color: AppColors.darkGrey,
                   ),
                   border: const OutlineInputBorder(),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.blue, width: 2.0),
                   ),
                 ),
               ),
@@ -508,15 +581,15 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
               TextField(
                 controller: _subcategoryController,
                 decoration: InputDecoration(
-                  labelText: 'Subcategory (optional)',
+                  labelText: localizations.subcategoryLabel,
                   labelStyle: TextStyle(
                     fontFamily: appFonts['Detail'],
                     fontSize: 16,
-                    color: Colors.grey[700],
+                    color: AppColors.darkGrey,
                   ),
                   border: const OutlineInputBorder(),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF2C73DE), width: 2.0),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.blue, width: 2.0),
                   ),
                 ),
               ),
@@ -526,11 +599,12 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel',
+                    child: Text(
+                      localizations.cancel,
                       style: TextStyle(
-                        fontFamily: 'Sansation',
+                        fontFamily: appFonts['Detail'],
                         fontSize: 14,
-                        color: Colors.red,
+                        color: AppColors.error,
                       ),
                     ),
                   ),
@@ -554,11 +628,15 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
                       widget.onSave(updatedBook);
                       Navigator.pop(context, updatedBook); // Return the updated book
                     },
-                    child: const Text('Save',
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white, // Keep original color
+                    ),
+                    child: Text(
+                      localizations.save,
                       style: TextStyle(
-                        fontFamily: 'Sansation',
+                        fontFamily: appFonts['Detail'],
                         fontSize: 14,
-                        color: Color(0xFF2C73DE),
+                        color: AppColors.blue,
                       ),
                     ),
                   ),

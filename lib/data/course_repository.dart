@@ -1,3 +1,5 @@
+import 'dart:io'; // Add this import for File class
+import 'package:lenski/data/archive_repository.dart';
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/data/card_repository.dart';
 import 'package:lenski/data/session_repository.dart';
@@ -27,11 +29,21 @@ class CourseRepository {
 
   /// Initializes the database and creates the courses table if it does not exist.
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'courses.db');
-    return openDatabase(
+    // Path for the database
+    String path = join(await getDatabasesPath(), 'lenski.db');
+    
+    // Ensure the database directory exists
+    Directory dbDirectory = Directory(dirname(path));
+    if (!await dbDirectory.exists()) {
+      await dbDirectory.create(recursive: true);
+    }
+    
+    // Create or open the database
+    Database db = await openDatabase(
       path,
-      onCreate: (db, version) {
-        return db.execute(
+      version: 5, // Increasing version due to schema change
+      onCreate: (db, version) async {
+        await db.execute(
           'CREATE TABLE courses('
           'id INTEGER PRIMARY KEY, '
           'name TEXT, '
@@ -43,24 +55,97 @@ class CourseRepository {
           'reading INTEGER, '
           'writing INTEGER, '
           'color INTEGER, '
-          'imageUrl TEXT, '
           'streak INTEGER DEFAULT 0, '
           'lastAccess INTEGER DEFAULT 0, '
           'dailyGoal INTEGER DEFAULT 100, '
           'totalGoal INTEGER DEFAULT 10000, '
           'visible INTEGER DEFAULT 1, '
-          'goalType TEXT DEFAULT "learn"'
+          'goalType TEXT DEFAULT "learn", '
+          'goalComplete INTEGER DEFAULT 0'
           ')',
         );
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 3) {
-          // Add the goalType column if upgrading from version 1 or 2
-          await db.execute('ALTER TABLE courses ADD COLUMN goalType TEXT DEFAULT "learn"');
+        // Handle database schema changes when upgrading
+        if (oldVersion < 5) {
+          // If upgrading from version 4 to 5, remove the imageUrl column
+          try {
+            // Creating a new table without the imageUrl column
+            await db.execute(
+              'CREATE TABLE courses_new('
+              'id INTEGER PRIMARY KEY, '
+              'name TEXT, '
+              'level TEXT, '
+              'code TEXT, '
+              'fromCode TEXT, '
+              'listening INTEGER, '
+              'speaking INTEGER, '
+              'reading INTEGER, '
+              'writing INTEGER, '
+              'color INTEGER, '
+              'streak INTEGER DEFAULT 0, '
+              'lastAccess INTEGER DEFAULT 0, '
+              'dailyGoal INTEGER DEFAULT 100, '
+              'totalGoal INTEGER DEFAULT 10000, '
+              'visible INTEGER DEFAULT 1, '
+              'goalType TEXT DEFAULT "learn", '
+              'goalComplete INTEGER DEFAULT 0'
+              ')',
+            );
+            
+            // Copy data from the old table to the new one
+            await db.execute(
+              'INSERT INTO courses_new '
+              'SELECT id, name, level, code, fromCode, listening, speaking, '
+              'reading, writing, color, streak, lastAccess, dailyGoal, '
+              'totalGoal, visible, goalType, goalComplete FROM courses'
+            );
+            
+            // Drop the old table
+            await db.execute('DROP TABLE courses');
+            
+            // Rename the new table to the original name
+            await db.execute('ALTER TABLE courses_new RENAME TO courses');
+            
+            print('Database schema updated: removed imageUrl column from courses table');
+          } catch (e) {
+            print('Error updating database schema: $e');
+          }
         }
       },
-      version: 3, // Increment version to trigger onUpgrade
+      onOpen: (db) async {
+        // Always check if courses table exists
+        final tables = await db.query('sqlite_master', 
+            where: 'type = ? AND name = ?', 
+            whereArgs: ['table', 'courses']);
+            
+        if (tables.isEmpty) {
+          await db.execute(
+            'CREATE TABLE courses('
+            'id INTEGER PRIMARY KEY, '
+            'name TEXT, '
+            'level TEXT, '
+            'code TEXT, '
+            'fromCode TEXT, '
+            'listening INTEGER, '
+            'speaking INTEGER, '
+            'reading INTEGER, '
+            'writing INTEGER, '
+            'color INTEGER, '
+            'streak INTEGER DEFAULT 0, '
+            'lastAccess INTEGER DEFAULT 0, '
+            'dailyGoal INTEGER DEFAULT 100, '
+            'totalGoal INTEGER DEFAULT 10000, '
+            'visible INTEGER DEFAULT 1, '
+            'goalType TEXT DEFAULT "learn", '
+            'goalComplete INTEGER DEFAULT 0'
+            ')',
+          );
+        }
+      },
     );
+    
+    return db;
   }
 
   /// Inserts a new course into the database.
@@ -203,6 +288,7 @@ class CourseRepository {
     // Get references to other repositories
     final cardRepository = CardRepository();
     final bookRepository = BookRepository();
+    final archiveRepository = ArchiveRepository();
     final sessionRepository = SessionRepository();
     
     try {
@@ -229,7 +315,7 @@ class CourseRepository {
       }
       
       // Also delete any archived books for this language
-      final archiveDb = await bookRepository.archiveDatabase;
+      final archiveDb = await archiveRepository.database;
       await archiveDb.delete(
         'archived_books',
         where: 'language = ?',

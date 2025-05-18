@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lenski/utils/fonts.dart';
+import 'package:lenski/utils/colors.dart';
 import 'package:lenski/utils/proportions.dart';
 
+/// A widget that displays help content for different types of text sources.
+///
+/// This screen provides guidance about the types of content that can be added as books:
+/// - Real-life interactions (conversations, dialogues, etc.)
+/// - Entertainment sources (songs, books, movies, etc.)
+/// - Academic content (articles, papers, etc.)
+///
+/// Each section includes examples and a description of benefits.
 class HelpSectionScreen extends StatelessWidget {
+  /// Creates a HelpSectionScreen widget.
   const HelpSectionScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
+    final localizations = AppLocalizations.of(context)!;
     
     return SingleChildScrollView(
       child: Column(
@@ -18,49 +30,49 @@ class HelpSectionScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildHelpColumn(
-                  'Real-Life Interactions',
+                  localizations.realLifeInteractionsTitle,
                   Icons.people_outline,
                   [
-                    'Video transcripts',
-                    'Conversation logs',
-                    'Interview transcripts',
-                    'Podcasts transcripts',
-                    'Daily dialogues',
-                    'Travel phrases'
+                    localizations.videoTranscripts,
+                    localizations.conversationLogs,
+                    localizations.interviewTranscripts,
+                    localizations.podcastTranscripts,
+                    localizations.dailyDialogues,
+                    localizations.travelPhrases
                   ],
-                  'Great for learning everyday language and common expressions people use in real situations.'
+                  localizations.realLifeInteractionsDescription
                 ),
               ),
               SizedBox(width: p.standardPadding()),
               Expanded(
                 child: _buildHelpColumn(
-                  'Entertainment',
+                  localizations.entertainmentTitle,
                   Icons.movie_outlined,
                   [
-                    'Song lyrics',
-                    'Books and stories',
-                    'Movie scripts',
-                    'Movie subtitles',
-                    'TV show scripts',
-                    'Plays and dialogues'
+                    localizations.songLyrics,
+                    localizations.booksAndStories,
+                    localizations.movieScripts,
+                    localizations.movieSubtitles,
+                    localizations.tvShowScripts,
+                    localizations.playsAndDialogues
                   ],
-                  'Contains various difficulty levels from simple songs to complex narratives. Great for cultural context.'
+                  localizations.entertainmentDescription
                 ),
               ),
               SizedBox(width: p.standardPadding()),
               Expanded(
                 child: _buildHelpColumn(
-                  'Articles & Academic',
+                  localizations.articlesAcademicTitle,
                   Icons.article_outlined,
                   [
-                    'Wikipedia articles',
-                    'News articles',
-                    'Scientific papers',
-                    'Blog posts',
-                    'Educational materials',
-                    'Specialized vocabulary'
+                    localizations.wikipediaArticles,
+                    localizations.newsArticles,
+                    localizations.scientificPapers,
+                    localizations.blogPosts,
+                    localizations.educationalMaterials,
+                    localizations.specializedVocabulary
                   ],
-                  'Perfect for learning formal language and specific vocabulary in different fields of interest.'
+                  localizations.articlesAcademicDescription
                 ),
               ),
             ],
@@ -69,17 +81,20 @@ class HelpSectionScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFE3F2FD),
+              color: const Color(0xFFE3F2FD), // Keep as is (light blue background)
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.lightbulb_outline, color: Color(0xFF2C73DE)),
-                SizedBox(width: 12),
+                Icon(Icons.lightbulb_outline, color: AppColors.blue),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Tip: Start with content that matches your interests! Learning is more effective when you enjoy what you\'re reading.',
-                    style: TextStyle(fontSize: 14),
+                    localizations.contentTip,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontFamily: appFonts['Paragraph'],
+                    ),
                   ),
                 ),
               ],
@@ -90,6 +105,12 @@ class HelpSectionScreen extends StatelessWidget {
     );
   }
 
+  /// Builds an individual help column with title, icon, list of items, and description.
+  ///
+  /// @param title The title of the help section
+  /// @param icon The icon to display next to the title
+  /// @param items A list of examples for this category
+  /// @param description A description of the benefits of this content type
   Widget _buildHelpColumn(String title, IconData icon, List<String> items, String description) {
     return Card(
       elevation: 2,
@@ -100,7 +121,7 @@ class HelpSectionScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, color: const Color(0xFF2C73DE), size: 24),
+                Icon(icon, color: AppColors.blue, size: 24),
                 const SizedBox(width: 8),
                 Text(
                   title,
@@ -118,9 +139,19 @@ class HelpSectionScreen extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('• ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                  Text('• ', style: TextStyle(
+                    fontSize: 14, 
+                    fontWeight: FontWeight.bold,
+                    fontFamily: appFonts['Paragraph'],
+                  )),
                   Expanded(
-                    child: Text(item, style: const TextStyle(fontSize: 14)),
+                    child: Text(
+                      item, 
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: appFonts['Paragraph'],
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -128,7 +159,12 @@ class HelpSectionScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               description,
-              style: TextStyle(fontSize: 13, color: Colors.grey[700], fontStyle: FontStyle.italic),
+              style: TextStyle(
+                fontSize: 13, 
+                color: AppColors.darkGrey, 
+                fontStyle: FontStyle.italic,
+                fontFamily: appFonts['Paragraph'],
+              ),
             ),
           ],
         ),

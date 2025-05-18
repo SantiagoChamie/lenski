@@ -1,20 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lenski/utils/proportions.dart';
+import 'package:lenski/utils/colors.dart';
+import 'package:lenski/utils/fonts.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Defines the available goal types for reading
 enum GoalType {
-  learn,  // Finding x new words
-  daily,  // Study x days
-  time    // Study for x hours
+  /// Finding x new words
+  learn,
+  
+  /// Study x days
+  daily,
+  
+  /// Study for x hours
+  time
 }
 
-/// A button widget for selecting a word reading goal.
+/// A button widget for selecting a course goal.
+///
+/// This component allows users to select both the type of goal (word count, days, or time)
+/// and the numeric value for that goal. It displays differently based on whether it's being
+/// used for daily goals or total goals.
+///
+/// Features:
+/// - Text field for entering numeric values
+/// - Goal type selection via popup dialog
+/// - Automatic formatting based on goal type
+/// - Different appearance for daily vs. total goals
 class GoalSelectorButton extends StatefulWidget {
+  /// Callback function triggered when the numeric value changes
   final Function(int) onValueChanged;
+  
+  /// Callback function triggered when the goal type changes
   final Function(GoalType)? onGoalTypeChanged;
+  
+  /// Initial numeric value for the goal
   final int initialValue;
-  final bool isDaily; // Controls if this is for daily goals or global goals
+  
+  /// Whether this is for daily goals (true) or total goals (false)
+  final bool isDaily;
+  
+  /// Initial goal type to display
   final GoalType initialGoalType;
 
   /// Creates a GoalSelectorButton widget.
@@ -38,8 +65,13 @@ class GoalSelectorButton extends StatefulWidget {
 }
 
 class _GoalSelectorButtonState extends State<GoalSelectorButton> {
+  /// Controller for the goal value text field
   late TextEditingController _controller;
+  
+  /// Focus node for the goal value text field
   late FocusNode _focusNode;
+  
+  /// Currently selected goal type
   late GoalType _goalType;
 
   @override
@@ -58,7 +90,9 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
     });
   }
 
-  // Add this method to respond to widget property changes
+  /// Updates state when widget properties change.
+  ///
+  /// This ensures the goal type stays in sync with the parent widget's value.
   @override
   void didUpdateWidget(GoalSelectorButton oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -79,8 +113,12 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
   }
   
   /// Displays a dialog for selecting a goal type.
+  ///
+  /// The dialog shows the three available goal types with descriptions
+  /// and allows the user to select one.
   void _showGoalTypeSelector(BuildContext context) {
     final p = Proportions(context);
+    final localizations = AppLocalizations.of(context)!;
     
     showDialog(
       context: context,
@@ -98,11 +136,11 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
                   child: Text(
-                    "Select Goal Type",
+                    localizations.selectGoalType,
                     style: TextStyle(
                       fontSize: 24,
-                      fontFamily: "Telex",
-                      color: Colors.grey[800],
+                      fontFamily: appFonts['Subtitle'],
+                      color: AppColors.black,
                     ),
                   ),
                 ),
@@ -112,22 +150,22 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
                       _buildGoalTypeOption(
                         context, 
                         GoalType.learn, 
-                        "Learn", 
-                        "Track words learned",
+                        localizations.goalTypeLearnTitle, 
+                        localizations.goalTypeLearnDescription,
                         Icons.psychology
                       ),
                       _buildGoalTypeOption(
                         context, 
                         GoalType.daily, 
-                        "Daily", 
-                        "Track study days",
+                        localizations.goalTypeDailyTitle, 
+                        localizations.goalTypeDailyDescription,
                         Icons.calendar_today
                       ),
                       _buildGoalTypeOption(
                         context, 
                         GoalType.time, 
-                        "Time", 
-                        "Track study hours",
+                        localizations.goalTypeTimeTitle, 
+                        localizations.goalTypeTimeDescription,
                         Icons.timer
                       ),
                     ],
@@ -141,13 +179,21 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
     );
   }
   
+  /// Builds a single goal type option for the selector dialog.
+  ///
+  /// @param context The build context
+  /// @param type The goal type this option represents
+  /// @param title The title text for this option
+  /// @param subtitle The descriptive text for this option
+  /// @param icon The icon to display for this option
+  /// @return A widget representing the goal type option
   Widget _buildGoalTypeOption(BuildContext context, GoalType type, String title, String subtitle, IconData icon) {
     final bool isSelected = type == _goalType;
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Material(
-        color: isSelected ? const Color(0xFFF5F0F6) : Colors.transparent,
+        color: isSelected ? AppColors.lightGrey : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
@@ -176,8 +222,8 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
                       title,
                       style: TextStyle(
                         fontSize: 18,
-                        fontFamily: "Varela Round",
-                        color: Colors.black,
+                        fontFamily: appFonts['Paragraph'],
+                        color: AppColors.black,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
@@ -185,6 +231,7 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
                       subtitle,
                       style: TextStyle(
                         fontSize: 14,
+                        fontFamily: appFonts['Detail'],
                         color: Colors.grey[600],
                       ),
                     ),
@@ -194,7 +241,7 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
                   const Spacer(),
                   const Icon(
                     Icons.check_circle_rounded,
-                    color: Color(0xFF2C73DE),
+                    color: AppColors.blue,
                     size: 24,
                   ),
                 ],
@@ -206,18 +253,23 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
     );
   }
 
+  /// Gets the appropriate label text based on goal type and mode.
+  ///
+  /// @return A string representing the current goal unit (words, days, etc.)
   String _getLabelText() {
+    final localizations = AppLocalizations.of(context)!;
+    
     if (widget.isDaily) {
       switch (_goalType) {
-        case GoalType.learn: return "words per day";
-        case GoalType.daily: return "1 daily session";
-        case GoalType.time: return "minutes per day";
+        case GoalType.learn: return localizations.wordsPerDay;
+        case GoalType.daily: return localizations.oneDailySession;
+        case GoalType.time: return localizations.minutesPerDay;
       }
     } else {
       switch (_goalType) {
-        case GoalType.learn: return "total words";
-        case GoalType.daily: return "total days";
-        case GoalType.time: return "total hours";
+        case GoalType.learn: return localizations.totalWords;
+        case GoalType.daily: return localizations.totalDays;
+        case GoalType.time: return localizations.totalHours;
       }
     }
   }
@@ -256,8 +308,8 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
               child: Theme(
                 data: Theme.of(context).copyWith(
                   textSelectionTheme: TextSelectionThemeData(
-                    selectionColor: widget.isDaily ? const Color(0xFFFFD38D) : const Color(0xFF71BDE0),
-                    cursorColor: widget.isDaily ? const Color(0xFFEE9A1D) : const Color(0xFF2C73DE),
+                    selectionColor: widget.isDaily ? AppColors.lightYellow : AppColors.lightBlue,
+                    cursorColor: widget.isDaily ? AppColors.yellow : AppColors.blue,
                   ),
                 ),
                 child: TextField(
@@ -273,10 +325,10 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
                     counterText: "", // Hide character counter
                     isCollapsed: true,
                   ),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
-                    fontFamily: "Varela Round",
-                    color: Colors.grey,
+                    fontFamily: appFonts['Paragraph'],
+                    color: AppColors.darkGrey,
                   ),
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
@@ -298,7 +350,7 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
             Container(
               height: 30,
               width: 1,
-              color: Colors.grey.withAlpha(128),
+              color: AppColors.darkerGrey.withAlpha(128),
             ),
             
             SizedBox(width: p.standardPadding()),
@@ -307,13 +359,17 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
           // Goal type label
           Text(
             labelText,
-            style: const TextStyle(fontSize: 20, fontFamily: "Varela Round", color: Colors.black),
+            style: TextStyle(
+              fontSize: 20, 
+              fontFamily: appFonts['Paragraph'], 
+              color: AppColors.black
+            ),
           ),
           
           const Spacer(),
           
           // Moved arrow icon to the right side
-          const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black),
+          const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.black),
         ],
       ),
     );

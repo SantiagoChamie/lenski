@@ -2,6 +2,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import '../models/session_model.dart';
 import '../data/course_repository.dart';
+import 'dart:io';
 
 /// A repository class for managing user session data in the database.
 class SessionRepository {
@@ -26,26 +27,42 @@ class SessionRepository {
 
   /// Initializes the database and creates the sessions table if it doesn't exist.
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'sessions.db');
-    return openDatabase(
-      path,
-      onCreate: (db, version) {
-        return db.execute(
-          'CREATE TABLE sessions('
-          'id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'courseCode TEXT NOT NULL, '
-          'date INTEGER NOT NULL, '
-          'wordsAdded INTEGER DEFAULT 0, '
-          'wordsReviewed INTEGER DEFAULT 0, '
-          'linesRead INTEGER DEFAULT 0, '
-          'minutesStudied INTEGER DEFAULT 0, '
-          'streakIncremented INTEGER DEFAULT 0, '
-          'UNIQUE(courseCode, date)'
-          ')',
-        );
-      },
-      version: 1,
-    );
+    // Path for the unified database
+    String path = join(await getDatabasesPath(), 'lenski.db');
+    
+    // Ensure directory exists
+    Directory dbDirectory = Directory(dirname(path));
+    if (!await dbDirectory.exists()) {
+      await dbDirectory.create(recursive: true);
+    }
+    
+    // Open database without depending on callbacks
+    Database db = await openDatabase(path, version: 5);
+    
+    // Always check if sessions table exists
+    final tables = await db.query('sqlite_master',
+        where: 'type = ? AND name = ?',
+        whereArgs: ['table', 'sessions']);
+        
+    if (tables.isEmpty) {
+      // Create the sessions table if it doesn't exist
+      await db.execute(
+        'CREATE TABLE sessions('
+        'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+        'courseCode TEXT NOT NULL, '
+        'date INTEGER NOT NULL, '
+        'wordsAdded INTEGER DEFAULT 0, '
+        'wordsReviewed INTEGER DEFAULT 0, '
+        'linesRead INTEGER DEFAULT 0, '
+        'minutesStudied INTEGER DEFAULT 0, '
+        'cardsDeleted INTEGER DEFAULT 0, '
+        'streakIncremented INTEGER DEFAULT 0, '
+        'UNIQUE(courseCode, date)'
+        ')',
+      );
+    }
+    
+    return db;
   }
 
   /// Converts a DateTime object to an integer representing the number of days since Unix epoch.
@@ -95,6 +112,7 @@ class SessionRepository {
     int? wordsReviewed, 
     int? linesRead,
     int? minutesStudied,
+    int? cardsDeleted,
   }) async {
     final session = await getOrCreateTodaySession(courseCode);
     
@@ -103,15 +121,16 @@ class SessionRepository {
     if (wordsReviewed != null) session.wordsReviewed += wordsReviewed;
     if (linesRead != null) session.linesRead += linesRead;
     if (minutesStudied != null) session.minutesStudied += minutesStudied;
+    if (cardsDeleted != null) session.cardsDeleted += cardsDeleted;
     
     // Save the updated session
     await updateSession(session);
     
-    // Always check if any goal is met when stats are updated
+    // Only check daily goal when stats are updated
     await _checkAndUpdateStreak(courseCode, session);
   }
 
-  /// Checks if goal is met based on course goal type and updates streak if needed.
+  /// Checks if daily goal is met and updates streak if needed.
   Future<void> _checkAndUpdateStreak(String courseCode, Session session) async {
     final db = await database;
     final today = _dateTimeToInt(DateTime.now());
@@ -130,36 +149,33 @@ class SessionRepository {
     }
     
     // Get the course to check goal and potentially update streak
-    final courses = await _courseRepository.courses();
-    final course = courses.firstWhere(
-      (c) => c.code == courseCode,
-      orElse: () => throw Exception('Course not found'),
-    );
+    final course = await _courseRepository.getCourse(courseCode);
     
-    // Check if goal is met based on the course's goal type
-    bool isGoalMet = false;
+    // Check if daily goal is met based on the course's goal type
+    bool isDailyGoalMet = false;
     
     switch (course.goalType) {
       case 'learn':
-        isGoalMet = session.wordsAdded >= course.dailyGoal;
+        isDailyGoalMet = session.wordsAdded >= course.dailyGoal;
         break;
       case 'daily':
         // For daily type, any activity counts as meeting the goal
-        isGoalMet = session.wordsAdded > 0 || 
+        // Explicitly EXCLUDING cardsDeleted from this check as specified
+        isDailyGoalMet = session.wordsAdded > 0 || 
                     session.wordsReviewed > 0 || 
                     session.linesRead > 0 ||
                     session.minutesStudied > 0;
         break;
       case 'time':
-        isGoalMet = session.minutesStudied >= course.dailyGoal;
+        isDailyGoalMet = session.minutesStudied >= course.dailyGoal;
         break;
       default:
         // Default to 'learn' behavior
-        isGoalMet = session.wordsAdded >= course.dailyGoal;
+        isDailyGoalMet = session.wordsAdded >= course.dailyGoal;
     }
     
-    // If goal is met, increment streak and mark as incremented
-    if (isGoalMet) {
+    // If daily goal is met, increment streak and mark as incremented
+    if (isDailyGoalMet) {
       await _courseRepository.incrementStreak(course);
       
       // Mark streak as incremented for today
@@ -170,6 +186,80 @@ class SessionRepository {
         whereArgs: [courseCode, today],
       );
     }
+  }
+
+  /// Checks if the total course goal has been completed and updates the course status
+  Future<bool> checkCourseCompletion(String courseCode) async {
+    // Get the course to check goal
+    final course = await _courseRepository.getCourse(courseCode);
+    
+    // Check if the total goal has been met (course completion)
+    final sessions = await getSessionsByCourse(courseCode);
+    bool isCourseGoalComplete = false;
+    
+    switch (course.goalType) {
+      case 'learn':
+        // Calculate total words and deleted cards
+        int words = 0;
+        int deleted = 0;
+        for (var s in sessions) {
+          words += s.wordsAdded;
+          deleted += s.cardsDeleted;
+        }
+        
+        // Calculate number of active competences
+        int activeCompetences = 0;
+        if (course.reading) activeCompetences++;
+        if (course.writing) activeCompetences++;
+        if (course.speaking) activeCompetences++;
+        if (course.listening) activeCompetences++;
+        
+        // Ensure we don't divide by zero
+        activeCompetences = activeCompetences > 0 ? activeCompetences : 1;
+        
+        // Calculate adjusted words added
+        int adjustedWords = words - (deleted * (1 / activeCompetences)).floor();
+        
+        // Ensure we don't go negative
+        adjustedWords = adjustedWords > 0 ? adjustedWords : 0;
+        
+        isCourseGoalComplete = adjustedWords >= course.totalGoal;
+        break;
+        
+      case 'daily':
+        // Count unique days with any activity
+        final Set<int> daysWithActivity = {};
+        for (var s in sessions) {
+          if (s.wordsAdded > 0 || 
+              s.wordsReviewed > 0 || 
+              s.linesRead > 0 ||
+              s.minutesStudied > 0) {
+            daysWithActivity.add(s.date);
+          }
+        }
+        isCourseGoalComplete = daysWithActivity.length >= course.totalGoal;
+        break;
+        
+      case 'time':
+        // Sum up all minutes studied
+        int totalMinutes = 0;
+        for (var s in sessions) {
+          totalMinutes += s.minutesStudied;
+        }
+        isCourseGoalComplete = totalMinutes >= course.totalGoal*60; // Convert hours to minutes
+        break;
+        
+      default:
+        isCourseGoalComplete = false;
+    }
+    
+    // Update the course's goalComplete status if needed
+    if (isCourseGoalComplete != course.goalComplete) {
+      course.goalComplete = isCourseGoalComplete;
+      await _courseRepository.updateCourse(course);
+    }
+    
+    return isCourseGoalComplete;
   }
 
   /// Updates an existing session in the database.
@@ -230,12 +320,14 @@ class SessionRepository {
     int totalWordsReviewed = 0;
     int totalLinesRead = 0;
     int totalMinutesStudied = 0;
+    int totalCardsDeleted = 0;
     
     for (var session in sessions) {
       totalWordsAdded += session.wordsAdded;
       totalWordsReviewed += session.wordsReviewed;
       totalLinesRead += session.linesRead;
       totalMinutesStudied += session.minutesStudied;
+      totalCardsDeleted += session.cardsDeleted;
     }
     
     return {
@@ -243,6 +335,7 @@ class SessionRepository {
       'wordsReviewed': totalWordsReviewed,
       'linesRead': totalLinesRead,
       'minutesStudied': totalMinutesStudied,
+      'cardsDeleted': totalCardsDeleted,
       'daysActive': sessions.length,
     };
   }

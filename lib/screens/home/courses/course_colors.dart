@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Predefined colors that can be used for courses
+/// Predefined colors that can be used for course buttons.
 class CourseColors {
   /// List of available colors for courses
   static const List<Color> colors = [

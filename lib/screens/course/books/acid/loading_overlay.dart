@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lenski/utils/colors.dart';
+import 'package:lenski/utils/fonts.dart';
 
+/// A widget that displays a loading overlay with progress indicator.
+/// 
+/// Shows a modal dialog with a lightbulb icon, progress indicator, and 
+/// processing message to indicate background processing. Can include an
+/// optional cancel button to abort the operation.
 class LoadingOverlay extends StatelessWidget {
+  /// Callback function when the cancel button is pressed
   final VoidCallback? onCancel;
 
+  /// Creates a LoadingOverlay widget.
+  /// 
+  /// [onCancel] is the callback function to be called when the cancel button is pressed.
+  /// If null, no cancel button will be shown.
   const LoadingOverlay({
     super.key,
     this.onCancel,
@@ -10,6 +23,8 @@ class LoadingOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Center(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
@@ -18,7 +33,7 @@ class LoadingOverlay extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
+              color: Colors.black.withOpacity(0.2),
               spreadRadius: 2,
               blurRadius: 8,
               offset: const Offset(0, 4),
@@ -28,16 +43,16 @@ class LoadingOverlay extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.lightbulb_outline, size: 48, color: Color(0xFFEE9A1D)),
+            Icon(Icons.lightbulb_outline, size: 48, color: AppColors.yellow),
             const SizedBox(height: 16),
-            const CircularProgressIndicator(color: Color(0xFF2C73DE)),
+            CircularProgressIndicator(color: AppColors.blue),
             const SizedBox(height: 16),
-            const Text(
-              'Your text is being processed,\nplease be patient',
+            Text(
+              localizations.textProcessingMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
-                fontFamily: "Telex",
+                fontFamily: appFonts['Subtitle'],
               ),
             ),
             if (onCancel != null) ...[
@@ -45,13 +60,13 @@ class LoadingOverlay extends StatelessWidget {
               TextButton(
                 onPressed: onCancel,
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.red,
+                  foregroundColor: AppColors.error,
                 ),
-                child: const Text(
-                  'Cancel',
+                child: Text(
+                  localizations.cancel,
                   style: TextStyle(
                     fontSize: 16,
-                    fontFamily: "Telex",
+                    fontFamily: appFonts['Subtitle'],
                   ),
                 ),
               ),

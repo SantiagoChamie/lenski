@@ -11,13 +11,13 @@ class Course {
   bool reading;
   bool writing;
   Color color;
-  String imageUrl;
   int streak;
   int lastAccess;
   int dailyGoal; // Daily word reading goal
   int totalGoal; // Total word reading goal
   bool visible; // Whether the course should be visible on the main screen
   String goalType; // Type of goal: 'learn', 'daily', or 'time'
+  bool goalComplete; // Whether the course goal has been completed
 
   /// Creates a Course object.
   /// 
@@ -37,9 +37,10 @@ class Course {
   /// [totalGoal] is the total number of words goal for the course.
   /// [visible] indicates if the course should be visible on the main screen.
   /// [goalType] indicates the type of goal for this course ('learn', 'daily', or 'time').
+  /// [goalComplete] indicates whether the course goal has been completed.
   Course({
     required this.name,
-    required this.level,
+    required this.level, //TODO remove or use it
     required this.code,
     required this.fromCode,
     required this.listening,
@@ -47,13 +48,13 @@ class Course {
     required this.reading,
     required this.writing,
     required this.color,
-    required this.imageUrl,
     this.streak = 0,
     DateTime? lastAccess,
     required this.dailyGoal,
     required this.totalGoal,
     this.visible = true,
     this.goalType = 'learn', // Default to 'learn'
+    this.goalComplete = false, // Default to false
   }) : lastAccess = _dateTimeToInt(
          lastAccess ?? DateTime.now().subtract(const Duration(days: 1))
        );
@@ -71,13 +72,13 @@ class Course {
       'reading': reading ? 1 : 0,
       'writing': writing ? 1 : 0,
       'color': color.toARGB32(),
-      'imageUrl': imageUrl,
       'streak': streak,
       'lastAccess': lastAccess,
       'dailyGoal': dailyGoal,
       'totalGoal': totalGoal,
       'visible': visible ? 1 : 0,
       'goalType': goalType,
+      'goalComplete': goalComplete ? 1 : 0,
     };
   }
 
@@ -93,13 +94,13 @@ class Course {
       reading: map['reading'] == 1,
       writing: map['writing'] == 1,
       color: Color(map['color']),
-      imageUrl: map['imageUrl'],
       streak: map['streak'] ?? 0,
       lastAccess: _intToDateTime(map['lastAccess'] ?? _dateTimeToInt(DateTime.now().subtract(const Duration(days: 1)))),
       dailyGoal: map['dailyGoal'],
       totalGoal: map['totalGoal'],
       visible: map['visible'] == null ? true : map['visible'] == 1,
       goalType: map['goalType'] ?? 'learn', // Default to 'learn' if not specified
+      goalComplete: map['goalComplete'] == null ? false : map['goalComplete'] == 1,
     );
   }
 
@@ -121,6 +122,7 @@ class Course {
     int? totalGoal,
     bool? visible,
     String? goalType,
+    bool? goalComplete,
   }) {
     return Course(
       name: name ?? this.name,
@@ -132,13 +134,13 @@ class Course {
       reading: reading ?? this.reading,
       writing: writing ?? this.writing,
       color: color ?? this.color,
-      imageUrl: imageUrl ?? this.imageUrl,
       streak: streak ?? this.streak,
       lastAccess: lastAccess ?? _intToDateTime(this.lastAccess),
       dailyGoal: dailyGoal ?? this.dailyGoal,
       totalGoal: totalGoal ?? this.totalGoal,
       visible: visible ?? this.visible,
       goalType: goalType ?? this.goalType,
+      goalComplete: goalComplete ?? this.goalComplete,
     );
   }
 

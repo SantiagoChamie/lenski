@@ -1,14 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:lenski/utils/languages.dart';
+import 'package:lenski/utils/languages/language_attributes.dart';
+import 'package:lenski/utils/colors.dart';
+import 'package:lenski/utils/fonts.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// A widget that displays the difficulty and intensity of a course as styled text.
+///
+/// This widget calculates and displays two key metrics about a language course:
+/// 1. Difficulty: Based on linguistic differences between the source and target languages
+/// 2. Intensity: Based on the daily learning goals and number of competences
+///
+/// Each metric is color-coded to visually communicate the level (light/low to extreme).
 class CourseDifficultyText extends StatelessWidget {
-  
+  /// The number of words or minutes to learn daily
   final int dailyWords;
+  
+  /// The language code of the source language
   final String startingLanguage;
+  
+  /// The language code of the target language
   final String targetLanguage;
+  
+  /// The number of selected competences
   final int competences;
-  final String goalType; // Add goal type parameter
+  
+  /// The type of goal ('learn', 'daily', or 'time')
+  final String goalType;
 
   /// Creates a CourseDifficultyText widget.
   /// 
@@ -23,9 +40,17 @@ class CourseDifficultyText extends StatelessWidget {
     required this.startingLanguage,
     required this.targetLanguage,
     required this.competences,
-    required this.goalType, // Default to 'learn' type
+    required this.goalType,
   });
 
+  /// Calculates language difficulty based on linguistic differences.
+  ///
+  /// This method compares various linguistic attributes between the source and target
+  /// languages to determine a difficulty score from 1-4.
+  ///
+  /// @param lang1 The source language code
+  /// @param lang2 The target language code
+  /// @return A difficulty score from 1 to 4
   int calculateLanguageDifficulty(String lang1, String lang2) {
     final langA = languageAttributes[lang1];
     final langB = languageAttributes[lang2];
@@ -52,26 +77,38 @@ class CourseDifficultyText extends StatelessWidget {
     return score.floor().clamp(1, 4);
   }
 
-  String get difficulty {
+  /// Gets the difficulty level as a localized string.
+  ///
+  /// @param context The build context for localization
+  /// @return A string representing the difficulty level
+  String getDifficulty(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     int score = calculateLanguageDifficulty(startingLanguage, targetLanguage);
+    
     switch (score) {
       case 1:
-        return "Light";
+        return localizations.difficultyLight;
       case 2:
-        return "Medium";
+        return localizations.difficultyMedium;
       case 3:
-        return "Heavy";
+        return localizations.difficultyHeavy;
       case 4:
-        return "Extreme";
+        return localizations.difficultyExtreme;
       default:
-        return "Unknown";
+        return localizations.difficultyUnknown;
     }
   }
 
-  String get intensity {
+  /// Gets the intensity level as a localized string.
+  ///
+  /// @param context The build context for localization
+  /// @return A string representing the intensity level
+  String getIntensity(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     // If goal type is 'daily', always return low intensity
     if (goalType == 'daily') {
-      return "low";
+      return localizations.intensityLow;
     }
     
     // For other goal types, calculate intensity based on type
@@ -93,50 +130,58 @@ class CourseDifficultyText extends StatelessWidget {
     }
     
     // Determine intensity level based on the calculated score
-    if (intensityScore < 20) return "low";
-    if (intensityScore < 40) return "medium";
-    if (intensityScore < 100) return "high";
-    return "extreme";
+    if (intensityScore < 20) return localizations.intensityLow;
+    if (intensityScore < 40) return localizations.intensityMedium;
+    if (intensityScore < 100) return localizations.intensityHigh;
+    return localizations.intensityExtreme;
   }
 
   /// Returns the appropriate color based on the difficulty or intensity level.
-  Color _getColor(String level) {
-    switch (level.toLowerCase()) {
-      case 'light':
-      case 'low':
-        return const Color(0xFF0BAE44);
-      case 'medium':
-        return const Color(0xFFEE9A1D);
-      case 'heavy':
-      case 'high':
-        return Colors.red;
-      case 'extreme':
-        return const Color(0xFF9B1D1D);
-      default:
-        return Colors.black;
+  ///
+  /// @param level The difficulty or intensity level
+  /// @return The color associated with that level
+  Color _getColor(String level, BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
+    if (level == localizations.difficultyLight || level == localizations.intensityLow) {
+      return AppColors.lightGreen;
     }
+    if (level == localizations.difficultyMedium || level == localizations.intensityMedium) {
+      return AppColors.yellow;
+    }
+    if (level == localizations.difficultyHeavy || level == localizations.intensityHigh) {
+      return AppColors.error;  // Using error red for high/heavy
+    }
+    if (level == localizations.difficultyExtreme || level == localizations.intensityExtreme) {
+      return AppColors.darkRed;
+    }
+    return AppColors.black;  // Default color
   }
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    final difficulty = getDifficulty(context);
+    final intensity = getIntensity(context);
+    
     return RichText(
       text: TextSpan(
-        style: const TextStyle(
-          fontFamily: "Varela Round",
+        style: TextStyle(
+          fontFamily: appFonts['Paragraph'],
           fontSize: 30,
-          color: Colors.black,
+          color:AppColors.black,
         ),
         children: [
           TextSpan(
             text: difficulty,
-            style: TextStyle(color: _getColor(difficulty)),
+            style: TextStyle(color: _getColor(difficulty, context)),
           ),
-          const TextSpan(text: " course with "),
+          TextSpan(text: localizations.courseWithIntensity),
           TextSpan(
             text: intensity,
-            style: TextStyle(color: _getColor(intensity)),
+            style: TextStyle(color: _getColor(intensity, context)),
           ),
-          const TextSpan(text: " intensity"),
+          TextSpan(text: localizations.intensity),
         ],
       ),
     );

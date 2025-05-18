@@ -1,21 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lenski/models/course_model.dart';
 import 'package:lenski/screens/course/books/library/book_button.dart';
 import 'package:lenski/utils/proportions.dart';
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/models/book_model.dart';
+import 'package:lenski/utils/fonts.dart';
+import 'package:lenski/utils/colors.dart';
 import 'dart:math' as math;
 
 /// A widget that displays a library of books for a specific course.
+///
+/// This component shows a grid of book buttons for a language course. Features include:
+/// - Displaying existing books for the course
+/// - Add button for creating new books
+/// - Empty placeholders to maintain grid layout
+/// - Responsive grid layout based on screen width
 class Library extends StatefulWidget {
+  /// The course for which books are displayed
   final Course course;
+  
+  /// Callback function for when the add book button is pressed
   final VoidCallback onAddBookPressed;
+  
+  /// Callback function for editing a book
   final Function(Book) onEditBook;
 
   /// Creates a Library widget.
   /// 
   /// [course] is the course for which the library is being created.
   /// [onAddBookPressed] is the callback function to be called when the add book button is pressed.
+  /// [onEditBook] is the callback function to be called when a book is to be edited.
   const Library({
     super.key,
     required this.course,
@@ -37,11 +52,16 @@ class _LibraryState extends State<Library> {
   }
 
   /// Fetches the list of books for the course from the repository.
+  ///
+  /// Returns a Future containing the list of books for the current course language.
   Future<List<Book>> _fetchBooks() async {
     return await BookRepository().booksByLanguage(widget.course.code);
   }
 
   /// Refreshes the list of books by fetching the latest data from the repository.
+  ///
+  /// This is typically called after operations that modify the books collection,
+  /// such as adding or deleting a book.
   void _refreshBooks() {
     setState(() {
       _booksFuture = _fetchBooks();
@@ -51,6 +71,7 @@ class _LibraryState extends State<Library> {
   @override
   Widget build(BuildContext context) {
     final p = Proportions(context);
+    final localizations = AppLocalizations.of(context)!;
 
     return FutureBuilder<List<Book>>(
       future: _booksFuture,
@@ -58,7 +79,15 @@ class _LibraryState extends State<Library> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return const Center(child: Text('Error loading books'));
+          return Center(
+            child: Text(
+              localizations.errorLoadingBooks,
+              style: TextStyle(
+                color: AppColors.error,
+                fontFamily: appFonts['Paragraph'],
+              ),
+            ),
+          );
         } else {
           List<BookButton> bookButtons = [];
           if (snapshot.hasData && snapshot.data!.isNotEmpty) {

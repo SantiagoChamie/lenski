@@ -6,6 +6,7 @@ class Session {
   int wordsReviewed;         // Number of words reviewed today
   int linesRead;             // Number of lines read today
   int minutesStudied;        // Minutes spent studying today
+  int cardsDeleted;          // Number of cards deleted today
   bool streakIncremented;    // Whether streak was incremented today
 
   /// Creates a Session object.
@@ -16,6 +17,7 @@ class Session {
   /// [wordsReviewed] is the number of words reviewed in this session.
   /// [linesRead] is the number of lines read in this session.
   /// [minutesStudied] is the time spent studying in this session.
+  /// [cardsDeleted] is the number of cards deleted in this session.
   /// [streakIncremented] indicates whether the streak was incremented today.
   Session({
     required this.courseCode,
@@ -24,6 +26,7 @@ class Session {
     this.wordsReviewed = 0,
     this.linesRead = 0,
     this.minutesStudied = 0,
+    this.cardsDeleted = 0,
     this.streakIncremented = false,
   }) : date = _dateTimeToInt(date ?? DateTime.now());
 
@@ -37,6 +40,7 @@ class Session {
       'wordsReviewed': wordsReviewed,
       'linesRead': linesRead,
       'minutesStudied': minutesStudied,
+      'cardsDeleted': cardsDeleted,
       'streakIncremented': streakIncremented ? 1 : 0,
     };
   }
@@ -50,6 +54,7 @@ class Session {
       wordsReviewed: map['wordsReviewed'] ?? 0,
       linesRead: map['linesRead'] ?? 0,
       minutesStudied: map['minutesStudied'] ?? 0,
+      cardsDeleted: map['cardsDeleted'] ?? 0,
       streakIncremented: map['streakIncremented'] == 1,
     );
   }
@@ -62,6 +67,7 @@ class Session {
     int? wordsReviewed,
     int? linesRead,
     int? minutesStudied,
+    int? cardsDeleted,
     bool? streakIncremented,
   }) {
     return Session(
@@ -71,6 +77,7 @@ class Session {
       wordsReviewed: wordsReviewed ?? this.wordsReviewed,
       linesRead: linesRead ?? this.linesRead,
       minutesStudied: minutesStudied ?? this.minutesStudied,
+      cardsDeleted: cardsDeleted ?? this.cardsDeleted,
       streakIncremented: streakIncremented ?? this.streakIncremented,
     );
   }
