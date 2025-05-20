@@ -40,9 +40,11 @@ LenSki is an autonomous language learning desktop application designed to help u
 
 1. Launch LenSki.
 2. Choose the language you want to learn.
-3. Enter text or select from exercises.
-4. Click **Translate** to view the translation.
-5. Click **Play** to hear the pronunciation via the system’s TTS.
+3. Choose your daily and end goal.
+4. Load texts from the internet, to use as learning material.
+5. Highlight words or phrases to see their translation and pronunciation.
+6. Add words or phrases to your review pile, to use them as study material.
+7. Review the words or phrases you added.
 
 ---
 
