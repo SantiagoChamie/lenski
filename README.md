@@ -15,7 +15,7 @@ LenSki is an autonomous language learning desktop application designed to help u
 
 ## Installation
 
-1. Download the latest Windows installer (`LenSki-Setup.exe`).
+1. Download the latest Windows installer (`installers/lenski.exe`).
 2. Run the `.exe` file and follow the on-screen instructions.
 
 ---
