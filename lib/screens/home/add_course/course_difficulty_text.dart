@@ -172,6 +172,7 @@ class CourseDifficultyText extends StatelessWidget {
           color:AppColors.black,
         ),
         children: [
+          TextSpan(text: localizations.curso),
           TextSpan(
             text: difficulty,
             style: TextStyle(color: _getColor(difficulty, context)),

@@ -104,7 +104,6 @@ class BackCard extends StatelessWidget {
                     );
                   }
                 },
-                tooltip: localizations.speakingCardTooltip,
               ),
             ),
             if (card.context != card.front) ...[

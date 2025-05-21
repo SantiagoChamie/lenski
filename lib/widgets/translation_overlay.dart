@@ -180,7 +180,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
       final card = custom_card.Card(
         front: widget.text,
         back: backText,
-        context: _useContext ? widget.contextText: widget.text,
+        context: widget.contextText, //_useContext ? widget.contextText: widget.text
         dueDate: today.add(Duration(days: i)),
         language: widget.sourceLang,
         type: types[i],
@@ -285,7 +285,7 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
                               ),
                             ],
                           ),
-                          child: CircularProgressIndicator(color: AppColors.blue)
+                          child: const CircularProgressIndicator(color: AppColors.blue)
                         );
                       } else if (cardExistsSnapshot.hasError) {
                         return Container(
@@ -380,20 +380,23 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
                                       color: AppColors.grey,
                                       borderRadius: BorderRadius.all(Radius.circular(10.0)),
                                     ),
-                                    child: RawMaterialButton(
-                                      focusNode: null, // Prevent stealing focus
-                                      constraints: const BoxConstraints(
-                                        minWidth: 48.0,
-                                        minHeight: 48.0,
+                                    child: Tooltip(
+                                      message: localizations.addToPile,
+                                      child: RawMaterialButton(
+                                        focusNode: null, // Prevent stealing focus
+                                        constraints: const BoxConstraints(
+                                          minWidth: 48.0,
+                                          minHeight: 48.0,
+                                        ),
+                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        shape: const CircleBorder(),
+                                        child: const Icon(Icons.add, color: AppColors.black, size: 30.0),
+                                        onPressed: () async {
+                                          if (snapshot.hasData) {
+                                            await _addCard(snapshot.data!);
+                                          }
+                                        },
                                       ),
-                                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                      shape: const CircleBorder(),
-                                      child: const Icon(Icons.add, color: AppColors.black, size: 30.0),
-                                      onPressed: () async {
-                                        if (snapshot.hasData) {
-                                          await _addCard(snapshot.data!);
-                                        }
-                                      },
                                     ),
                                   ),
                                   SizedBox(width: p.standardPadding()/2),
@@ -488,8 +491,8 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
             ),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             shape: const CircleBorder(),
-            child: Icon(Icons.close, color: AppColors.black, size: 16),
             onPressed: widget.onClose,
+            child: const Icon(Icons.close, color: AppColors.black, size: 16),
           ),
         ),
       ],

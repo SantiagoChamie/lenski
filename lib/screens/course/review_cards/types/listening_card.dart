@@ -82,7 +82,6 @@ class ListeningCard extends StatelessWidget {
                       );
                     }
                   },
-                  tooltip: localizations.listenToWordTooltip,
                 ),
               ),
               const SizedBox(height: 24.0),
@@ -120,7 +119,6 @@ class ListeningCard extends StatelessWidget {
                             );
                           }
                         },
-                        tooltip: localizations.listenToContextTooltip,
                       ),
                     ),
                   ],

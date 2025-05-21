@@ -30,6 +30,9 @@ class CompetenceSelectorButton extends StatefulWidget {
   /// Whether to display the button in a compact form
   final bool isSmall;
 
+  /// Whether to display a tooltip on the icon
+  final bool hasTooltip;
+
   /// Creates a CompetenceSelectorButton widget.
   /// 
   /// [competence] is the name of the competence to be displayed.
@@ -42,6 +45,7 @@ class CompetenceSelectorButton extends StatefulWidget {
     required this.onToggle, 
     this.isSelected = false, // Default to false
     this.isSmall = false,
+    this.hasTooltip = false,
   });
 
   @override
@@ -56,7 +60,7 @@ class _CompetenceSelectorButtonState extends State<CompetenceSelectorButton> {
   void initState() {
     super.initState();
     // Initialize selection state from widget parameter or default to reading
-    _isSelected = widget.isSelected || widget.competence == "reading";
+    _isSelected = widget.isSelected;
     
     // Use Future.microtask to schedule the callback after the build is complete
     if (_isSelected && !widget.isSelected) { // Only call if not explicitly set but selected by default
@@ -72,7 +76,7 @@ class _CompetenceSelectorButtonState extends State<CompetenceSelectorButton> {
     // Update selection state if the isSelected prop changes
     if (oldWidget.isSelected != widget.isSelected) {
       setState(() {
-        _isSelected = widget.isSelected || widget.competence == "reading";
+        _isSelected = widget.isSelected;
       });
     }
   }
@@ -84,8 +88,6 @@ class _CompetenceSelectorButtonState extends State<CompetenceSelectorButton> {
   /// 2. Calls the onToggle callback to notify parent components
   /// 3. Does nothing if the competence is reading (which is always selected)
   void _toggleSelection() {
-    // Don't allow toggling if it's reading
-    if (widget.competence == "reading") return;
 
     setState(() {
       _isSelected = !_isSelected;
@@ -166,7 +168,12 @@ class _CompetenceSelectorButtonState extends State<CompetenceSelectorButton> {
               child: const Icon(Icons.help_outline, color: AppColors.darkGrey),
             ),
           const Spacer(),
-          CompetenceIcon(size: 50, type: widget.competence),
+          widget.hasTooltip
+            ? Tooltip(
+                message: _getCompetenceName(context, widget.competence),
+                child: CompetenceIcon(size: 50, type: widget.competence),
+              )
+            : CompetenceIcon(size: 50, type: widget.competence)
         ],
       ),
     );

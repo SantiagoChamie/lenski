@@ -219,7 +219,6 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
           SnackBar(
             content: Text(localizations.sameLanguageError),
             duration: const Duration(seconds: 2),
-            backgroundColor: AppColors.error,
           ),
         ).closed.then((_) {
           _isMessageDisplayed = false;
@@ -236,7 +235,6 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
           SnackBar(
             content: Text(localizations.noCompetenceError),
             duration: const Duration(seconds: 2),
-            backgroundColor: AppColors.error,
           ),
         ).closed.then((_) {
           _isMessageDisplayed = false;
@@ -533,6 +531,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                                         onToggle: _toggleCompetence,
                                         isSelected: _selectedCompetences.contains('listening'),
                                         isSmall: true,
+                                        hasTooltip: true,
                                       ),
                                       SizedBox(width: p.standardPadding()),
                                       CompetenceSelectorButton(
@@ -540,6 +539,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                                         onToggle: _toggleCompetence,
                                         isSelected: _selectedCompetences.contains('speaking'),
                                         isSmall: true, 
+                                        hasTooltip: true,
                                       ),
                                       SizedBox(width: p.standardPadding()),
                                       CompetenceSelectorButton(
@@ -547,6 +547,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                                         onToggle: _toggleCompetence,
                                         isSelected: _selectedCompetences.contains('writing'),
                                         isSmall: true,
+                                        hasTooltip: true,
                                       ),
                                       SizedBox(width: p.standardPadding()),
                                       CompetenceSelectorButton(
@@ -554,6 +555,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                                         onToggle: _toggleCompetence,
                                         isSelected: _selectedCompetences.contains('reading'),
                                         isSmall: true,
+                                        hasTooltip: true,
                                       ),
                                     ],
                                   ),
@@ -709,7 +711,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                 top: 10,
                 right: 30,
                 child: IconButton(
-                  icon: Icon(Icons.close, color: AppColors.black),
+                  icon: const Icon(Icons.close, color: AppColors.black),
                   onPressed: () => widget.onBack(widget.course),
                   iconSize: 24,
                 ),

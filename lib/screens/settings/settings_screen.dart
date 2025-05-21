@@ -297,14 +297,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         // User cancelled, delete the temporary file
         final sourceFile = File(migrationResult.filePath!);
         await sourceFile.delete();
-        
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(localizations.cancel),
-            backgroundColor: AppColors.warning,
-          ),
-        );
       }
     } catch (e) {
       if (mounted) {

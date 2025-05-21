@@ -99,6 +99,7 @@
   "@intensity": {
     "description": "Text after intensity level"
   },
+  "curso": "",
   
   "apiKeys": "API Keys",
   "deeplApiKey": "DeepL API Key",
@@ -119,6 +120,7 @@
   "warningMessage": "Importing data will replace all your current courses, books, cards, and progress.\nThis action cannot be undone. Do you want to continue?",
   
   "cancel": "Cancel",
+  "exportCancelled": "Export cancelled",
   "importAndReplace": "Import and Replace",
   
   "importSuccess": "Import successful. Please restart the app to see changes.",
@@ -996,6 +998,10 @@
   "subcategoryLabel": "Subcategory (optional)",
   "@subcategoryLabel": {
     "description": "Label for the subcategory field"
-  }
+  },
+
+  "addToPile": "Add to pile",
+
+  "skillsInfo": "Determines the type of exercises will be created"
 }
 

@@ -2,19 +2,20 @@
   "@@locale": "es",
   "appTitle": "Lenski",
   
-  "difficultyLight": "Ligero",
-  "difficultyMedium": "Medio",
-  "difficultyHeavy": "Pesado",
-  "difficultyExtreme": "Extremo",
-  "difficultyUnknown": "Desconocido",
+  "difficultyLight": "ligero",
+  "difficultyMedium": "medio",
+  "difficultyHeavy": "pesado",
+  "difficultyExtreme": "extremo",
+  "difficultyUnknown": "desconocido",
   
   "intensityLow": "baja",
   "intensityMedium": "media",
   "intensityHigh": "alta",
   "intensityExtreme": "extrema",
   
-  "courseWithIntensity": " curso con intensidad ",
-  "intensity": "",
+  "courseWithIntensity": " con ",
+  "intensity": " intensidad",
+  "curso": "Curso ",
   
   "addCoursePrompt": "¡Añade un curso para empezar a aprender!",
   
@@ -46,6 +47,7 @@
   "warningMessage": "Importar datos reemplazará todos sus cursos, libros, tarjetas y progreso actuales.\nEsta acción no se puede deshacer. ¿Desea continuar?",
   
   "cancel": "Cancelar",
+  "exportCancelled": "Exportación cancelada",
   "importAndReplace": "Importar y reemplazar",
   
   "importSuccess": "Importación exitosa.",
@@ -220,6 +222,10 @@
   "editArchivedBookTitle": "Editar Libro",
   "nameLabel": "Nombre",
   "categoryLabel": "Categoría",
-  "subcategoryLabel": "Subcategoría (opcional)"
+  "subcategoryLabel": "Subcategoría (opcional)",
+
+  "addToPile": "Añadir a la pila",
+
+  "skillsInfo": "Determina el tipo de ejercicios que se crean"
 
 }

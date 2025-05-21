@@ -297,13 +297,23 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             SizedBox(height: p.createCourseButtonHeight()),
-                            Text(
-                              localizations.skillsColumnTitle,
-                              style: TextStyle(
-                                fontSize: 25, 
-                                fontWeight: FontWeight.bold,
-                                fontFamily: appFonts['Title']
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  localizations.skillsColumnTitle,
+                                  style: TextStyle(
+                                    fontSize: 25, 
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: appFonts['Title']
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Tooltip(
+                                  message: localizations.skillsInfo,
+                                  child: const Icon(Icons.help_outline, color: AppColors.darkGrey),
+                                ),
+                              ],
                             ),
                             SizedBox(height: p.standardPadding() * 3),
                             CompetenceSelectorButton(
