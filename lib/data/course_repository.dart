@@ -1,3 +1,8 @@
+import 'dart:io'; // Add this import for File class
+import 'package:lenski/data/archive_repository.dart';
+import 'package:lenski/data/book_repository.dart';
+import 'package:lenski/data/card_repository.dart';
+import 'package:lenski/data/session_repository.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import '../../models/course_model.dart';
@@ -24,11 +29,21 @@ class CourseRepository {
 
   /// Initializes the database and creates the courses table if it does not exist.
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'courses.db');
-    return openDatabase(
+    // Path for the database
+    String path = join(await getDatabasesPath(), 'lenski.db');
+    
+    // Ensure the database directory exists
+    Directory dbDirectory = Directory(dirname(path));
+    if (!await dbDirectory.exists()) {
+      await dbDirectory.create(recursive: true);
+    }
+    
+    // Create or open the database
+    Database db = await openDatabase(
       path,
-      onCreate: (db, version) {
-        return db.execute(
+      version: 5, // Increasing version due to schema change
+      onCreate: (db, version) async {
+        await db.execute(
           'CREATE TABLE courses('
           'id INTEGER PRIMARY KEY, '
           'name TEXT, '
@@ -40,32 +55,143 @@ class CourseRepository {
           'reading INTEGER, '
           'writing INTEGER, '
           'color INTEGER, '
-          'imageUrl TEXT, '
           'streak INTEGER DEFAULT 0, '
-          'lastAccess INTEGER DEFAULT 0'
+          'lastAccess INTEGER DEFAULT 0, '
+          'dailyGoal INTEGER DEFAULT 100, '
+          'totalGoal INTEGER DEFAULT 10000, '
+          'visible INTEGER DEFAULT 1, '
+          'goalType TEXT DEFAULT "learn", '
+          'goalComplete INTEGER DEFAULT 0'
           ')',
         );
       },
-      version: 1,
+      onUpgrade: (db, oldVersion, newVersion) async {
+        // Handle database schema changes when upgrading
+        if (oldVersion < 5) {
+          // If upgrading from version 4 to 5, remove the imageUrl column
+          try {
+            // Creating a new table without the imageUrl column
+            await db.execute(
+              'CREATE TABLE courses_new('
+              'id INTEGER PRIMARY KEY, '
+              'name TEXT, '
+              'level TEXT, '
+              'code TEXT, '
+              'fromCode TEXT, '
+              'listening INTEGER, '
+              'speaking INTEGER, '
+              'reading INTEGER, '
+              'writing INTEGER, '
+              'color INTEGER, '
+              'streak INTEGER DEFAULT 0, '
+              'lastAccess INTEGER DEFAULT 0, '
+              'dailyGoal INTEGER DEFAULT 100, '
+              'totalGoal INTEGER DEFAULT 10000, '
+              'visible INTEGER DEFAULT 1, '
+              'goalType TEXT DEFAULT "learn", '
+              'goalComplete INTEGER DEFAULT 0'
+              ')',
+            );
+            
+            // Copy data from the old table to the new one
+            await db.execute(
+              'INSERT INTO courses_new '
+              'SELECT id, name, level, code, fromCode, listening, speaking, '
+              'reading, writing, color, streak, lastAccess, dailyGoal, '
+              'totalGoal, visible, goalType, goalComplete FROM courses'
+            );
+            
+            // Drop the old table
+            await db.execute('DROP TABLE courses');
+            
+            // Rename the new table to the original name
+            await db.execute('ALTER TABLE courses_new RENAME TO courses');
+            
+            print('Database schema updated: removed imageUrl column from courses table');
+          } catch (e) {
+            print('Error updating database schema: $e');
+          }
+        }
+      },
+      onOpen: (db) async {
+        // Always check if courses table exists
+        final tables = await db.query('sqlite_master', 
+            where: 'type = ? AND name = ?', 
+            whereArgs: ['table', 'courses']);
+            
+        if (tables.isEmpty) {
+          await db.execute(
+            'CREATE TABLE courses('
+            'id INTEGER PRIMARY KEY, '
+            'name TEXT, '
+            'level TEXT, '
+            'code TEXT, '
+            'fromCode TEXT, '
+            'listening INTEGER, '
+            'speaking INTEGER, '
+            'reading INTEGER, '
+            'writing INTEGER, '
+            'color INTEGER, '
+            'streak INTEGER DEFAULT 0, '
+            'lastAccess INTEGER DEFAULT 0, '
+            'dailyGoal INTEGER DEFAULT 100, '
+            'totalGoal INTEGER DEFAULT 10000, '
+            'visible INTEGER DEFAULT 1, '
+            'goalType TEXT DEFAULT "learn", '
+            'goalComplete INTEGER DEFAULT 0'
+            ')',
+          );
+        }
+      },
     );
+    
+    return db;
   }
 
   /// Inserts a new course into the database.
   /// 
+  /// If the course already exists, it updates specific fields and makes it visible again.
+  /// 
   /// [course] is the course to be inserted.
   Future<void> insertCourse(Course course) async {
     final db = await database;
-    await db.insert(
+    
+    // Check if course already exists
+    final List<Map<String, dynamic>> existingCourses = await db.query(
       'courses',
-      course.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      where: 'code = ?',
+      whereArgs: [course.code],
     );
+    
+    if (existingCourses.isNotEmpty) {
+      // Course exists, update specific fields and make visible
+      final existingCourse = Course.fromMap(existingCourses.first);
+      final updatedCourse = existingCourse.copyWith(
+        fromCode: course.fromCode,
+        listening: course.listening,
+        speaking: course.speaking,
+        reading: course.reading,
+        writing: course.writing,
+        dailyGoal: course.dailyGoal,
+        totalGoal: course.totalGoal,
+        goalType: course.goalType,
+        visible: true,
+      );
+      
+      await updateCourse(updatedCourse);
+    } else {
+      // New course, insert it
+      await db.insert(
+        'courses',
+        course.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
   }
 
   /// Checks and resets streak if more than one day has passed since last access
   Future<void> checkStreak(Course course) async {
-    final today = DateTime.now();
-    final todayDays = _dateTimeToInt(today);
+    final todayDays = _dateTimeToInt(DateTime.now());
     
     if (todayDays - course.lastAccess > 1) {
       // Streak broken - more than one day has passed
@@ -76,8 +202,7 @@ class CourseRepository {
 
   /// Increments streak if accessing on a different day than last access
   Future<void> incrementStreak(Course course) async {
-    final today = DateTime.now();
-    final todayDays = _dateTimeToInt(today);
+    final todayDays = _dateTimeToInt(DateTime.now());
     
     if (todayDays > course.lastAccess) {
       // New day, increment streak
@@ -89,14 +214,35 @@ class CourseRepository {
   
   /// Checks if the course was accessed today
   Future<bool> wasAccessedToday(Course course) async {
-    final today = _dateTimeToInt(DateTime.now());
-    return course.lastAccess == today;
+    final todayDays = _dateTimeToInt(DateTime.now());
+    return course.lastAccess == todayDays;
   }
 
-  /// Retrieves all courses and checks their streaks
+  Future<Course> getCourse(String code) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'courses',
+      where: 'code = ?',
+      whereArgs: [code],
+    );
+    
+    if (maps.isNotEmpty) {
+      final course = Course.fromMap(maps.first);
+      checkStreak(course); // Check for streak breaks
+      return course;
+    } else {
+      throw Exception('Course not found');
+    }
+  }
+
+  /// Retrieves all visible courses and checks their streaks
   Future<List<Course>> courses() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('courses');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'courses',
+      where: 'visible = ?',
+      whereArgs: [1],
+    );
     final List<Course> courseList = List.generate(maps.length, (i) {
       final course = Course.fromMap(maps[i]);
       checkStreak(course); // Only check for streak breaks
@@ -108,7 +254,12 @@ class CourseRepository {
 
   /// Helper method to convert DateTime to days since epoch
   static int _dateTimeToInt(DateTime date) {
-    return date.toUtc().difference(DateTime.utc(1970, 1, 1)).inDays;
+    return _startOfDay(date).toUtc().difference(DateTime.utc(1970, 1, 1)).inDays;
+  }
+
+  /// Helper method to get the start of the day for a given DateTime
+  static DateTime _startOfDay(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
   }
 
   /// Updates an existing course in the database.
@@ -124,15 +275,97 @@ class CourseRepository {
     );
   }
 
-  /// Deletes a course from the database.
+  /// Deletes a course from the database along with all associated data.
+  /// 
+  /// This includes:
+  /// - All flashcards for the language
+  /// - All books for the language
+  /// - All session data for the course
+  /// - The course record itself
   /// 
   /// [code] is the language code of the course to be deleted.
   Future<void> deleteCourse(String code) async {
+    // Get references to other repositories
+    final cardRepository = CardRepository();
+    final bookRepository = BookRepository();
+    final archiveRepository = ArchiveRepository();
+    final sessionRepository = SessionRepository();
+    
+    try {
+      // 1. Delete all sessions for this course
+      await sessionRepository.deleteSessionsByCourse(code);
+      
+      // 2. Delete all cards for this language
+      final db = await cardRepository.database;
+      await db.delete(
+        'cards',
+        where: 'language = ?',
+        whereArgs: [code],
+      );
+      
+      // 3. Delete all books for this language
+      // First get all books for this language
+      final books = await bookRepository.booksByLanguage(code);
+      
+      // Delete each book (this will also delete associated book databases)
+      for (var book in books) {
+        if (book.id != null) {
+          await bookRepository.deleteBook(book.id!);
+        }
+      }
+      
+      // Also delete any archived books for this language
+      final archiveDb = await archiveRepository.database;
+      await archiveDb.delete(
+        'archived_books',
+        where: 'language = ?',
+        whereArgs: [code],
+      );
+      
+      // 4. Finally, delete the course itself
+      final courseDb = await database;
+      await courseDb.delete(
+        'courses',
+        where: 'code = ?',
+        whereArgs: [code],
+      );
+      
+    } catch (e) {
+      // Handle any errors
+      print('Error deleting course: $e');
+      throw Exception('Failed to delete course: $e');
+    }
+  }
+
+  /// Makes a course invisible instead of completely deleting it.
+  /// This allows the course to be restored later while hiding it from the main screen.
+  /// 
+  /// [code] is the language code of the course to be made invisible.
+  Future<void> makeInvisible(String code) async {
     final db = await database;
-    await db.delete(
-      'courses',
-      where: 'code = ?',
-      whereArgs: [code],
-    );
+    
+    try {
+      // Find the course first
+      final List<Map<String, dynamic>> maps = await db.query(
+        'courses',
+        where: 'code = ?',
+        whereArgs: [code],
+      );
+      
+      if (maps.isNotEmpty) {
+        
+        // Update only the visible field in the database
+        await db.update(
+          'courses',
+          {'visible': 0},
+          where: 'code = ?',
+          whereArgs: [code],
+        );
+      }
+    } catch (e) {
+      // Handle any errors
+      print('Error making course invisible: $e');
+      throw Exception('Failed to make course invisible');
+    }
   }
 }

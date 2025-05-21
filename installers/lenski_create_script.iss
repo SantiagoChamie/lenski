@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "LenSki"
-#define MyAppVersion "1.1"
+#define MyAppVersion "2"
 #define MyAppPublisher "LenSki"
 #define MyAppURL "https://github.com/SantiagoChamie/lenski"
 #define MyAppExeName "lenski.exe"
@@ -41,6 +41,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "C:\Users\santi\Desktop\santiagochamie\lenski\build\windows\x64\runner\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\santi\Desktop\santiagochamie\lenski\build\windows\x64\runner\Release\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\santi\Desktop\santiagochamie\lenski\build\windows\x64\runner\Release\flutter_tts_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\santi\Desktop\santiagochamie\lenski\build\windows\x64\runner\Release\window_size_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\santi\Desktop\santiagochamie\lenski\build\windows\x64\runner\Release\sqlite3.def"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\santi\Desktop\santiagochamie\lenski\build\windows\x64\runner\Release\sqlite3.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\santi\Desktop\santiagochamie\lenski\build\windows\x64\runner\Release\.dart_tool\*"; DestDir: "{app}\.dart_tool"; Flags: ignoreversion recursesubdirs createallsubdirs

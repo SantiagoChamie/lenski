@@ -1,21 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:lenski/utils/colors.dart';
 
-/// An icon representing a competence
-/// Competences include: listening, speaking, reading, writing
+/// A widget that displays an icon representing a language learning competence.
+///
+/// CompetenceIcon visually represents one of the four core language learning competences:
+/// - Listening (headphones icon with purple background)
+/// - Speaking (microphone icon with red background)
+/// - Reading (book icon with orange background)
+/// - Writing (pen icon with yellow background)
+///
+/// The icon can also be displayed in a gray state to indicate an inactive or disabled competence.
+/// Each competence has a distinctive color and icon for quick visual identification.
 class CompetenceIcon extends StatelessWidget {
+  /// The size of the icon container in logical pixels
   final double size;
+  
+  /// The type of competence (must be one of: 'listening', 'speaking', 'reading', 'writing')
   final String type;
+  
+  /// Whether to display the icon in grayscale (inactive) mode
+  final bool gray;
 
   /// Creates a CompetenceIcon widget.
   /// 
-  /// [size] is the size of the icon.
-  /// [type] is the type of competence (e.g., listening, speaking, reading, writing).
-  const CompetenceIcon({super.key, required this.size, required this.type});
+  /// [size] determines the width and height of the icon container.
+  /// [type] specifies which competence icon to display ('listening', 'speaking', 'reading', or 'writing').
+  /// [gray] when true, displays the icon in grayscale to indicate an inactive state.
+  const CompetenceIcon({
+    super.key, 
+    required this.size, 
+    required this.type, 
+    this.gray = false
+  });
 
   @override
   Widget build(BuildContext context) {
     final iconData = _getIconData(type);
-    final color = _getColor(type);
+    final color = _getColor(gray ? 'null' : type);
 
     return Container(
       height: size,
@@ -30,6 +51,9 @@ class CompetenceIcon extends StatelessWidget {
   }
 
   /// Returns the appropriate icon data based on the type of competence.
+  ///
+  /// @param type The competence type string
+  /// @return The IconData to display for the competence
   IconData _getIconData(String type) {
     switch (type) {
       case 'listening':
@@ -46,18 +70,21 @@ class CompetenceIcon extends StatelessWidget {
   }
 
   /// Returns the appropriate color based on the type of competence.
+  ///
+  /// @param type The competence type string
+  /// @return The color to use for the competence background
   Color _getColor(String type) {
     switch (type) {
       case 'listening':
-        return const Color(0xFFD52CDE);
+        return AppColors.listening;
       case 'speaking':
-        return const Color(0xFFDE2C50);
+        return AppColors.speaking;
       case 'reading':
-        return const Color(0xFFEDA42E);
+        return AppColors.reading;
       case 'writing':
-        return const Color(0xFFEDE72D);
+        return AppColors.writing;
       default:
-        return Colors.grey;
+        return const Color(0xFF808080);
     }
   }
 }

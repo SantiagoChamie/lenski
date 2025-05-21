@@ -1,13 +1,15 @@
 import 'package:lenski/models/sentence_model.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
-import 'dart:io';
 import '../../models/book_model.dart';
+import 'archive_repository.dart';
+import 'dart:io';
 
 /// A repository class for managing books in the database.
 class BookRepository {
   static final BookRepository _instance = BookRepository._internal();
   Database? _database;
+  late final ArchiveRepository _archiveRepository;
 
   /// Factory constructor to return the singleton instance of BookRepository.
   factory BookRepository() {
@@ -15,7 +17,12 @@ class BookRepository {
   }
 
   /// Internal constructor for singleton pattern.
-  BookRepository._internal();
+  BookRepository._internal() {
+    // Initialize archive repository lazily to avoid circular dependency
+    Future.delayed(Duration.zero, () {
+      _archiveRepository = ArchiveRepository();
+    });
+  }
 
   /// Getter for the database. Initializes the database if it is not already initialized.
   Future<Database> get database async {
@@ -26,21 +33,35 @@ class BookRepository {
 
   /// Initializes the database and creates the books table if it does not exist.
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'books.db');
-    return openDatabase(
-      path,
-      onCreate: (db, version) {
-        return db.execute(
-          'CREATE TABLE books(id INTEGER PRIMARY KEY, name TEXT, imageUrl TEXT, totalLines INTEGER, currentLine INTEGER, language TEXT)',
-        );
-      },
-      version: 1,
-    );
+    // Path for the unified database
+    String path = join(await getDatabasesPath(), 'lenski.db');
+    
+    // Ensure directory exists
+    Directory dbDirectory = Directory(dirname(path));
+    if (!await dbDirectory.exists()) {
+      await dbDirectory.create(recursive: true);
+    }
+    
+    // Open database without depending on callbacks
+    Database db = await openDatabase(path, version: 5);
+    
+    // Always check if books table exists
+    final tables = await db.query('sqlite_master',
+        where: 'type = ? AND name = ?',
+        whereArgs: ['table', 'books']);
+        
+    if (tables.isEmpty) {
+      print('Creating books table in unified database');
+      // Create the books table if it doesn't exist
+      await db.execute(
+        'CREATE TABLE books(id INTEGER PRIMARY KEY, name TEXT, imageUrl TEXT, totalLines INTEGER, currentLine INTEGER, language TEXT, finished INTEGER DEFAULT 0)',
+      );
+    }
+    
+    return db;
   }
 
   /// Inserts a new book into the database.
-  /// 
-  /// [book] is the book to be inserted.
   Future<void> insertBook(Book book) async {
     final db = await database;
     await db.insert(
@@ -50,65 +71,66 @@ class BookRepository {
     );
   }
 
-  /// Creates a new database for a book and inserts its sentences.
-  /// 
-  /// [bookId] is the ID of the book.
-  /// [sentences] is the list of sentences to be inserted.
+  /// Creates a table for a book and inserts its sentences.
   Future<void> createBookDatabase(int bookId, List<String> sentences) async {
-    String dbName = '$bookId.db';
-    String path = join(await getDatabasesPath(), dbName);
-    Database bookDb = await openDatabase(
-      path,
-      onCreate: (db, version) {
-        return db.execute(
-          'CREATE TABLE sentences(id INTEGER PRIMARY KEY, sentence TEXT)',
-        );
-      },
-      version: 1,
-    );
-
-    for (int i = 0; i < sentences.length; i++) {
-      await bookDb.insert(
-        'sentences',
-        {'id': i + 1, 'sentence': sentences[i]},
-        conflictAlgorithm: ConflictAlgorithm.replace,
+    final db = await database;
+    
+    // First check if the table already exists
+    final tables = await db.query('sqlite_master',
+        where: 'type = ? AND name = ?',
+        whereArgs: ['table', 'b$bookId']);
+        
+    if (tables.isEmpty) {
+      // Create the table if it doesn't exist
+      await db.execute(
+        'CREATE TABLE b$bookId(id INTEGER PRIMARY KEY, sentence TEXT)',
       );
     }
+
+    // Insert sentences
+    await db.transaction((txn) async {
+      for (int i = 0; i < sentences.length; i++) {
+        await txn.insert(
+          'b$bookId',
+          {'id': i + 1, 'sentence': sentences[i]},
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    });
   }
 
-  /// Retrieves the sentences for a book from its database.
-  /// 
-  /// [bookId] is the ID of the book.
-  /// Returns a list of sentences.
+  /// Retrieves the sentences for a book from its table.
   Future<List<Sentence>> getSentences(int bookId) async {
-    String dbName = '$bookId.db';
-    String path = join(await getDatabasesPath(), dbName);
-    Database bookDb = await openDatabase(path);
-    final List<Map<String, dynamic>> maps = await bookDb.query('sentences');
+    final db = await database;
+    
+    // Check if the table exists
+    final tables = await db.query('sqlite_master',
+        where: 'type = ? AND name = ?',
+        whereArgs: ['table', 'b$bookId']);
+        
+    if (tables.isEmpty) {
+      // No table found
+      return [];
+    }
+    
+    // Query the sentences
+    final List<Map<String, dynamic>> maps = await db.query('b$bookId');
     return List.generate(maps.length, (i) {
       return Sentence.fromMap(maps[i]);
     });
   }
 
   /// Retrieves all books for a specific language from the database.
-  /// 
-  /// [language] is the language code of the books.
-  /// Returns a list of books.
   Future<List<Book>> booksByLanguage(String language) async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = 
-      await db.query(
-        'books', 
-        where: 'language = ?', 
-        whereArgs: [language]);
+    final List<Map<String, dynamic>> maps =
+        await db.query('books', where: 'language = ?', whereArgs: [language]);
     return List.generate(maps.length, (i) {
       return Book.fromMap(maps[i]);
     });
   }
 
   /// Updates an existing book in the database.
-  /// 
-  /// [book] is the book to be updated.
   Future<void> updateBook(Book book) async {
     final db = await database;
     await db.update(
@@ -119,11 +141,11 @@ class BookRepository {
     );
   }
 
-  /// Deletes a book and its associated database.
-  /// 
-  /// [id] is the ID of the book to be deleted.
+  /// Deletes a book and its associated table.
   Future<void> deleteBook(int id) async {
     final db = await database;
+    
+    // Check if the book exists
     final book = await db.query(
       'books',
       where: 'id = ?',
@@ -131,27 +153,21 @@ class BookRepository {
     );
 
     if (book.isNotEmpty) {
-      final bookId = book.first['id'];
-      String dbName = '$bookId.db';
-      String path = join(await getDatabasesPath(), dbName);
-
-      // Close the book-related database connection if it is open
-      Database? bookDb;
+      // Drop the book sentences table if it exists
       try {
-        bookDb = await openDatabase(path);
-        await bookDb.close();
+        final tables = await db.query('sqlite_master',
+            where: 'type = ? AND name = ?',
+            whereArgs: ['table', 'b$id']);
+            
+        if (tables.isNotEmpty) {
+          await db.execute('DROP TABLE b$id');
+        }
       } catch (e) {
-        // Handle any errors that occur while closing the database
-        print('Error closing book database: $e');
-      }
-
-      // Delete the book-related database file
-      final file = File(path);
-      if (await file.exists()) {
-        await file.delete();
+        print('Error dropping book table: $e');
       }
     }
 
+    // Delete the book entry
     await db.delete(
       'books',
       where: 'id = ?',
@@ -159,53 +175,9 @@ class BookRepository {
     );
   }
 
-  /// Deletes a sentence from a book and updates the total lines count
-  Future<void> deleteSentence(int bookId, int sentenceId) async {
-    String dbName = '$bookId.db';
-    String path = join(await getDatabasesPath(), dbName);
-    Database bookDb = await openDatabase(path);
-
-    await bookDb.delete(
-      'sentences',
-      where: 'id = ?',
-      whereArgs: [sentenceId],
-    );
-
-    // Update the book's total lines count
-    final db = await database;
-    final book = (await db.query(
-      'books',
-      where: 'id = ?',
-      whereArgs: [bookId],
-    )).first;
-
-    final updatedBook = Book.fromMap(book);
-    updatedBook.totalLines--;
-    await updateBook(updatedBook);
-  }
-
-  /// Restores a deleted sentence
-  Future<void> restoreSentence(int bookId, Sentence sentence) async {
-    String dbName = '$bookId.db';
-    String path = join(await getDatabasesPath(), dbName);
-    Database bookDb = await openDatabase(path);
-
-    await bookDb.insert(
-      'sentences',
-      sentence.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-
-    // Update the book's total lines count
-    final db = await database;
-    final book = (await db.query(
-      'books',
-      where: 'id = ?',
-      whereArgs: [bookId],
-    )).first;
-
-    final updatedBook = Book.fromMap(book);
-    updatedBook.totalLines++;
-    await updateBook(updatedBook);
+  /// Archives a book by delegating to ArchiveRepository.
+  /// This method is kept for backward compatibility.
+  Future<void> archiveBook(Book book) async {
+    await _archiveRepository.archiveBook(book);
   }
 }
