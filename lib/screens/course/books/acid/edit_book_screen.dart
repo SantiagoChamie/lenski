@@ -183,7 +183,7 @@ class _EditBookScreenState extends State<EditBookScreen> {
       final bookRepository = BookRepository();
       await bookRepository.archiveBook(widget.book);
       if (mounted) {
-        Navigator.pop(context); // Close book screen after archiving
+        widget.onBackPressed();
       }
     }
   }
