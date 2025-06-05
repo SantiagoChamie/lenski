@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "LenSki"
-#define MyAppVersion "2"
+#define MyAppVersion "3"
 #define MyAppPublisher "LenSki"
 #define MyAppURL "https://github.com/SantiagoChamie/lenski"
 #define MyAppExeName "lenski.exe"

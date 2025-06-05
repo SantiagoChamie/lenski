@@ -127,9 +127,8 @@ class _AddCardScreenState extends State<AddCardScreen> {
       onKeyEvent: (KeyEvent event) {
         // Only process KeyDownEvent
         if (event is KeyDownEvent) {
-          // Check for Escape key or Space key
-          if (event.logicalKey == LogicalKeyboardKey.escape || 
-              event.logicalKey == LogicalKeyboardKey.space) {
+          // Check for Escape key
+          if (event.logicalKey == LogicalKeyboardKey.escape) {
             widget.onBackPressed();
           }
         }

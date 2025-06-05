@@ -329,14 +329,8 @@ class _EditBookScreenState extends State<EditBookScreen> {
             _saveChanges();
           }
           // Check for Delete key
-          else if (event.logicalKey == LogicalKeyboardKey.delete || event.logicalKey == LogicalKeyboardKey.keyD) {
+          else if (event.logicalKey == LogicalKeyboardKey.delete) {
             _deleteBook(context);
-          }
-          // Check for 'A' key
-          else if (event.logicalKey == LogicalKeyboardKey.keyA) {
-            if(widget.book.finished) {
-              _showArchiveConfirmation();
-            }
           }
         }
       },
