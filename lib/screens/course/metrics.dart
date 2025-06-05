@@ -88,7 +88,8 @@ class _MetricsState extends State<Metrics> {
     final prefs = await SharedPreferences.getInstance();
     final lastMetric = prefs.getInt('last_metric_${widget.course.code}') ?? 0;
     setState(() {
-      _currentIndex = lastMetric;
+      // Ensure the index is within valid bounds (0-1 for 2 metrics)
+      _currentIndex = lastMetric.clamp(0, 1);
     });
   }
 
