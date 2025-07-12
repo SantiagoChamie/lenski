@@ -28,7 +28,13 @@ class Session {
     this.minutesStudied = 0,
     this.cardsDeleted = 0,
     this.streakIncremented = false,
-  }) : date = _dateTimeToInt(date ?? DateTime.now());
+  }) : date = _dateTimeToInt(date ?? _getTodayUtc()); // FIX: Use consistent UTC calculation
+
+  /// Gets today's date in UTC with time set to 00:00:00
+  static DateTime _getTodayUtc() {
+    final now = DateTime.now().toUtc();
+    return DateTime.utc(now.year, now.month, now.day);
+  }
 
   /// Converts a Session object into a Map.
   /// The keys correspond to the columns in the database.
@@ -84,10 +90,12 @@ class Session {
 
   /// Converts a DateTime object to an integer representing the number of days since Unix epoch.
   static int _dateTimeToInt(DateTime date) {
-    return DateTime(date.year, date.month, date.day)
-        .toUtc()
-        .difference(DateTime.utc(1970, 1, 1))
-        .inDays;
+    // Ensure we're working with UTC and strip time component
+    final utcDate = DateTime.utc(date.year, date.month, date.day);
+    final days = utcDate.difference(DateTime.utc(1970, 1, 1)).inDays;
+    
+    print("converting date time to int: ${date} -> UTC: ${utcDate} -> days: ${days}");
+    return days;
   }
 
   /// Converts an integer representing the number of days since Unix epoch to a DateTime object.

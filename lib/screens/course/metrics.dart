@@ -67,6 +67,7 @@ class _MetricsState extends State<Metrics> {
 
   /// Refreshes session data from the repository.
   void _refreshData() {
+    print("refresh");
     _sessionFuture = _sessionRepository.getOrCreateTodaySession(widget.course.code);
   }
 

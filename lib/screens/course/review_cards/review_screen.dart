@@ -377,7 +377,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
       },
       child: KeyboardListener(
         focusNode: _focusNode,
-        onKeyEvent: (KeyEvent event) {
+        onKeyEvent: (KeyEvent event) async {
           // Only handle key down events
           if (event is! KeyDownEvent) {
             return;
@@ -411,6 +411,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
           if(logicalKey == LogicalKeyboardKey.keyD || 
              logicalKey == LogicalKeyboardKey.delete) {
             handleDelete();
+          }
+
+          if(logicalKey == LogicalKeyboardKey.keyR) {
+            try {await TtsService().speak(cards.first.front, widget.course.code);} catch (e) {}
           }
 
           if(logicalKey == LogicalKeyboardKey.escape) {

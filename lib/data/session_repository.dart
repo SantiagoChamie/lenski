@@ -65,17 +65,24 @@ class SessionRepository {
     return db;
   }
 
-  /// Converts a DateTime object to an integer representing the number of days since Unix epoch.
+  /// This method ensures consistent UTC-based date calculation across the app.
   static int _dateTimeToInt(DateTime date) {
-    return DateTime(date.year, date.month, date.day)
-        .toUtc()
-        .difference(DateTime.utc(1970, 1, 1))
-        .inDays;
+    // Always convert to UTC and strip time component for consistency
+    final utcDate = DateTime.utc(date.year, date.month, date.day);
+    return utcDate.difference(DateTime.utc(1970, 1, 1)).inDays;
+  }
+
+  /// Gets today's date as an integer (days since epoch) in UTC
+  static int _getTodayInt() {
+    final now = DateTime.now().toUtc();
+    final todayUtc = DateTime.utc(now.year, now.month, now.day);
+    return _dateTimeToInt(todayUtc);
   }
 
   /// Gets or creates a session for today for the specified course.
   Future<Session> getOrCreateTodaySession(String courseCode) async {
-    final today = _dateTimeToInt(DateTime.now());
+    final today = _getTodayInt(); // Use consistent helper method
+    
     final db = await database;
     
     // Try to find existing session for today
@@ -86,7 +93,8 @@ class SessionRepository {
     );
     
     if (maps.isNotEmpty) {
-      return Session.fromMap(maps.first);
+      final session = Session.fromMap(maps.first);
+      return session;
     } 
     
     // No session found, create a new one
@@ -131,9 +139,10 @@ class SessionRepository {
   }
 
   /// Checks if daily goal is met and updates streak if needed.
+  /// Checks if daily goal is met and updates streak if needed.
   Future<void> _checkAndUpdateStreak(String courseCode, Session session) async {
     final db = await database;
-    final today = _dateTimeToInt(DateTime.now());
+    final today = _getTodayInt(); // Use consistent helper method
     
     // Check if streak was already incremented today
     final List<Map<String, dynamic>> sessionMaps = await db.query(
@@ -148,10 +157,9 @@ class SessionRepository {
       return;
     }
     
-    // Get the course to check goal and potentially update streak
+    // Rest of the method remains the same...
     final course = await _courseRepository.getCourse(courseCode);
     
-    // Check if daily goal is met based on the course's goal type
     bool isDailyGoalMet = false;
     
     switch (course.goalType) {
@@ -159,8 +167,6 @@ class SessionRepository {
         isDailyGoalMet = session.wordsAdded >= course.dailyGoal;
         break;
       case 'daily':
-        // For daily type, any activity counts as meeting the goal
-        // Explicitly EXCLUDING cardsDeleted from this check as specified
         isDailyGoalMet = session.wordsAdded > 0 || 
                     session.wordsReviewed > 0 || 
                     session.linesRead > 0 ||
@@ -170,15 +176,12 @@ class SessionRepository {
         isDailyGoalMet = session.minutesStudied >= course.dailyGoal;
         break;
       default:
-        // Default to 'learn' behavior
         isDailyGoalMet = session.wordsAdded >= course.dailyGoal;
     }
     
-    // If daily goal is met, increment streak and mark as incremented
     if (isDailyGoalMet) {
       await _courseRepository.incrementStreak(course);
       
-      // Mark streak as incremented for today
       await db.update(
         'sessions',
         {'streakIncremented': 1},
