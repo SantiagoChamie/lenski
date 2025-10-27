@@ -332,7 +332,7 @@ class _AddCardScreenState extends State<AddCardScreen> {
                           widget.onCardAdded!();
                         }
 
-                        widget.onBackPressed();
+                        //widget.onBackPressed(); // i removed this
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.blue,
