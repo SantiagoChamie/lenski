@@ -409,7 +409,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
         border: Border.all(color: AppColors.grey.withAlpha(128), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(13),
+            color: AppColors.black.withAlpha(13),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -695,7 +695,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                               style: TextStyle(
                                 fontFamily: appFonts['Subtitle'], 
                                 fontSize: 18, 
-                                color: Colors.white
+                                color: AppColors.white
                               ),
                             ),
                           ),

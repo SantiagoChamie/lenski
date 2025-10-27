@@ -151,19 +151,19 @@ class _BookButtonState extends State<BookButton> {
                             height: 40,
                             decoration: const BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
-                            child: Center(
-                              child: Text(
-                                '$percentage%',
-                                style: TextStyle(
-                                  fontSize: fontSize,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: appFonts['Detail'],
-                                  color: AppColors.black,
+                              child: Center(
+                                child: Text(
+                                  '$percentage%',
+                                  style: TextStyle(
+                                    fontSize: fontSize,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: appFonts['Detail'],
+                                    color: AppColors.black,
+                                  ),
                                 ),
                               ),
-                            ),
                           ),
                           SizedBox(
                             width: 40,
@@ -171,7 +171,7 @@ class _BookButtonState extends State<BookButton> {
                             child: CircularProgressIndicator(
                               value: percentage / 100,
                               strokeWidth: 5,
-                              backgroundColor: Colors.white,
+                                backgroundColor: AppColors.lightGrey,
                               valueColor: const AlwaysStoppedAnimation<Color>(AppColors.blue),
                             ),
                           ),
@@ -184,7 +184,7 @@ class _BookButtonState extends State<BookButton> {
                       top: 10,
                       left: 10,
                       child: IconButton(
-                        icon: const Icon(Icons.settings, color: Colors.white),
+                        icon: const Icon(Icons.settings, color: AppColors.white),
                         onPressed: () => widget.onEdit?.call(book!),
                       ),
                     )

@@ -245,164 +245,161 @@ class _AddBookScreenState extends State<AddBookScreen> {
                 padding: EdgeInsets.only(bottom: p.standardPadding() * 2),
                 child: Stack(
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.lightGrey,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12, // Keep as is for shadow
-                            blurRadius: 2,
-                            offset: Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      width: p.mainScreenWidth() - p.standardPadding() * 4,
-                      child: Padding(
-                        padding: EdgeInsets.all(p.standardPadding() * 2),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  localizations.addYourOwnTexts,
-                                  style: TextStyle(
-                                    fontSize: 24, 
-                                    fontFamily: appFonts['Title']
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  child: IconButton(
-                                    icon: Icon(
-                                      isHelpVisible ? Icons.close : Icons.help_outline, 
-                                      size: 20, 
-                                      color: Colors.grey[600]
+                    // Replace the original ClipRRect + Container with a PhysicalModel that correctly renders shadow + rounded corners
+                    PhysicalModel(
+                      color: AppColors.lightGrey,
+                      shadowColor: AppColors.lightGrey,
+                      elevation: 8.0,
+                      borderRadius: BorderRadius.circular(16),
+                      clipBehavior: Clip.antiAlias,
+                      child: SizedBox(
+                        width: p.mainScreenWidth() - p.standardPadding() * 4,
+                        child: Padding(
+                          padding: EdgeInsets.all(p.standardPadding() * 2),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    localizations.addYourOwnTexts,
+                                    style: TextStyle(
+                                      fontSize: 24, 
+                                      fontFamily: appFonts['Title']
                                     ),
-                                    onPressed: _toggleHelpSection,
                                   ),
-                                ),
-                              ],
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.all(p.standardPadding()),
-                                child: _buildAnimatedSection(),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: IconButton(
+                                      icon: Icon(
+                                        isHelpVisible ? Icons.close : Icons.help_outline, 
+                                        size: 20, 
+                                        color: AppColors.grey600
+                                      ),
+                                      onPressed: _toggleHelpSection,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            Column(
-                              children: [
-                                if (!isHelpVisible) _buildPageIndicator(),
-                                SizedBox(height: p.standardPadding()),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    // Main start learning button with proper width constraint
-                                    SizedBox(
-                                      width: 300,
-                                      height: p.sidebarButtonWidth(),
-                                      child: ElevatedButton(
-                                        onPressed: isLoading || isHelpVisible ? null : () async {
-                                          if (!_hasText()) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text(localizations.pleaseAddTextOrFile),
-                                                duration: const Duration(seconds: 2),
-                                              ),
-                                            );
-                                            return;
-                                          }
-                                          setState(() => isLoading = true);
-                                          try {
-                                            bool success;
-                                            if (isFileMode == true) {
-                                              success = await _bookCreator.processFile(
-                                                selectedFilePath!, 
-                                                widget.languageCode,
-                                                shuffleSentences: isShuffleEnabled,
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.all(p.standardPadding()),
+                                  child: _buildAnimatedSection(),
+                                ),
+                              ),
+                              Column(
+                                children: [
+                                  if (!isHelpVisible) _buildPageIndicator(),
+                                  SizedBox(height: p.standardPadding()),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      // Main start learning button with proper width constraint
+                                      SizedBox(
+                                        width: 300,
+                                        height: p.sidebarButtonWidth(),
+                                        child: ElevatedButton(
+                                          onPressed: isLoading || isHelpVisible ? null : () async {
+                                            if (!_hasText()) {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(localizations.pleaseAddTextOrFile),
+                                                  duration: const Duration(seconds: 2),
+                                                ),
                                               );
-                                            } else {
-                                              success = await _bookCreator.processBook(
-                                                textController.text, 
-                                                widget.languageCode,
-                                                shuffleSentences: isShuffleEnabled,
-                                              );
+                                              return;
                                             }
-                                            
-                                            if (!_bookCreator.isCancelled) {
-                                              if (success) {
-                                                widget.onBackPressed();
+                                            setState(() => isLoading = true);
+                                            try {
+                                              bool success;
+                                              if (isFileMode == true) {
+                                                success = await _bookCreator.processFile(
+                                                  selectedFilePath!, 
+                                                  widget.languageCode,
+                                                  shuffleSentences: isShuffleEnabled,
+                                                );
                                               } else {
-                                                _showLanguageMismatchDialog(
-                                                  isFileMode == true ? selectedFilePath! : textController.text,
-                                                  isFileMode == true
+                                                success = await _bookCreator.processBook(
+                                                  textController.text, 
+                                                  widget.languageCode,
+                                                  shuffleSentences: isShuffleEnabled,
                                                 );
                                               }
+                                              
+                                              if (!_bookCreator.isCancelled) {
+                                                if (success) {
+                                                  widget.onBackPressed();
+                                                } else {
+                                                  _showLanguageMismatchDialog(
+                                                    isFileMode == true ? selectedFilePath! : textController.text,
+                                                    isFileMode == true
+                                                  );
+                                                }
+                                              }
+                                            } finally {
+                                              if (!_bookCreator.isCancelled) {
+                                                setState(() => isLoading = false);
+                                              }
                                             }
-                                          } finally {
-                                            if (!_bookCreator.isCancelled) {
-                                              setState(() => isLoading = false);
-                                            }
-                                          }
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: AppColors.blue,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(10),
-                                          ),
-                                          disabledBackgroundColor: Colors.grey[300],
-                                          disabledForegroundColor: Colors.grey[600],
-                                        ),
-                                        child: Text(
-                                          localizations.startLearningButton,
-                                          style: TextStyle(
-                                            fontFamily: appFonts['Subtitle'], 
-                                            fontSize: 30, 
-                                            color: Colors.white
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    // Shuffle toggle button with improved tooltip
-                                    Container(
-                                      height: p.sidebarButtonWidth(),
-                                      margin: const EdgeInsets.only(left: 8),
-                                      child: Tooltip(
-                                        message: isShuffleEnabled 
-                                            ? localizations.randomSentences 
-                                            : localizations.realSentences,
-                                        verticalOffset: -40,
-                                        waitDuration: const Duration(milliseconds: 500),
-                                        preferBelow: false,
-                                        child: ElevatedButton(
-                                          onPressed: isLoading || isHelpVisible ? null : () {
-                                            setState(() {
-                                              isShuffleEnabled = !isShuffleEnabled;
-                                            });
                                           },
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: isShuffleEnabled 
-                                                ? AppColors.lightBlue // Light blue when active
-                                                : Colors.grey[300], // Grey when inactive
-                                            shape: const CircleBorder(),
-                                            padding: const EdgeInsets.all(16),
-                                            disabledBackgroundColor: Colors.grey[200],
-                                            disabledForegroundColor: Colors.grey[400],
+                                            backgroundColor: AppColors.blue,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            disabledBackgroundColor: AppColors.grey300,
+                                            disabledForegroundColor: AppColors.grey600,
                                           ),
-                                          child: Icon(
-                                            isShuffleEnabled ? Icons.shuffle : Icons.format_list_numbered,
-                                            color: isShuffleEnabled ? Colors.white : Colors.grey[700],
+                                          child: Text(
+                                            localizations.startLearningButton,
+                                            style: TextStyle(
+                                              fontFamily: appFonts['Subtitle'], 
+                                              fontSize: 30, 
+                                              color: AppColors.white
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
+                                      // Shuffle toggle button with improved tooltip
+                                      Container(
+                                        height: p.sidebarButtonWidth(),
+                                        margin: const EdgeInsets.only(left: 8),
+                                        child: Tooltip(
+                                          message: isShuffleEnabled 
+                                              ? localizations.randomSentences 
+                                              : localizations.realSentences,
+                                          verticalOffset: -40,
+                                          waitDuration: const Duration(milliseconds: 500),
+                                          preferBelow: false,
+                                          child: ElevatedButton(
+                                            onPressed: isLoading || isHelpVisible ? null : () {
+                                              setState(() {
+                                                isShuffleEnabled = !isShuffleEnabled;
+                                              });
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: isShuffleEnabled 
+                                                  ? AppColors.lightBlue // Light blue when active
+                                                  : AppColors.grey300, // Grey when inactive
+                                              shape: const CircleBorder(),
+                                              padding: const EdgeInsets.all(16),
+                                              disabledBackgroundColor: AppColors.grey300,
+                                              disabledForegroundColor: AppColors.grey400,
+                                            ),
+                                            child: Icon(
+                                              isShuffleEnabled ? Icons.shuffle : Icons.format_list_numbered,
+                                              color: isShuffleEnabled ? AppColors.white : AppColors.grey700,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -485,7 +482,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
       verticalOffset: 70,
       waitDuration: const Duration(milliseconds: 500),
       child: DottedBorder(
-        color: Colors.grey, // Keep the original Colors.grey instead of AppColors.grey
+        color: AppColors.darkGrey,
         strokeWidth: 2,
         borderType: BorderType.RRect,
         radius: const Radius.circular(10),
@@ -507,14 +504,14 @@ class _AddBookScreenState extends State<AddBookScreen> {
                   const Icon(
                     Icons.upload_file,
                     size: 64,
-                    color: Colors.grey, // Keep the original Colors.grey
+                    color: AppColors.darkGrey,
                   ),
                   const SizedBox(height: 16),
-                  Text(
+                      Text(
                    localizations.addFilesTypes,
                     style: TextStyle(
                       fontSize: 18,
-                      color: Colors.grey, // Keep the original Colors.grey
+                      color: AppColors.darkGrey,
                       fontFamily: appFonts['Paragraph'],
                     ),
                   ),

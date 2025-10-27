@@ -88,7 +88,7 @@ class _FlagIconState extends State<FlagIcon> {
         height: widget.size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: widget.borderColor ?? Colors.white, width: widget.borderWidth),
+          border: Border.all(color: widget.borderColor ?? AppColors.white, width: widget.borderWidth),
         ),
         child: ClipOval(
           child: !_isLoaded
@@ -100,7 +100,7 @@ class _FlagIconState extends State<FlagIcon> {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black54),
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.black54),
                       ),
                     ),
                   ),
@@ -119,7 +119,7 @@ class _FlagIconState extends State<FlagIcon> {
                     color: AppColors.lightGrey,
                     child: const Icon(
                       Icons.language, 
-                      color: Colors.black54,
+                      color: AppColors.black54,
                       size: 24,
                     ),
                   ),

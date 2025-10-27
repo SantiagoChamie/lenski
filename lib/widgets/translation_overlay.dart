@@ -233,11 +233,11 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
                   return Container(
                     padding: EdgeInsets.all(p.standardPadding()),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.white,
                       borderRadius: BorderRadius.circular(8.0),
                       boxShadow: const [
                         BoxShadow(
-                          color: Colors.black26,
+                          color: AppColors.black26,
                           blurRadius: 4.0,
                           offset: Offset(0, 2),
                         ),
@@ -249,11 +249,11 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
                   return Container(
                     padding: EdgeInsets.all(p.standardPadding()),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.white,
                       borderRadius: BorderRadius.circular(8.0),
                       boxShadow: const [
                         BoxShadow(
-                          color: Colors.black26,
+                          color: AppColors.black26,
                           blurRadius: 4.0,
                           offset: Offset(0, 2),
                         ),
@@ -275,11 +275,11 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
                         return Container(
                           padding: EdgeInsets.all(p.standardPadding()),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.white,
                             borderRadius: BorderRadius.circular(8.0),
                             boxShadow: const [
                               BoxShadow(
-                                color: Colors.black26,
+                                color: AppColors.black26,
                                 blurRadius: 4.0,
                                 offset: Offset(0, 2),
                               ),
@@ -291,11 +291,11 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
                         return Container(
                           padding: EdgeInsets.all(p.standardPadding()),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.white,
                             borderRadius: BorderRadius.circular(8.0),
                             boxShadow: const [
                               BoxShadow(
-                                color: Colors.black26,
+                                color: AppColors.black26,
                                 blurRadius: 4.0,
                                 offset: Offset(0, 2),
                               ),
@@ -313,11 +313,11 @@ class _TranslationOverlayState extends State<TranslationOverlay> {
                         return Container(
                           padding: EdgeInsets.all(p.standardPadding()),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.white,
                             borderRadius: BorderRadius.circular(8.0),
                             boxShadow: const [
                               BoxShadow(
-                                color: Colors.black26,
+                                color: AppColors.black26,
                                 blurRadius: 4.0,
                                 offset: Offset(0, 2),
                               ),

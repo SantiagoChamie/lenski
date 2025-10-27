@@ -213,7 +213,7 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
             ),
             child: Row(
               children: [
-                Icon(icon, size: 30, color: Colors.grey[700]),
+                Icon(icon, size: 30, color: AppColors.grey700),
                 const SizedBox(width: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,7 +232,7 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
                       style: TextStyle(
                         fontSize: 14,
                         fontFamily: appFonts['Detail'],
-                        color: Colors.grey[600],
+                        color: AppColors.grey600,
                       ),
                     ),
                   ],
@@ -292,7 +292,7 @@ class _GoalSelectorButtonState extends State<GoalSelectorButton> {
           borderRadius: BorderRadius.circular(10),
         ),
         fixedSize: Size(p.createCourseButtonWidth(), p.createCourseButtonHeight()),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         overlayColor: Colors.transparent
       ),
       onPressed: () => _showGoalTypeSelector(context),

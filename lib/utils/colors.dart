@@ -36,4 +36,23 @@ class AppColors {
   static const Color listening = Color(0xFFD52CDE);
 
   static const Color black = Colors.black;
+  /// White color (use for foreground on dark backgrounds)
+  static const Color white = Color(0xFFFFFFFF);
+
+  // Common semi-transparent blacks used for shadows and overlays
+  static const Color black54 = Color(0x8A000000);
+  static const Color black38 = Color(0x61000000);
+  static const Color black12 = Color(0x1F000000);
+  static const Color black26 = Color(0x42000000);
+  static const Color black45 = Color(0x73000000);
+
+  // Transparent (useful for overlays and transparent backgrounds)
+  static const Color transparent = Color(0x00000000);
+
+  // Common greys from Material palette used across the app
+  static const Color grey700 = Color(0xFF616161);
+  static const Color grey600 = Color(0xFF757575);
+  static const Color grey400 = Color(0xFFBDBDBD);
+  static const Color grey300 = Color(0xFFE0E0E0);
+  static const Color grey850 = Color(0xFF212121);
 }

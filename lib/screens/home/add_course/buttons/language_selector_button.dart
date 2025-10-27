@@ -205,7 +205,7 @@ class _LanguageSelectorButtonState extends State<LanguageSelectorButton> {
           borderRadius: BorderRadius.circular(10), 
         ),
         fixedSize: Size(p.createCourseButtonWidth(), p.createCourseButtonHeight()),
-        backgroundColor: Colors.white, // Keep as is (UI element color)
+        backgroundColor: AppColors.white, // adapt to theme
         overlayColor: Colors.transparent // Keep as is (UI element color)
       ),
       onPressed: () => _showLanguageSelector(context),

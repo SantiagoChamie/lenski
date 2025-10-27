@@ -428,11 +428,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
               child: Center(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isFront ? AppColors.lightGrey : Colors.white,
+                    color: isFront ? AppColors.lightGrey : AppColors.white,
                     borderRadius: BorderRadius.circular(5.0),
                     boxShadow: const [
                       BoxShadow(
-                        color: Colors.black26,
+                        color: AppColors.black26,
                         blurRadius: 4.0,
                         offset: Offset(0, 2),
                       ),
@@ -795,7 +795,7 @@ class _EditCardDialogState extends State<EditCardDialog> {
                       style: TextStyle(
                         fontFamily: appFonts['Detail'],
                         fontSize: 14,
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
                     ),
                   ),

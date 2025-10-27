@@ -1,5 +1,6 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:lenski/utils/colors.dart';
 
 /// A widget that displays an empty book button with a dotted border.
 ///
@@ -20,7 +21,7 @@ class EmptyBookButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DottedBorder(
-      color: Colors.grey,
+      color: AppColors.grey,
       strokeWidth: stokeWidth,
       borderType: BorderType.RRect,
       radius: const Radius.circular(8),

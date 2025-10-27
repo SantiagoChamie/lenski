@@ -177,7 +177,7 @@ class _ReviewPileState extends State<ReviewPile> {
                     borderRadius: BorderRadius.circular(5.0),
                     boxShadow: [
                       BoxShadow(
-                        color: _isHovered ? Colors.black45 : Colors.black38, // Kept as is for shadow effect
+                        color: _isHovered ? AppColors.black45 : AppColors.black38,
                         blurRadius: _isHovered ? 6.0 : 4.0,
                         offset: Offset(0, _isHovered ? 3 : 2),
                       ),

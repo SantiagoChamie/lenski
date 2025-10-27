@@ -129,7 +129,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
                             child: Icon(
                               Icons.broken_image,
                               size: 48,
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
                           );
                         },
@@ -138,7 +138,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
                         child: Icon(
                           Icons.book,
                           size: 48,
-                          color: Colors.white,
+                          color: AppColors.white,
                         ),
                       ),
               ),
@@ -340,7 +340,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
                 borderRadius: BorderRadius.circular(5.0),
                 boxShadow: const [
                   BoxShadow(
-                    color: Colors.black26, // Keep original shadow color
+                    color: AppColors.black26, // Use AppColors for shadow
                     blurRadius: 4.0,
                     offset: Offset(0, 2),
                   ),
@@ -512,7 +512,7 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
           data: Theme.of(context).copyWith(
             textSelectionTheme: TextSelectionThemeData(
               selectionColor: AppColors.lightBlue,
-              cursorColor: Colors.black54, // Keep original cursor color
+              cursorColor: AppColors.black54, // Use AppColors cursor color
             ),
           ),
           child: Column(
@@ -637,7 +637,7 @@ class _EditArchivedBookOverlayState extends State<EditArchivedBookOverlay> {
                       Navigator.pop(context, updatedBook); // Return the updated book
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white, // Keep original color
+                      backgroundColor: AppColors.white, // Use AppColors for background
                     ),
                     child: Text(
                       localizations.save,

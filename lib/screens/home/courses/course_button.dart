@@ -171,7 +171,7 @@ class _CourseButtonState extends State<CourseButton> {
                         style: TextStyle(
                           fontSize: 40, 
                           fontFamily: appFonts['Title'], 
-                          color: Colors.white
+                          color: AppColors.white
                         )
                       ),
                       
@@ -204,7 +204,7 @@ class _CourseButtonState extends State<CourseButton> {
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(230),
+                      color: AppColors.white.withAlpha(230),
                       borderRadius: BorderRadius.circular(33),
                     ),
                     child: Row(
@@ -235,7 +235,7 @@ class _CourseButtonState extends State<CourseButton> {
             top: 10,
             right: 10,
             child: IconButton(
-              icon: const Icon(Icons.settings, color: Colors.white),
+              icon: const Icon(Icons.settings, color: AppColors.white),
               onPressed: () {
                 setState(() {
                   _showColorMenu = !_showColorMenu;
@@ -250,11 +250,11 @@ class _CourseButtonState extends State<CourseButton> {
               right: 50,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.grey[850],
+                  color: AppColors.grey850,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(51),
+                      BoxShadow(
+                      color: AppColors.black.withAlpha(51),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -282,7 +282,7 @@ class _CourseButtonState extends State<CourseButton> {
                             color: color,
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: Colors.white,
+                              color: AppColors.white,
                               width: 2,
                             ),
                           ),

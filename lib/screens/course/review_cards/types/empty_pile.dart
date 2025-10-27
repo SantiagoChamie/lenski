@@ -39,7 +39,7 @@ class EmptyPile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(5.0),
                   boxShadow: const [
                     BoxShadow(
-                      color: Colors.black26, // Keep as is for shadow effect
+                      color: AppColors.black26, // Use AppColors for shadow effect
                       blurRadius: 4.0,
                       offset: Offset(0, 2),
                     ),

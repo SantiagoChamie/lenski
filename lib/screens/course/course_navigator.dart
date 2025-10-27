@@ -193,7 +193,7 @@ class _CourseNavigatorState extends State<CourseNavigator> {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                color: AppColors.white,
                 border: Border.all(
                   color: AppColors.blue,
                   width: 2,
@@ -213,7 +213,7 @@ class _CourseNavigatorState extends State<CourseNavigator> {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                color: AppColors.white,
                 border: Border.all(
                   color: AppColors.blue,
                   width: 2,

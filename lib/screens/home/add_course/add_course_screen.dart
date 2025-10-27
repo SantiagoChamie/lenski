@@ -441,7 +441,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                                   style: TextStyle(
                                     fontFamily: appFonts['Subtitle'],
                                     fontSize: 30,
-                                    color: Colors.white
+                                    color: AppColors.white
                                   ),
                                 ),
                               ),

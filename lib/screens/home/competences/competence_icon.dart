@@ -46,7 +46,7 @@ class CompetenceIcon extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(4),
-      child: Icon(iconData, color: Colors.white, size: size * 2 / 3),
+  child: Icon(iconData, color: AppColors.white, size: size * 2 / 3),
     );
   }
 

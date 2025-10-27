@@ -353,15 +353,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             child: TextField(
                               controller: _apiKeyController,
                               obscureText: true,
-                              cursorColor: Colors.black,
+                              cursorColor: AppColors.black,
                               decoration: InputDecoration(
                                 labelText: localizations.deeplApiKey,
                                 labelStyle: TextStyle(
                                   fontFamily: appFonts['Detail'], 
-                                  color: Colors.black
+                                  color: AppColors.black
                                 ),
                                 focusedBorder: const UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.black),
+                                  borderSide: BorderSide(color: AppColors.black),
                                 ),
                               ),
                             ),
@@ -470,7 +470,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onPressed: _isExporting ? null : _exportFile,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.lightGrey,
-                      foregroundColor: Colors.black,
+                      foregroundColor: AppColors.black,
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                     ),
                     child: _isExporting
@@ -489,7 +489,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onPressed: _isImporting ? null : _importFile,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.blue,
-                      foregroundColor: Colors.white,
+                      foregroundColor: AppColors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                     ),
                     child: _isImporting
@@ -497,7 +497,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
-                              color: Colors.white,
+                              color: AppColors.white,
                               strokeWidth: 2,
                             ),
                           )

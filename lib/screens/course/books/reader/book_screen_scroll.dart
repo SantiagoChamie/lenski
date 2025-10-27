@@ -264,7 +264,7 @@ class _BookScreenScrollState extends State<BookScreenScroll> {
                           borderRadius: BorderRadius.circular(5.0),
                           boxShadow: const [
                             BoxShadow(
-                              color: Colors.black26,
+                              color: AppColors.black26,
                               blurRadius: 4.0,
                               offset: Offset(0, 2),
                             ),

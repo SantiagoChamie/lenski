@@ -147,7 +147,7 @@ class _AddCardScreenState extends State<AddCardScreen> {
               borderRadius: BorderRadius.circular(5.0),
               boxShadow: const [
                 BoxShadow(
-                  color: Colors.black38, // Keep as is for shadow
+                  color: AppColors.black38, // Use AppColors for shadow
                   blurRadius: 4.0,
                   offset: Offset(0, 2),
                 ),
@@ -162,12 +162,12 @@ class _AddCardScreenState extends State<AddCardScreen> {
                     child: Padding(
                       padding: EdgeInsets.all(p.standardPadding()),
                       child: Theme(
-                        data: Theme.of(context).copyWith(
-                          textSelectionTheme: TextSelectionThemeData(
-                            selectionColor: AppColors.lightBlue,
-                            cursorColor: Colors.black54, // Keep as is for cursor color
-                          ),
-                        ),
+                                  data: Theme.of(context).copyWith(
+                                    textSelectionTheme: TextSelectionThemeData(
+                                      selectionColor: AppColors.lightBlue,
+                                      cursorColor: AppColors.black54,
+                                    ),
+                                  ),
                         child: Column(
                           children: [
                             TextField(
@@ -345,7 +345,7 @@ class _AddCardScreenState extends State<AddCardScreen> {
                         style: TextStyle(
                           fontFamily: appFonts['Subtitle'], 
                           fontSize: 30, 
-                          color: Colors.white // Keep as is for text color
+                          color: AppColors.white // Use AppColors for text color
                         ),
                       ),
                     ),

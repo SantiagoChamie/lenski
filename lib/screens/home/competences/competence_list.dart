@@ -38,7 +38,7 @@ class CompetenceList extends StatelessWidget {
       case 'writing':
         return AppColors.writing;
       default:
-        return Colors.grey;
+        return AppColors.grey;
     }
   }
 

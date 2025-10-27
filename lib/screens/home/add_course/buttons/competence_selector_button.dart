@@ -129,7 +129,7 @@ class _CompetenceSelectorButtonState extends State<CompetenceSelectorButton> {
           borderRadius: BorderRadius.circular(10),
         ),
         fixedSize: Size(!widget.isSmall ? p.createCourseButtonWidth() : 150, p.createCourseButtonHeight()),
-        backgroundColor: Colors.white, 
+        backgroundColor: AppColors.white,
         overlayColor: Colors.transparent 
       ),
       onPressed: _toggleSelection,
@@ -142,7 +142,7 @@ class _CompetenceSelectorButtonState extends State<CompetenceSelectorButton> {
               side: const BorderSide(color: AppColors.darkGrey, width: 1),
               value: _isSelected,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              checkColor: Colors.white,
+              checkColor: AppColors.white,
               activeColor: AppColors.blue,
               onChanged: (bool? value) {
                 _toggleSelection();

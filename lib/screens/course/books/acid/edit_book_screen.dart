@@ -196,7 +196,7 @@ class _EditBookScreenState extends State<EditBookScreen> {
         data: Theme.of(context).copyWith(
             textSelectionTheme: const TextSelectionThemeData(
               selectionColor: AppColors.lightBlue,
-              cursorColor: Colors.black54, // Keep as is for cursor color
+              cursorColor: AppColors.black54,
             ),
           ),
         child: Column(
@@ -398,7 +398,7 @@ class _EditBookScreenState extends State<EditBookScreen> {
                               style: TextStyle(
                                 fontFamily: appFonts['Detail'],
                                 fontSize: 30,
-                                color: Colors.white, // Keep as is for contrast
+                                color: AppColors.white, // Use AppColors for contrast
                               ),
                             ),
                           ),
@@ -437,7 +437,7 @@ class _EditBookScreenState extends State<EditBookScreen> {
         child: Icon(
           Icons.book_outlined,
           size: 120,
-          color: Colors.white, // Keep as is for visibility
+          color: AppColors.white, // Use AppColors for visibility
         ),
       ) : null,
     );

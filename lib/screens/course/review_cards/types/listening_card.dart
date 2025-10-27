@@ -66,7 +66,7 @@ class ListeningCard extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.volume_up, color: Colors.white), // Keep white for contrast
+                  icon: const Icon(Icons.volume_up, color: AppColors.white), // Use AppColors for contrast
                   iconSize: 80.0,
                   padding: const EdgeInsets.all(24),
                   onPressed: () async {
