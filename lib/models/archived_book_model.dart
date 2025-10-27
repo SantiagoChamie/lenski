@@ -70,13 +70,13 @@ class ArchivedBook {
   /// Returns a new ArchivedBook instance populated from the map.
   factory ArchivedBook.fromMap(Map<String, dynamic> map) {
     return ArchivedBook(
-      id: map['id'],
-      name: map['name'],
-      language: map['language'],
-      category: map['category'],
-      subcategory: map['subcategory'],
-      imageUrl: map['imageUrl'],
-      finishedDate: _intToDateTime(map['finishedDate']),
+      id: map.containsKey('id') ? map['id'] as int? : null,
+      name: (map['name'] ?? '') as String,
+      language: (map['language'] ?? '') as String,
+      imageUrl: map.containsKey('imageUrl') ? map['imageUrl'] as String? : null,
+      category: (map['category'] ?? '') as String,
+      subcategory: map.containsKey('subcategory') ? map['subcategory'] as String? : null,
+      finishedDate: _intToDateTime(map['finishedDate'] ?? _dateTimeToInt(DateTime.now())),
     );
   }
 

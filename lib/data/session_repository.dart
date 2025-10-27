@@ -1,8 +1,7 @@
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:path/path.dart';
 import '../models/session_model.dart';
 import '../data/course_repository.dart';
-import 'dart:io';
+import 'database_helper.dart';
 
 /// A repository class for managing user session data in the database.
 class SessionRepository {
@@ -27,22 +26,12 @@ class SessionRepository {
 
   /// Initializes the database and creates the sessions table if it doesn't exist.
   Future<Database> _initDatabase() async {
-    // Path for the unified database
-    String path = join(await getDatabasesPath(), 'lenski.db');
-    
-    // Ensure directory exists
-    Directory dbDirectory = Directory(dirname(path));
-    if (!await dbDirectory.exists()) {
-      await dbDirectory.create(recursive: true);
-    }
-    
-    // Open database without depending on callbacks
-    Database db = await openDatabase(path, version: 5);
+    final db = await DatabaseHelper().database;
     
     // Always check if sessions table exists
-    final tables = await db.query('sqlite_master',
-        where: 'type = ? AND name = ?',
-        whereArgs: ['table', 'sessions']);
+  final tables = await db.query('sqlite_master',
+    where: 'type = ? AND name = ?',
+    whereArgs: ['table', 'sessions']);
         
     if (tables.isEmpty) {
       // Create the sessions table if it doesn't exist

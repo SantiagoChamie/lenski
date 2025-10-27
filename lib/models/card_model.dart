@@ -56,16 +56,16 @@ class Card {
   /// Extracts a Card object from a Map.
   factory Card.fromMap(Map<String, dynamic> map) {
     return Card(
-      id: map['id'],
-      front: map['front'],
-      back: map['back'],
-      context: map['context'],
-      dueDate: _intToDateTime(map['dueDate']), // Convert integer to DateTime
-      language: map['language'],
-      type: map['type'], // Add type from map
-      prevInterval: map['prevInterval'], // Include prevInterval
-      eFactor: map['eFactor'], // Include eFactor
-      repetition: map['repetition'], // Include repetition
+      id: map['id'] as int?,
+      front: (map['front'] ?? '') as String,
+      back: (map['back'] ?? '') as String,
+      context: (map['context'] ?? '') as String,
+      dueDate: _intToDateTime(map['dueDate'] ?? _dateTimeToInt(DateTime.now())), // Convert integer to DateTime with fallback
+      language: (map['language'] ?? '') as String,
+      type: (map['type'] ?? 'default') as String,
+      prevInterval: map.containsKey('prevInterval') ? (map['prevInterval'] as int) : 0,
+      eFactor: map.containsKey('eFactor') ? (map['eFactor'] as double) : 2.5,
+      repetition: map.containsKey('repetition') ? (map['repetition'] as int) : 0,
     );
   }
 

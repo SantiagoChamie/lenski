@@ -1,11 +1,11 @@
-import 'dart:io'; // Add this import for File class
+// 'dart:io' intentionally not imported here; DatabaseHelper handles file/path creation
 import 'package:lenski/data/archive_repository.dart';
 import 'package:lenski/data/book_repository.dart';
 import 'package:lenski/data/card_repository.dart';
 import 'package:lenski/data/session_repository.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:path/path.dart';
 import '../../models/course_model.dart';
+import 'database_helper.dart';
 
 /// A repository class for managing courses in the database.
 class CourseRepository {
@@ -29,122 +29,39 @@ class CourseRepository {
 
   /// Initializes the database and creates the courses table if it does not exist.
   Future<Database> _initDatabase() async {
-    // Path for the database
-    String path = join(await getDatabasesPath(), 'lenski.db');
+    // We rely on DatabaseHelper to open the unified DB instance. Repositories
+    // can still create/check tables as needed to remain forward/backwards compatible.
+    final db = await DatabaseHelper().database;
     
-    // Ensure the database directory exists
-    Directory dbDirectory = Directory(dirname(path));
-    if (!await dbDirectory.exists()) {
-      await dbDirectory.create(recursive: true);
+    // Ensure courses table exists with expected columns (repositories will handle creation if missing)
+    final tables = await db.query('sqlite_master', 
+        where: 'type = ? AND name = ?', 
+        whereArgs: ['table', 'courses']);
+        
+    if (tables.isEmpty) {
+      await db.execute(
+        'CREATE TABLE courses('
+        'id INTEGER PRIMARY KEY, '
+        'name TEXT, '
+        'level TEXT, '
+        'code TEXT, '
+        'fromCode TEXT, '
+        'listening INTEGER, '
+        'speaking INTEGER, '
+        'reading INTEGER, '
+        'writing INTEGER, '
+        'color INTEGER, '
+        'streak INTEGER DEFAULT 0, '
+        'lastAccess INTEGER DEFAULT 0, '
+        'dailyGoal INTEGER DEFAULT 100, '
+        'totalGoal INTEGER DEFAULT 10000, '
+        'visible INTEGER DEFAULT 1, '
+        'goalType TEXT DEFAULT "learn", '
+        'goalComplete INTEGER DEFAULT 0'
+        ')',
+      );
     }
-    
-    // Create or open the database
-    Database db = await openDatabase(
-      path,
-      version: 5, // Increasing version due to schema change
-      onCreate: (db, version) async {
-        await db.execute(
-          'CREATE TABLE courses('
-          'id INTEGER PRIMARY KEY, '
-          'name TEXT, '
-          'level TEXT, '
-          'code TEXT, '
-          'fromCode TEXT, '
-          'listening INTEGER, '
-          'speaking INTEGER, '
-          'reading INTEGER, '
-          'writing INTEGER, '
-          'color INTEGER, '
-          'streak INTEGER DEFAULT 0, '
-          'lastAccess INTEGER DEFAULT 0, '
-          'dailyGoal INTEGER DEFAULT 100, '
-          'totalGoal INTEGER DEFAULT 10000, '
-          'visible INTEGER DEFAULT 1, '
-          'goalType TEXT DEFAULT "learn", '
-          'goalComplete INTEGER DEFAULT 0'
-          ')',
-        );
-      },
-      onUpgrade: (db, oldVersion, newVersion) async {
-        // Handle database schema changes when upgrading
-        if (oldVersion < 5) {
-          // If upgrading from version 4 to 5, remove the imageUrl column
-          try {
-            // Creating a new table without the imageUrl column
-            await db.execute(
-              'CREATE TABLE courses_new('
-              'id INTEGER PRIMARY KEY, '
-              'name TEXT, '
-              'level TEXT, '
-              'code TEXT, '
-              'fromCode TEXT, '
-              'listening INTEGER, '
-              'speaking INTEGER, '
-              'reading INTEGER, '
-              'writing INTEGER, '
-              'color INTEGER, '
-              'streak INTEGER DEFAULT 0, '
-              'lastAccess INTEGER DEFAULT 0, '
-              'dailyGoal INTEGER DEFAULT 100, '
-              'totalGoal INTEGER DEFAULT 10000, '
-              'visible INTEGER DEFAULT 1, '
-              'goalType TEXT DEFAULT "learn", '
-              'goalComplete INTEGER DEFAULT 0'
-              ')',
-            );
-            
-            // Copy data from the old table to the new one
-            await db.execute(
-              'INSERT INTO courses_new '
-              'SELECT id, name, level, code, fromCode, listening, speaking, '
-              'reading, writing, color, streak, lastAccess, dailyGoal, '
-              'totalGoal, visible, goalType, goalComplete FROM courses'
-            );
-            
-            // Drop the old table
-            await db.execute('DROP TABLE courses');
-            
-            // Rename the new table to the original name
-            await db.execute('ALTER TABLE courses_new RENAME TO courses');
-            
-            print('Database schema updated: removed imageUrl column from courses table');
-          } catch (e) {
-            print('Error updating database schema: $e');
-          }
-        }
-      },
-      onOpen: (db) async {
-        // Always check if courses table exists
-        final tables = await db.query('sqlite_master', 
-            where: 'type = ? AND name = ?', 
-            whereArgs: ['table', 'courses']);
-            
-        if (tables.isEmpty) {
-          await db.execute(
-            'CREATE TABLE courses('
-            'id INTEGER PRIMARY KEY, '
-            'name TEXT, '
-            'level TEXT, '
-            'code TEXT, '
-            'fromCode TEXT, '
-            'listening INTEGER, '
-            'speaking INTEGER, '
-            'reading INTEGER, '
-            'writing INTEGER, '
-            'color INTEGER, '
-            'streak INTEGER DEFAULT 0, '
-            'lastAccess INTEGER DEFAULT 0, '
-            'dailyGoal INTEGER DEFAULT 100, '
-            'totalGoal INTEGER DEFAULT 10000, '
-            'visible INTEGER DEFAULT 1, '
-            'goalType TEXT DEFAULT "learn", '
-            'goalComplete INTEGER DEFAULT 0'
-            ')',
-          );
-        }
-      },
-    );
-    
+
     return db;
   }
 

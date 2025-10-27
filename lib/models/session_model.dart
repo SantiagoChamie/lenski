@@ -93,8 +93,6 @@ class Session {
     // Ensure we're working with UTC and strip time component
     final utcDate = DateTime.utc(date.year, date.month, date.day);
     final days = utcDate.difference(DateTime.utc(1970, 1, 1)).inDays;
-    
-    print("converting date time to int: ${date} -> UTC: ${utcDate} -> days: ${days}");
     return days;
   }
 

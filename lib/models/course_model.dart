@@ -85,22 +85,22 @@ class Course {
   /// Extracts a Course object from a Map.
   factory Course.fromMap(Map<String, dynamic> map) {
     return Course(
-      name: map['name'],
-      level: map['level'],
-      code: map['code'],
-      fromCode: map['fromCode'],
-      listening: map['listening'] == 1,
-      speaking: map['speaking'] == 1,
-      reading: map['reading'] == 1,
-      writing: map['writing'] == 1,
-      color: Color(map['color']),
+      name: (map['name'] ?? '') as String,
+      level: (map['level'] ?? '') as String,
+      code: (map['code'] ?? '') as String,
+      fromCode: (map['fromCode'] ?? '') as String,
+      listening: (map['listening'] ?? 0) == 1,
+      speaking: (map['speaking'] ?? 0) == 1,
+      reading: (map['reading'] ?? 0) == 1,
+      writing: (map['writing'] ?? 0) == 1,
+      color: Color((map['color'] ?? 0xFF2196F3) as int),
       streak: map['streak'] ?? 0,
       lastAccess: _intToDateTime(map['lastAccess'] ?? _dateTimeToInt(DateTime.now().subtract(const Duration(days: 1)))),
-      dailyGoal: map['dailyGoal'],
-      totalGoal: map['totalGoal'],
-      visible: map['visible'] == null ? true : map['visible'] == 1,
+      dailyGoal: map['dailyGoal'] ?? 100,
+      totalGoal: map['totalGoal'] ?? 10000,
+      visible: (map['visible'] ?? 1) == 1,
       goalType: map['goalType'] ?? 'learn', // Default to 'learn' if not specified
-      goalComplete: map['goalComplete'] == null ? false : map['goalComplete'] == 1,
+      goalComplete: (map['goalComplete'] ?? 0) == 1,
     );
   }
 

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'database_helper.dart';
 
 /// Result of a migration operation containing status and optional error message
 class MigrationResult {
@@ -24,8 +25,8 @@ class MigrationHandler {
   /// Returns a [MigrationResult] indicating success or failure and the export file path.
   Future<MigrationResult> exportData() async {
     try {
-      // Get direct database access for bulk operations
-      final db = await openDatabase(await getDatabasePath());
+  // Get direct database access for bulk operations (shared database instance)
+  final db = await DatabaseHelper().database;
       
       // 1. Create data structure with metadata
       final Map<String, dynamic> exportData = {
@@ -143,8 +144,8 @@ class MigrationHandler {
         );
       }
       
-      // 4. Get direct database access for bulk operations
-      final db = await openDatabase(await getDatabasePath());
+  // 4. Get direct database access for bulk operations (shared instance)
+  final db = await DatabaseHelper().database;
       
       try {
         // Use a transaction for all import operations to ensure atomicity

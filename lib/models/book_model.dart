@@ -65,13 +65,13 @@ class Book {
   /// Extracts a Book object from a Map.
   factory Book.fromMap(Map<String, dynamic> map) {
     return Book(
-      id: map['id'],
-      name: map['name'],
-      imageUrl: map['imageUrl'],
-      totalLines: map['totalLines'],
-      currentLine: map['currentLine'],
-      language: map['language'],
-      finished: map['finished'] == 1,  // Convert int to bool from SQLite
+      id: map['id'] as int?,
+      name: (map['name'] ?? '') as String,
+      imageUrl: map.containsKey('imageUrl') ? map['imageUrl'] as String? : null,
+      totalLines: (map['totalLines'] ?? 0) as int,
+      currentLine: (map['currentLine'] ?? 1) as int,
+      language: (map['language'] ?? '') as String,
+      finished: map.containsKey('finished') ? (map['finished'] == 1 || map['finished'] == true) : false,
     );
   }
 }

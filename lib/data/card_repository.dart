@@ -1,7 +1,6 @@
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
-import 'dart:io';
 import '../../models/card_model.dart';
+import 'database_helper.dart';
 
 /// A repository class for managing flashcards in the database.
 class CardRepository {
@@ -36,22 +35,12 @@ class CardRepository {
 
   /// Initializes the database and creates the cards table if it does not exist.
   Future<Database> _initDatabase() async {
-    // Path for the unified database
-    String path = join(await getDatabasesPath(), 'lenski.db');
-    
-    // Ensure directory exists
-    Directory dbDirectory = Directory(dirname(path));
-    if (!await dbDirectory.exists()) {
-      await dbDirectory.create(recursive: true);
-    }
-    
-    // Open the database without depending on callbacks
-    Database db = await openDatabase(path, version: 5);
+    final db = await DatabaseHelper().database;
     
     // Always explicitly check if cards table exists
-    final tables = await db.query('sqlite_master',
-        where: 'type = ? AND name = ?',
-        whereArgs: ['table', 'cards']);
+  final tables = await db.query('sqlite_master',
+    where: 'type = ? AND name = ?',
+    whereArgs: ['table', 'cards']);
         
     if (tables.isEmpty) {
       // Create the cards table if it doesn't exist

@@ -1,9 +1,9 @@
 import 'package:lenski/models/sentence_model.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:path/path.dart';
 import '../../models/book_model.dart';
 import 'archive_repository.dart';
-import 'dart:io';
+// 'dart:io' intentionally not imported here; DatabaseHelper handles directory creation
+import 'database_helper.dart';
 
 /// A repository class for managing books in the database.
 class BookRepository {
@@ -33,22 +33,12 @@ class BookRepository {
 
   /// Initializes the database and creates the books table if it does not exist.
   Future<Database> _initDatabase() async {
-    // Path for the unified database
-    String path = join(await getDatabasesPath(), 'lenski.db');
-    
-    // Ensure directory exists
-    Directory dbDirectory = Directory(dirname(path));
-    if (!await dbDirectory.exists()) {
-      await dbDirectory.create(recursive: true);
-    }
-    
-    // Open database without depending on callbacks
-    Database db = await openDatabase(path, version: 5);
+    final db = await DatabaseHelper().database;
     
     // Always check if books table exists
-    final tables = await db.query('sqlite_master',
-        where: 'type = ? AND name = ?',
-        whereArgs: ['table', 'books']);
+  final tables = await db.query('sqlite_master',
+    where: 'type = ? AND name = ?',
+    whereArgs: ['table', 'books']);
         
     if (tables.isEmpty) {
       print('Creating books table in unified database');
