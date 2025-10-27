@@ -239,14 +239,22 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
             }
           }
 
-          // Insert subcategory groups at their correct positions
-          subcategoryPositions.forEach((subcategory, position) {
+          // Insert subcategory groups at their correct positions.
+          // When inserting multiple groups we must account for index shifts caused by previous insertions.
+          final entries = subcategoryPositions.entries.toList()
+            ..sort((a, b) => a.value.compareTo(b.value));
+
+          int offset = 0;
+          for (final entry in entries) {
+            final subcategory = entry.key;
+            final position = entry.value;
             final subcategoryBooks = pendingSubcategoryBooks[subcategory]!;
             // Sort books within the subcategory by date
             subcategoryBooks.sort((a, b) => a.finishedDate.compareTo(b.finishedDate));
-            // Insert the entire subcategory group at the position of its earliest book
-            orderedBooks.insertAll(position, subcategoryBooks);
-          });
+            // Insert at the original position adjusted by the cumulative offset
+            orderedBooks.insertAll(position + offset, subcategoryBooks);
+            offset += subcategoryBooks.length;
+          }
 
           // Calculate rows
           final rowCount = (orderedBooks.length / booksPerRow).ceil();
